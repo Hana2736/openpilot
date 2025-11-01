@@ -423,6 +423,22 @@
         <source>Miles</source>
         <translation type="gpt-5-generated">أميال</translation>
     </message>
+    <message>
+        <source>ALL TIME (KONIK)</source>
+        <translation type="gpt-5-generated">طوال الوقت (KONIK)</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation type="gpt-5-generated">طوال الوقت</translation>
+    </message>
+    <message>
+        <source>PAST WEEK (KONIK)</source>
+        <translation type="gpt-5-generated">الأسبوع الماضي (KONIK)</translation>
+    </message>
+    <message>
+        <source>PAST WEEK</source>
+        <translation type="gpt-5-generated">الأسبوع الماضي</translation>
+    </message>
 </context>
 <context>
     <name>DriverViewWindow</name>
@@ -483,6 +499,30 @@
     <message>
         <source>LIMIT</source>
         <translation type="gpt-5-generated">الحد</translation>
+    </message>
+    <message>
+        <source>Desired: %1</source>
+        <translation type="gpt-5-generated">المرغوب: %1</translation>
+    </message>
+    <message>
+        <source>s</source>
+        <translation type="gpt-5-generated">س</translation>
+    </message>
+    <message>
+        <source>1 minute</source>
+        <translation type="gpt-5-generated">1 دقيقة</translation>
+    </message>
+    <message>
+        <source>%1 minutes</source>
+        <translation type="gpt-5-generated">%1 دقائق</translation>
+    </message>
+    <message>
+        <source>1 second</source>
+        <translation type="gpt-5-generated">1 ثانية</translation>
+    </message>
+    <message>
+        <source>%1 seconds</source>
+        <translation type="gpt-5-generated">%1 ثوانٍ</translation>
     </message>
 </context>
 <context>
@@ -694,6 +734,238 @@
         <source>Choose a backup to delete</source>
         <translation type="gpt-5-generated">اختر نسخة احتياطية لحذفها</translation>
     </message>
+    <message>
+        <source>FrogPilot Stats</source>
+        <translation type="gpt-5-generated">إحصائيات FrogPilot</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;View your collected FrogPilot stats.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;عرض إحصاءات FrogPilot التي جُمعت.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation type="gpt-5-generated">إعادة ضبط</translation>
+    </message>
+    <message>
+        <source>VIEW</source>
+        <translation type="gpt-5-generated">عرض</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to reset all of your FrogPilot stats?</source>
+        <translation type="gpt-5-generated">هل أنت متأكد أنك تريد إعادة ضبط جميع إحصاءات FrogPilot الخاصة بك؟</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="gpt-5-generated">إعادة ضبط</translation>
+    </message>
+    <message>
+        <source>Total Emergency Brake Alerts</source>
+        <translation type="gpt-5-generated">إجمالي تنبيهات الفرملة الطارئة</translation>
+    </message>
+    <message>
+        <source>Time Using "Always On Lateral"</source>
+        <translation type="gpt-5-generated">الوقت باستخدام "Always On Lateral"</translation>
+    </message>
+    <message>
+        <source>Favorite Set Speed</source>
+        <translation type="gpt-5-generated">سرعة الضبط المفضلة</translation>
+    </message>
+    <message>
+        <source>Total Disengagements</source>
+        <translation type="gpt-5-generated">إجمالي حالات فك الارتباط</translation>
+    </message>
+    <message>
+        <source>Total Engagements</source>
+        <translation type="gpt-5-generated">إجمالي التفاعلات</translation>
+    </message>
+    <message>
+        <source>Time Using "Experimental Mode"</source>
+        <translation type="gpt-5-generated">الوقت باستخدام "الوضع التجريبي"</translation>
+    </message>
+    <message>
+        <source>Total Frog Chirps</source>
+        <translation type="gpt-5-generated">إجمالي نقيق الضفادع</translation>
+    </message>
+    <message>
+        <source>Total Frog Hops</source>
+        <translation type="gpt-5-generated">إجمالي قفزات الضفدع</translation>
+    </message>
+    <message>
+        <source>Total Drives</source>
+        <translation type="gpt-5-generated">إجمالي الرحلات</translation>
+    </message>
+    <message>
+        <source>Total Distance Driven</source>
+        <translation type="gpt-5-generated">إجمالي المسافة المقطوعة</translation>
+    </message>
+    <message>
+        <source>Total Driving Time</source>
+        <translation type="gpt-5-generated">إجمالي وقت القيادة</translation>
+    </message>
+    <message>
+        <source>Total Frog Squeaks</source>
+        <translation type="gpt-5-generated">إجمالي صرير الضفادع</translation>
+    </message>
+    <message>
+        <source>Total Goat Screams</source>
+        <translation type="gpt-5-generated">إجمالي صرخات الماعز</translation>
+    </message>
+    <message>
+        <source>Highest Acceleration Rate</source>
+        <translation type="gpt-5-generated">أعلى معدل تسارع</translation>
+    </message>
+    <message>
+        <source>Time Using Lateral Control</source>
+        <translation type="gpt-5-generated">الوقت باستخدام التحكم الجانبي</translation>
+    </message>
+    <message>
+        <source>Longest Distance Without an Override</source>
+        <translation type="gpt-5-generated">أطول مسافة دون تدخل</translation>
+    </message>
+    <message>
+        <source>Time Using Longitudinal Control</source>
+        <translation type="gpt-5-generated">الوقت باستخدام التحكم الطولي</translation>
+    </message>
+    <message>
+        <source>Driving Models:</source>
+        <translation type="gpt-5-generated">نماذج القيادة</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation type="gpt-5-generated">شهر</translation>
+    </message>
+    <message>
+        <source>Total Overrides</source>
+        <translation type="gpt-5-generated">إجمالي التجاوزات</translation>
+    </message>
+    <message>
+        <source>Time Overriding openpilot</source>
+        <translation type="gpt-5-generated">تجاوز الوقت لـ openpilot</translation>
+    </message>
+    <message>
+        <source>Random Events:</source>
+        <translation type="gpt-5-generated">أحداث عشوائية</translation>
+    </message>
+    <message>
+        <source>Time Stopped</source>
+        <translation type="gpt-5-generated">توقف الوقت</translation>
+    </message>
+    <message>
+        <source>Time Spent at Stoplights</source>
+        <translation type="gpt-5-generated">الوقت المُستغرق عند إشارات المرور</translation>
+    </message>
+    <message>
+        <source>Total Time Tracked</source>
+        <translation type="gpt-5-generated">إجمالي الوقت المُتعقَّب</translation>
+    </message>
+    <message>
+        <source>UwUs</source>
+        <translation type="gpt-5-generated">UwUs</translation>
+    </message>
+    <message>
+        <source>Loch Ness Encounters</source>
+        <translation type="gpt-5-generated">لقاءات لوخ نيس</translation>
+    </message>
+    <message>
+        <source>Visits to 1955</source>
+        <translation type="gpt-5-generated">زيارات إلى 1955</translation>
+    </message>
+    <message>
+        <source>Deja Vu Moments</source>
+        <translation type="gpt-5-generated">لحظات الديجافو</translation>
+    </message>
+    <message>
+        <source>Internet Explorer Weeeeeeees</source>
+        <translation type="gpt-5-generated">Internet Explorer وييييييييي</translation>
+    </message>
+    <message>
+        <source>HAL 9000 Denials</source>
+        <translation type="gpt-5-generated">رفض HAL 9000</translation>
+    </message>
+    <message>
+        <source>openpilot Crashes</source>
+        <translation type="gpt-5-generated">أعطال openpilot</translation>
+    </message>
+    <message>
+        <source>This Is Fine Moments</source>
+        <translation type="gpt-5-generated">لحظات هذا جيد</translation>
+    </message>
+    <message>
+        <source>To Be Continued Moments</source>
+        <translation type="gpt-5-generated">لحظات تُستكمل لاحقًا</translation>
+    </message>
+    <message>
+        <source>Noices</source>
+        <translation type="gpt-5-generated">أصوات</translation>
+    </message>
+    <message>
+        <source>Attempted Frog Murders</source>
+        <translation type="gpt-5-generated">محاولات قتل الضفادع</translation>
+    </message>
+    <message>
+        <source>Total Mail Received</source>
+        <translation type="gpt-5-generated">إجمالي البريد المستلم</translation>
+    </message>
+    <message>
+        <source> kilometer</source>
+        <translation type="gpt-5-generated"> كيلومتر</translation>
+    </message>
+    <message>
+        <source> kilometers</source>
+        <translation type="gpt-5-generated"> كيلومترات</translation>
+    </message>
+    <message>
+        <source> mile</source>
+        <translation type="gpt-5-generated"> ميل</translation>
+    </message>
+    <message>
+        <source> miles</source>
+        <translation type="gpt-5-generated">أميال</translation>
+    </message>
+    <message>
+        <source> day </source>
+        <translation type="gpt-5-generated">يوم</translation>
+    </message>
+    <message>
+        <source> days </source>
+        <translation type="gpt-5-generated">أيام</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">ساعة</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">ساعات</translation>
+    </message>
+    <message>
+        <source> minute</source>
+        <translation type="gpt-5-generated">دقيقة</translation>
+    </message>
+    <message>
+        <source> minutes</source>
+        <translation type="gpt-5-generated"> دقائق</translation>
+    </message>
+    <message>
+        <source>km/h</source>
+        <translation type="gpt-5-generated">كم/ساعة</translation>
+    </message>
+    <message>
+        <source>mph</source>
+        <translation type="gpt-5-generated">ميل/ساعة</translation>
+    </message>
+    <message>
+        <source>m/s²</source>
+        <translation type="gpt-5-generated">م/ث²</translation>
+    </message>
+    <message>
+        <source>Total </source>
+        <translation type="gpt-5-generated">الإجمالي</translation>
+    </message>
+    <message>
+        <source>% of </source>
+        <translation type="gpt-5-generated">% من</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotDevicePanel</name>
@@ -872,6 +1144,125 @@
     <message>
         <source> seconds</source>
         <translation type="gpt-5-generated"> ثوانٍ</translation>
+    </message>
+</context>
+<context>
+    <name>FrogPilotDriveSummary</name>
+    <message>
+        <source>Random Events Summary</source>
+        <translation type="gpt-5-generated">ملخص الأحداث العشوائية</translation>
+    </message>
+    <message>
+        <source>Drive Summary</source>
+        <translation type="gpt-5-generated">ملخص القيادة</translation>
+    </message>
+    <message>
+        <source>UwUs</source>
+        <translation type="gpt-5-generated">UwUs</translation>
+    </message>
+    <message>
+        <source>Loch Ness Encounters</source>
+        <translation type="gpt-5-generated">لقاءات بحيرة لوخ نيس</translation>
+    </message>
+    <message>
+        <source>Visits to 1955</source>
+        <translation type="gpt-5-generated">الزيارات إلى 1955</translation>
+    </message>
+    <message>
+        <source>Deja Vu Moments</source>
+        <translation type="gpt-5-generated">لحظات ديجا فو</translation>
+    </message>
+    <message>
+        <source>Internet Explorer Weeeeeeees</source>
+        <translation type="gpt-5-generated">إنترنت إكسبلورر وييييييييييس</translation>
+    </message>
+    <message>
+        <source>HAL 9000 Denials</source>
+        <translation type="gpt-5-generated">رفض HAL 9000</translation>
+    </message>
+    <message>
+        <source>openpilot Crashes</source>
+        <translation type="gpt-5-generated">أعطال openpilot</translation>
+    </message>
+    <message>
+        <source>This Is Fine Moments</source>
+        <translation type="gpt-5-generated">لحظات «كل شيء على ما يرام»</translation>
+    </message>
+    <message>
+        <source>To Be Continued Moments</source>
+        <translation type="gpt-5-generated">اللحظات سيتم استكمالها لاحقًا</translation>
+    </message>
+    <message>
+        <source>Noices</source>
+        <translation type="gpt-5-generated">أصوات</translation>
+    </message>
+    <message>
+        <source>Attempted Frog Murders</source>
+        <translation type="gpt-5-generated">محاولات قتل ضفادع</translation>
+    </message>
+    <message>
+        <source>Total Mail Received</source>
+        <translation type="gpt-5-generated">إجمالي البريد المستلم</translation>
+    </message>
+    <message>
+        <source>% of Drive With openpilot Engaged</source>
+        <translation type="gpt-5-generated">نسبة القيادة مع تشغيل openpilot</translation>
+    </message>
+    <message>
+        <source>Drive Distance</source>
+        <translation type="gpt-5-generated">مسافة القيادة</translation>
+    </message>
+    <message>
+        <source>Drive Time</source>
+        <translation type="gpt-5-generated">وقت القيادة</translation>
+    </message>
+    <message>
+        <source>% of Drive In "Experimental Mode"</source>
+        <translation type="gpt-5-generated">٪ من القيادة في "الوضع التجريبي"</translation>
+    </message>
+    <message>
+        <source>No Random Events Played!</source>
+        <translation type="gpt-5-generated">لم يتم تشغيل أي أحداث عشوائية!</translation>
+    </message>
+    <message>
+        <source> kilometer</source>
+        <translation type="gpt-5-generated">كيلومتر</translation>
+    </message>
+    <message>
+        <source> kilometers</source>
+        <translation type="gpt-5-generated"> كيلومترات</translation>
+    </message>
+    <message>
+        <source> mile</source>
+        <translation type="gpt-5-generated"> ميل</translation>
+    </message>
+    <message>
+        <source> miles</source>
+        <translation type="gpt-5-generated"> أميال</translation>
+    </message>
+    <message>
+        <source> day </source>
+        <translation type="gpt-5-generated">يوم</translation>
+    </message>
+    <message>
+        <source> days </source>
+        <translation type="gpt-5-generated">أيام</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">ساعة</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">ساعات</translation>
+    </message>
+    <message>
+        <source> minute</source>
+        <translation type="gpt-5-generated"> دقيقة</translation>
+    </message>
+    <message>
+        <source> minutes</source>
+        <translation type="gpt-5-generated"> دقائق</translation>
     </message>
 </context>
 <context>
@@ -1292,10 +1683,6 @@
         <translation type="gpt-5-generated">التوقف المتوقع خلال</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Switch to "Experimental Mode" when openpilot predicts a stop within the set time.&lt;/b&gt; This is usually triggered when the model "sees" a red light or stop sign ahead.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason.&lt;/i&gt;</source>
-        <translation type="gpt-5-generated">&lt;b&gt;بدّل إلى "الوضع التجريبي" عندما يتوقع openpilot توقفًا ضمن الوقت المحدد.&lt;/b&gt; عادةً ما يتم تشغيل ذلك عندما "يرى" النموذج إشارة ضوء أحمر أو علامة توقف في الأمام.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;إخلاء المسؤولية&lt;/b&gt;: لا يكتشف openpilot إشارات المرور أو علامات التوقف صراحةً. في "الوضع التجريبي"، يتخذ openpilot قرارات قيادة شاملة من مدخلات الكاميرا، ما يعني أنه قد يتوقف حتى عندما لا يكون هناك سبب واضح.&lt;/i&gt;</translation>
-    </message>
-    <message>
         <source>Turn Signal Below</source>
         <translation type="gpt-5-generated">إشارة الانعطاف أدناه</translation>
     </message>
@@ -1614,10 +2001,6 @@
     <message>
         <source>Force Stop at "Detected" Stop Lights/Signs</source>
         <translation type="gpt-5-generated">إيقاف إجباري عند أضواء/علامات التوقف «المكتشفة»</translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;Force openpilot to stop whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason.&lt;/i&gt;</source>
-        <translation type="gpt-5-generated">&lt;b&gt;فرض إيقاف openpilot كلما "يكتشف" نموذج القيادة إشارة ضوئية حمراء أو علامة توقف.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;إخلاء المسؤولية&lt;/b&gt;: لا يكتشف openpilot إشارات المرور أو علامات التوقف بشكل صريح. في "الوضع التجريبي"، يتخذ openpilot قرارات قيادة شاملة من مدخلات الكاميرا، ما يعني أنه قد يتوقف حتى عندما لا يوجد سبب واضح.&lt;/i&gt;</translation>
     </message>
     <message>
         <source>Increase Stopped Distance by:</source>
@@ -2075,6 +2458,154 @@
         <source>&lt;b&gt;Following behavior that mimics human drivers&lt;/b&gt; by closing gaps behind faster vehicles for quicker takeoffs and dynamically adjusting the desired following distance for gentler, more efficient braking.</source>
         <translation type="gpt-5-generated">&lt;b&gt;سلوك متابعة يحاكي السائقين البشر&lt;/b&gt; عبر تقليل الفجوات خلف المركبات الأسرع لانطلاق أسرع وضبط مسافة المتابعة المطلوبة ديناميكياً لكبح ألطف وأكثر كفاءة.</translation>
     </message>
+    <message>
+        <source>Weather Condition Offsets</source>
+        <translation type="gpt-5-generated">تعويضات حالة الطقس</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Automatically adjust driving behavior based on real-time weather.&lt;/b&gt; Helps maintain comfort and safety in low visibility, rain, or snow.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;اضبط سلوك القيادة تلقائيًا بناءً على حالة الطقس الفعلية في الوقت الحقيقي.&lt;/b&gt; يساعد على الحفاظ على الراحة والسلامة في حالات ضعف الرؤية أو المطر أو الثلج.</translation>
+    </message>
+    <message>
+        <source>Low Visibility</source>
+        <translation type="gpt-5-generated">ضعف الرؤية</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for fog, haze, or other low-visibility conditions.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;تعديلات القيادة للضباب أو الغبار أو غيرها من ظروف الرؤية المنخفضة.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in low visibility.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;أضف مسافة إضافية خلف المركبات الأمامية في ضعف الرؤية.&lt;/b&gt; زِد لزيادة المسافة؛ خفّض لتقليل الفجوات.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in low visibility.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;أضِف مسافة أمان إضافية عند التوقف خلف مركبات في ظروف رؤية منخفضة.&lt;/b&gt; زِد لحيّز أكبر؛ قَلّل لفجوات أقصر.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in low visibility.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;خفّض الحد الأقصى للتسارع في ضعف الرؤية.&lt;/b&gt; زدْه لانطلاقات أكثر نعومة؛ وخفّضه لانطلاقات أسرع لكنها أقل استقرارًا.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in low visibility.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;خفّض السرعة المطلوبة أثناء القيادة عبر المنعطفات في ضعف الرؤية.&lt;/b&gt; زدها لالتفافات أكثر أمانًا ولطفًا؛ وخفّضها لقيادة أكثر عدوانية في المنعطفات.</translation>
+    </message>
+    <message>
+        <source>Rain</source>
+        <translation type="gpt-5-generated">مطر</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for rainy conditions.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;تعديلات القيادة للظروف الممطرة.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in rain.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;أضف مسافة إضافية خلف المركبات الأمامية عند المطر.&lt;/b&gt; زِد للحصول على مساحة أكبر؛ قَلِّل لمسافات أقصر.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in rain.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;أضِف مسافة أمان إضافية عند التوقف خلف المركبات أثناء المطر.&lt;/b&gt; زِدها لمزيد من المساحة؛ خفّضها لفواصل أقصر.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in rain.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;خفّض الحد الأقصى للتسارع في المطر.&lt;/b&gt; زدْه لبدء انطلاقات أكثر نعومة؛ وخفّضه لانطلاقات أسرع ولكن أقل استقرارًا.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in rain.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;خفّض السرعة المطلوبة أثناء القيادة عبر المنعطفات في المطر.&lt;/b&gt; زدها لانعطافات أكثر أمانًا ولطفًا؛ وأنقصها لقيادة أكثر عدوانية في المنعطفات.</translation>
+    </message>
+    <message>
+        <source>Rainstorms</source>
+        <translation type="gpt-5-generated">عواصف مطرية</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for rainstorms.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;تعديلات القيادة للعواصف المطرية.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in a rainstorm.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;أضف مسافة إضافية خلف المركبات الأمامية أثناء العاصفة الممطرة.&lt;/b&gt; زد لزيادة المسافة؛ خفّض لتقليل الفجوات.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in a rainstorm.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;أضف هامش أمان إضافيًا عند التوقف خلف المركبات أثناء عاصفة مطرية.&lt;/b&gt; زِد لحيز أكبر؛ قَلِّل لفجوات أقصر.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in a rainstorm.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;خفّض الحد الأقصى للتسارع أثناء العاصفة الممطرة.&lt;/b&gt; زِدْه لنعومة أكبر عند الانطلاق؛ وخفِّضه لانطلاق أسرع ولكن أقل استقرارًا.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in a rainstorm.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;اخفض السرعة المرغوبة أثناء القيادة عبر المنعطفات في عاصفة ممطرة.&lt;/b&gt; زدها لنعطفات أكثر أمانًا ولطفًا؛ وخفّضها لقيادة أكثر عدوانية في المنعطفات.</translation>
+    </message>
+    <message>
+        <source>Human-Like Lane Changes</source>
+        <translation type="gpt-5-generated">تغييرات مسار شبيهة بالبشر</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lane-change behavior that mimics human drivers&lt;/b&gt; by anticipating and tracking adjacent vehicles during lane changes.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;سلوك تغيير المسار يحاكي السائقين البشر&lt;/b&gt; عبر التنبؤ ومتابعة المركبات المجاورة أثناء تغيير المسارات.</translation>
+    </message>
+    <message>
+        <source>"Detected" Stop Lights/Signs</source>
+        <translation type="gpt-5-generated">أُكتشفت إشارات/أضواء توقف</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Switch to "Experimental Mode" whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;التبديل إلى "الوضع التجريبي" كلما "اكتشف" نموذج القيادة إشارة ضوء أحمر أو علامة توقف.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;إخلاء مسؤولية&lt;/b&gt;: لا يكتشف openpilot إشارات المرور أو علامات التوقف صراحةً. في "الوضع التجريبي"، يتخذ openpilot قرارات قيادة شاملة من مدخلات الكاميرا، ما يعني أنه قد يتوقف حتى عندما لا يوجد سبب واضح!&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Switch to "Experimental Mode" when openpilot predicts a stop within the set time.&lt;/b&gt; This is usually triggered when the model "sees" a red light or stop sign ahead.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;انتقل إلى "الوضع التجريبي" عندما يتوقع openpilot توقفًا ضمن الزمن المحدد.&lt;/b&gt; يحدث هذا عادةً عندما "يرى" النموذج إشارة ضوئية حمراء أو إشارة توقف أمامك.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;إخلاء مسؤولية&lt;/b&gt;: لا يكتشف openpilot إشارات المرور أو إشارات التوقف بشكل صريح. في "الوضع التجريبي"، يتخذ openpilot قرارات قيادة شاملة من مدخلات الكاميرا، ما يعني أنه قد يتوقف حتى عندما لا يوجد سبب واضح!&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Force openpilot to stop whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;إجبار openpilot على التوقف كلما "اكتشف" نموذج القيادة إشارة حمراء أو إشارة توقف.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;إخلاء المسؤولية&lt;/b&gt;: لا يكتشف openpilot إشارات المرور أو إشارات التوقف بشكل صريح. في "الوضع التجريبي"، يتخذ openpilot قرارات قيادة شاملة من مدخلات الكاميرا، ما يعني أنه قد يتوقف حتى عندما لا يوجد سبب واضح!&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>Set Your Own Key</source>
+        <translation type="gpt-5-generated">عيّن مفتاحك الخاص</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Set your own "OpenWeatherMap" key to increase the weather update rate.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;Personal keys grant 1,000 free calls per day, allowing for updates every minute. The default key is shared and only updates every 15 minutes.&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;عيّن مفتاح "OpenWeatherMap" الخاص بك لزيادة معدل تحديث الطقس.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;توفر المفاتيح الشخصية 1,000 مكالمة مجانية يوميًا، مما يسمح بتحديثات كل دقيقة. المفتاح الافتراضي مشترك ويُحدّث كل 15 دقيقة فقط.&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>ADD</source>
+        <translation type="gpt-5-generated">إضافة</translation>
+    </message>
+    <message>
+        <source>Enter your "OpenWeatherMap" key</source>
+        <translation type="gpt-5-generated">أدخل مفتاح "OpenWeatherMap" الخاص بك</translation>
+    </message>
+    <message>
+        <source>REMOVE</source>
+        <translation type="gpt-5-generated">إزالة</translation>
+    </message>
+    <message>
+        <source>Invalid key!</source>
+        <translation type="gpt-5-generated">مفتاح غير صالح!</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to remove your key?</source>
+        <translation type="gpt-5-generated">هل أنت متأكد أنك تريد إزالة مفتاحك؟</translation>
+    </message>
+    <message>
+        <source>TEST</source>
+        <translation type="gpt-5-generated">اختبار</translation>
+    </message>
+    <message>
+        <source>Testing...</source>
+        <translation type="gpt-5-generated">جارٍ الاختبار...</translation>
+    </message>
+    <message>
+        <source>Key is valid!</source>
+        <translation type="gpt-5-generated">المفتاح صالح!</translation>
+    </message>
+    <message>
+        <source>An error occurred: %1</source>
+        <translation type="gpt-5-generated">حدث خطأ: %1</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotManageControl</name>
@@ -2195,7 +2726,7 @@
     </message>
     <message>
         <source>Resetting...</source>
-        <translation type="gpt-5-generated">إعادة التعيين جارٍ…</translation>
+        <translation type="gpt-5-generated">إعادة التعيين جارٍ...</translation>
     </message>
     <message>
         <source>Reset!</source>
@@ -2259,11 +2790,19 @@
     </message>
     <message>
         <source>Offline...</source>
-        <translation type="gpt-5-generated">غير متصل…</translation>
+        <translation type="gpt-5-generated">غير متصل...</translation>
     </message>
     <message>
-        <source>CANCELLED</source>
-        <translation type="gpt-5-generated">أُلغي</translation>
+        <source>0 MB</source>
+        <translation type="gpt-5-generated">0 ميغابايت</translation>
+    </message>
+    <message>
+        <source>Calculating...</source>
+        <translation type="gpt-5-generated">جارٍ الحساب...</translation>
+    </message>
+    <message>
+        <source>Not parked</source>
+        <translation type="gpt-5-generated">غير مركون</translation>
     </message>
 </context>
 <context>
@@ -2476,6 +3015,38 @@
         <source>Select a Model — 🗺️ = Navigation | 📡 = Radar | 👀 = VOACC</source>
         <translation type="gpt-5-generated">اختر نموذجًا — 🗺️ = الملاحة | 📡 = الرادار | 👀 = VOACC</translation>
     </message>
+    <message>
+        <source>Downloading...</source>
+        <translation type="gpt-5-generated">جارٍ التنزيل...</translation>
+    </message>
+    <message>
+        <source>Not parked</source>
+        <translation type="gpt-5-generated">غير مُركن</translation>
+    </message>
+    <message>
+        <source>Downloaded!</source>
+        <translation type="gpt-5-generated">تم التنزيل!</translation>
+    </message>
+    <message>
+        <source>All models downloaded!</source>
+        <translation type="gpt-5-generated">تم تنزيل جميع النماذج!</translation>
+    </message>
+    <message>
+        <source>Download cancelled...</source>
+        <translation type="gpt-5-generated">تم إلغاء التنزيل...</translation>
+    </message>
+    <message>
+        <source>Download failed...</source>
+        <translation type="gpt-5-generated">فشل التنزيل...</translation>
+    </message>
+    <message>
+        <source>GitHub and GitLab are offline...</source>
+        <translation type="gpt-5-generated">GitHub وGitLab غير متاحين...</translation>
+    </message>
+    <message>
+        <source>Repository unavailable</source>
+        <translation type="gpt-5-generated">المستودع غير متاح</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotModelReview</name>
@@ -2552,7 +3123,7 @@
     </message>
     <message>
         <source>Offline...</source>
-        <translation type="gpt-5-generated">غير متصل…</translation>
+        <translation type="gpt-5-generated">غير متصل...</translation>
     </message>
     <message>
         <source>Mapbox</source>
@@ -2661,6 +3232,57 @@ It will reset in %1 hours and %2 minutes.</source>
     <message>
         <source>Completed!</source>
         <translation type="gpt-5-generated">اكتمل!</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Manage your Public Mapbox Key.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;إدارة مفتاح Mapbox العام.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>TEST</source>
+        <translation type="gpt-5-generated">اختبار</translation>
+    </message>
+    <message>
+        <source>Remove your Public Mapbox Key?</source>
+        <translation type="gpt-5-generated">إزالة مفتاح Mapbox العام الخاص بك؟</translation>
+    </message>
+    <message>
+        <source>Enter your Public Mapbox Key</source>
+        <translation type="gpt-5-generated">أدخل مفتاح Mapbox العام الخاص بك</translation>
+    </message>
+    <message>
+        <source>Testing...</source>
+        <translation type="gpt-5-generated">جارٍ الاختبار...</translation>
+    </message>
+    <message>
+        <source>Key is valid!</source>
+        <translation type="gpt-5-generated">المفتاح صالح!</translation>
+    </message>
+    <message>
+        <source>Key is invalid!</source>
+        <translation type="gpt-5-generated">المفتاح غير صالح!</translation>
+    </message>
+    <message>
+        <source>An error occurred: %1</source>
+        <translation type="gpt-5-generated">حدث خطأ: %1</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Manage your Secret Mapbox Key.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;إدارة مفتاح Mapbox السري.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Remove your Secret Mapbox Key?</source>
+        <translation type="gpt-5-generated">إزالة مفتاح Mapbox السري الخاص بك؟</translation>
+    </message>
+    <message>
+        <source>Enter your Secret Mapbox Key</source>
+        <translation type="gpt-5-generated">أدخل مفتاح Mapbox السري الخاص بك</translation>
+    </message>
+</context>
+<context>
+    <name>FrogPilotOnroadWindow</name>
+    <message>
+        <source>FPS: %1 | Min: %2 | Max: %3 | Avg: %4</source>
+        <translation type="gpt-5-generated">الإطارات في الثانية: %1 | الأدنى: %2 | الأقصى: %3 | المتوسط: %4</translation>
     </message>
 </context>
 <context>
@@ -3189,6 +3811,38 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
         <source>CANCEL</source>
         <translation type="gpt-5-generated">إلغاء</translation>
     </message>
+    <message>
+        <source>Downloading...</source>
+        <translation type="gpt-5-generated">جارٍ التنزيل...</translation>
+    </message>
+    <message>
+        <source>Idle</source>
+        <translation type="gpt-5-generated">خامل</translation>
+    </message>
+    <message>
+        <source>Unpacking theme...</source>
+        <translation type="gpt-5-generated">جارٍ فك حزمة السمة...</translation>
+    </message>
+    <message>
+        <source>Downloaded!</source>
+        <translation type="gpt-5-generated">تم التنزيل!</translation>
+    </message>
+    <message>
+        <source>Download cancelled...</source>
+        <translation type="gpt-5-generated">تم إلغاء التنزيل...</translation>
+    </message>
+    <message>
+        <source>Download failed...</source>
+        <translation type="gpt-5-generated">فشل التنزيل...</translation>
+    </message>
+    <message>
+        <source>Repository unavailable</source>
+        <translation type="gpt-5-generated">المستودع غير متاح</translation>
+    </message>
+    <message>
+        <source>GitHub and GitLab are offline...</source>
+        <translation type="gpt-5-generated">GitHub وGitLab غير متصلين بالإنترنت...</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotUtilitiesPanel</name>
@@ -3630,6 +4284,54 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     <message>
         <source>comma Pedal Support</source>
         <translation type="gpt-5-generated">دعم comma Pedal</translation>
+    </message>
+    <message>
+        <source>Subaru Settings</source>
+        <translation type="gpt-5-generated">إعدادات Subaru</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;FrogPilot features for Subaru vehicles.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ميزات FrogPilot لمركبات سوبارو.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Stop and Go</source>
+        <translation type="gpt-5-generated">توقف وانطلق</translation>
+    </message>
+    <message>
+        <source>Stop and go for supported Subaru vehicles.</source>
+        <translation type="gpt-5-generated">توقف وانطلاق للمركبات المدعومة من Subaru.</translation>
+    </message>
+    <message>
+        <source>Acura/Honda Settings</source>
+        <translation type="gpt-5-generated">إعدادات Acura/Honda</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;FrogPilot features for Acura and Honda vehicles.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ميزات FrogPilot لمركبات Acura وHonda.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Gentle Following</source>
+        <translation type="gpt-5-generated">متابعة سلسة</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Reduces jerky acceleration and braking when following a lead vehicle.&lt;/b&gt; Ideal for stop-and-go traffic.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;يقلل التسارع والكبح المتقطعين عند متابعة مركبة أمامية.&lt;/b&gt; مثالي لحركة المرور المتقطعة.</translation>
+    </message>
+    <message>
+        <source>Increased Braking Force</source>
+        <translation type="gpt-5-generated">قوة كبح متزايدة</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Increases the maximum braking force for improved stopping performance.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;يزيد قوة الكبح القصوى لتحسين أداء التوقف.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Responsive Pedal at Low Speeds</source>
+        <translation type="gpt-5-generated">دواسة استجابة عند السرعات المنخفضة</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Improves acceleration from a standstill for a more responsive throttle feel in city driving.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;يحسن التسارع من التوقف التام لمنح دواسة الوقود استجابة أكثر في القيادة داخل المدينة.&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -4736,6 +5438,42 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
         <source>FrogPilot</source>
         <translation type="gpt-5-generated">FrogPilot</translation>
     </message>
+    <message>
+        <source>0 MB</source>
+        <translation type="gpt-5-generated">0 ميجابايت</translation>
+    </message>
+    <message>
+        <source> GB</source>
+        <translation type="gpt-5-generated">جي بي</translation>
+    </message>
+    <message>
+        <source> MB</source>
+        <translation type="gpt-5-generated"> ميغابايت</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">ساعة</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">ساعات</translation>
+    </message>
+    <message>
+        <source> minute </source>
+        <translation type="gpt-5-generated">دقيقة</translation>
+    </message>
+    <message>
+        <source> minutes </source>
+        <translation type="gpt-5-generated">دقائق</translation>
+    </message>
+    <message>
+        <source> second</source>
+        <translation type="gpt-5-generated"> ثانية</translation>
+    </message>
+    <message>
+        <source> seconds</source>
+        <translation type="gpt-5-generated">ثوانٍ</translation>
+    </message>
 </context>
 <context>
     <name>Reset</name>
@@ -5166,6 +5904,22 @@ This may take up to a minute.</source>
     <message>
         <source>This is a complete factory reset and cannot be undone. Are you absolutely sure you want to continue?</source>
         <translation type="gpt-5-generated">هذا إعادة ضبط مصنع كاملة ولا يمكن التراجع عنها. هل أنت متأكد تمامًا أنك تريد المتابعة؟</translation>
+    </message>
+    <message>
+        <source>downloading…</source>
+        <translation type="gpt-5-generated">جارٍ التنزيل…</translation>
+    </message>
+    <message>
+        <source>checking…</source>
+        <translation type="gpt-5-generated">جارٍ الفحص…</translation>
+    </message>
+    <message>
+        <source>waiting for vehicle to go offroad...</source>
+        <translation type="gpt-5-generated">جارٍ انتظار المركبة للخروج عن الطريق...</translation>
+    </message>
+    <message>
+        <source>finalizing update...</source>
+        <translation type="gpt-5-generated">جارٍ إنهاء التحديث...</translation>
     </message>
 </context>
 <context>

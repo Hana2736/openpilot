@@ -405,7 +405,7 @@
     <name>DriveStats</name>
     <message>
         <source>FROGPILOT</source>
-        <translation type="gpt-5-generated">FROGPILOT</translation>
+        <translation>개구리파일럿</translation>
     </message>
     <message>
         <source>Drives</source>
@@ -422,6 +422,22 @@
     <message>
         <source>Miles</source>
         <translation type="gpt-5-generated">마일</translation>
+    </message>
+    <message>
+        <source>ALL TIME (KONIK)</source>
+        <translation type="gpt-5-generated">전체 시간 (KONIK)</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation type="gpt-5-generated">항상</translation>
+    </message>
+    <message>
+        <source>PAST WEEK (KONIK)</source>
+        <translation type="gpt-5-generated">지난 주(코닉)</translation>
+    </message>
+    <message>
+        <source>PAST WEEK</source>
+        <translation type="gpt-5-generated">지난 주</translation>
     </message>
 </context>
 <context>
@@ -484,6 +500,30 @@
         <source>LIMIT</source>
         <translation type="gpt-5-generated">제한</translation>
     </message>
+    <message>
+        <source>Desired: %1</source>
+        <translation type="gpt-5-generated">원하는 값: %1</translation>
+    </message>
+    <message>
+        <source>s</source>
+        <translation type="gpt-5-generated">s</translation>
+    </message>
+    <message>
+        <source>1 minute</source>
+        <translation type="gpt-5-generated">1분</translation>
+    </message>
+    <message>
+        <source>%1 minutes</source>
+        <translation type="gpt-5-generated">%1분</translation>
+    </message>
+    <message>
+        <source>1 second</source>
+        <translation type="gpt-5-generated">1초</translation>
+    </message>
+    <message>
+        <source>%1 seconds</source>
+        <translation type="gpt-5-generated">%1초</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotConfirmationDialog</name>
@@ -501,7 +541,7 @@
     </message>
     <message>
         <source>Yes</source>
-        <translation type="gpt-5-generated">예</translation>
+        <translation>네</translation>
     </message>
     <message>
         <source>No</source>
@@ -532,11 +572,11 @@
     </message>
     <message>
         <source>Deleting...</source>
-        <translation type="gpt-5-generated">삭제 중...</translation>
+        <translation>삭제하는 중</translation>
     </message>
     <message>
         <source>Deleted!</source>
-        <translation type="gpt-5-generated">삭제됨!</translation>
+        <translation>삭제 완료!</translation>
     </message>
     <message>
         <source>Delete Error Logs</source>
@@ -636,7 +676,7 @@
     </message>
     <message>
         <source>Compressing...</source>
-        <translation type="gpt-5-generated">압축 중…</translation>
+        <translation type="gpt-5-generated">압축 중...</translation>
     </message>
     <message>
         <source>Backup created!</source>
@@ -680,7 +720,7 @@
     </message>
     <message>
         <source>Rebooting...</source>
-        <translation type="gpt-5-generated">재부팅 중…</translation>
+        <translation>재부팅 중...</translation>
     </message>
     <message>
         <source>Toggle Backups</source>
@@ -693,6 +733,238 @@
     <message>
         <source>Choose a backup to delete</source>
         <translation type="gpt-5-generated">삭제할 백업을 선택하세요</translation>
+    </message>
+    <message>
+        <source>FrogPilot Stats</source>
+        <translation type="gpt-5-generated">FrogPilot 통계</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;View your collected FrogPilot stats.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;수집된 FrogPilot 통계를 확인하세요.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation>초기화</translation>
+    </message>
+    <message>
+        <source>VIEW</source>
+        <translation type="gpt-5-generated">보기</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to reset all of your FrogPilot stats?</source>
+        <translation type="gpt-5-generated">FrogPilot 통계를 모두 재설정하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>초기화</translation>
+    </message>
+    <message>
+        <source>Total Emergency Brake Alerts</source>
+        <translation type="gpt-5-generated">비상 제동 경고 총계</translation>
+    </message>
+    <message>
+        <source>Time Using "Always On Lateral"</source>
+        <translation type="gpt-5-generated">"항상 켜짐 조향" 사용 시간</translation>
+    </message>
+    <message>
+        <source>Favorite Set Speed</source>
+        <translation type="gpt-5-generated">즐겨찾는 설정 속도</translation>
+    </message>
+    <message>
+        <source>Total Disengagements</source>
+        <translation type="gpt-5-generated">총 비개입 횟수</translation>
+    </message>
+    <message>
+        <source>Total Engagements</source>
+        <translation type="gpt-5-generated">총 참여 횟수</translation>
+    </message>
+    <message>
+        <source>Time Using "Experimental Mode"</source>
+        <translation type="gpt-5-generated">"Experimental Mode" 사용 시간</translation>
+    </message>
+    <message>
+        <source>Total Frog Chirps</source>
+        <translation type="gpt-5-generated">개구리 울음 총계</translation>
+    </message>
+    <message>
+        <source>Total Frog Hops</source>
+        <translation type="gpt-5-generated">개구리 총 점프 수</translation>
+    </message>
+    <message>
+        <source>Total Drives</source>
+        <translation type="gpt-5-generated">총 주행 횟수</translation>
+    </message>
+    <message>
+        <source>Total Distance Driven</source>
+        <translation type="gpt-5-generated">총 주행 거리</translation>
+    </message>
+    <message>
+        <source>Total Driving Time</source>
+        <translation type="gpt-5-generated">총 운전 시간</translation>
+    </message>
+    <message>
+        <source>Total Frog Squeaks</source>
+        <translation type="gpt-5-generated">개구리 삑삑 소리 총합</translation>
+    </message>
+    <message>
+        <source>Total Goat Screams</source>
+        <translation type="gpt-5-generated">총 염소 비명</translation>
+    </message>
+    <message>
+        <source>Highest Acceleration Rate</source>
+        <translation type="gpt-5-generated">최대 가속률</translation>
+    </message>
+    <message>
+        <source>Time Using Lateral Control</source>
+        <translation type="gpt-5-generated">횡방향 제어 사용 시간</translation>
+    </message>
+    <message>
+        <source>Longest Distance Without an Override</source>
+        <translation type="gpt-5-generated">오버라이드 없이 주행한 최장 거리</translation>
+    </message>
+    <message>
+        <source>Time Using Longitudinal Control</source>
+        <translation type="gpt-5-generated">종방향 제어 사용 시간</translation>
+    </message>
+    <message>
+        <source>Driving Models:</source>
+        <translation type="gpt-5-generated">주행 모델:</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation type="gpt-5-generated">월</translation>
+    </message>
+    <message>
+        <source>Total Overrides</source>
+        <translation type="gpt-5-generated">총 개입 횟수</translation>
+    </message>
+    <message>
+        <source>Time Overriding openpilot</source>
+        <translation type="gpt-5-generated">openpilot 시간 재정의 중</translation>
+    </message>
+    <message>
+        <source>Random Events:</source>
+        <translation type="gpt-5-generated">무작위 이벤트</translation>
+    </message>
+    <message>
+        <source>Time Stopped</source>
+        <translation type="gpt-5-generated">시간이 정지됨</translation>
+    </message>
+    <message>
+        <source>Time Spent at Stoplights</source>
+        <translation type="gpt-5-generated">신호대기 시간</translation>
+    </message>
+    <message>
+        <source>Total Time Tracked</source>
+        <translation type="gpt-5-generated">총 추적 시간</translation>
+    </message>
+    <message>
+        <source>UwUs</source>
+        <translation type="gpt-5-generated">UwUs</translation>
+    </message>
+    <message>
+        <source>Loch Ness Encounters</source>
+        <translation type="gpt-5-generated">네스호 조우</translation>
+    </message>
+    <message>
+        <source>Visits to 1955</source>
+        <translation type="gpt-5-generated">1955 방문</translation>
+    </message>
+    <message>
+        <source>Deja Vu Moments</source>
+        <translation type="gpt-5-generated">데자뷰 순간</translation>
+    </message>
+    <message>
+        <source>Internet Explorer Weeeeeeees</source>
+        <translation type="gpt-5-generated">Internet Explorer 위이이이이스</translation>
+    </message>
+    <message>
+        <source>HAL 9000 Denials</source>
+        <translation type="gpt-5-generated">HAL 9000 거부</translation>
+    </message>
+    <message>
+        <source>openpilot Crashes</source>
+        <translation type="gpt-5-generated">openpilot 충돌</translation>
+    </message>
+    <message>
+        <source>This Is Fine Moments</source>
+        <translation type="gpt-5-generated">괜찮은 순간들</translation>
+    </message>
+    <message>
+        <source>To Be Continued Moments</source>
+        <translation type="gpt-5-generated">계속될 순간들</translation>
+    </message>
+    <message>
+        <source>Noices</source>
+        <translation type="gpt-5-generated">잡음</translation>
+    </message>
+    <message>
+        <source>Attempted Frog Murders</source>
+        <translation type="gpt-5-generated">개구리 살해 시도</translation>
+    </message>
+    <message>
+        <source>Total Mail Received</source>
+        <translation type="gpt-5-generated">총 수신 메일</translation>
+    </message>
+    <message>
+        <source> kilometer</source>
+        <translation type="gpt-5-generated">킬로미터</translation>
+    </message>
+    <message>
+        <source> kilometers</source>
+        <translation type="gpt-5-generated">킬로미터</translation>
+    </message>
+    <message>
+        <source> mile</source>
+        <translation type="gpt-5-generated"> 마일</translation>
+    </message>
+    <message>
+        <source> miles</source>
+        <translation type="gpt-5-generated"> 마일</translation>
+    </message>
+    <message>
+        <source> day </source>
+        <translation type="gpt-5-generated">일</translation>
+    </message>
+    <message>
+        <source> days </source>
+        <translation type="gpt-5-generated">일</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">시간</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">시간</translation>
+    </message>
+    <message>
+        <source> minute</source>
+        <translation type="gpt-5-generated"> 분</translation>
+    </message>
+    <message>
+        <source> minutes</source>
+        <translation type="gpt-5-generated">분</translation>
+    </message>
+    <message>
+        <source>km/h</source>
+        <translation>km/h</translation>
+    </message>
+    <message>
+        <source>mph</source>
+        <translation type="gpt-5-generated">mph</translation>
+    </message>
+    <message>
+        <source>m/s²</source>
+        <translation type="gpt-5-generated">m/s²</translation>
+    </message>
+    <message>
+        <source>Total </source>
+        <translation type="gpt-5-generated">합계</translation>
+    </message>
+    <message>
+        <source>% of </source>
+        <translation type="gpt-5-generated">% 중</translation>
     </message>
 </context>
 <context>
@@ -875,10 +1147,129 @@
     </message>
 </context>
 <context>
+    <name>FrogPilotDriveSummary</name>
+    <message>
+        <source>Random Events Summary</source>
+        <translation type="gpt-5-generated">무작위 이벤트 요약</translation>
+    </message>
+    <message>
+        <source>Drive Summary</source>
+        <translation type="gpt-5-generated">주행 요약</translation>
+    </message>
+    <message>
+        <source>UwUs</source>
+        <translation type="gpt-5-generated">UwUs</translation>
+    </message>
+    <message>
+        <source>Loch Ness Encounters</source>
+        <translation type="gpt-5-generated">네스호 조우</translation>
+    </message>
+    <message>
+        <source>Visits to 1955</source>
+        <translation type="gpt-5-generated">1955 방문</translation>
+    </message>
+    <message>
+        <source>Deja Vu Moments</source>
+        <translation type="gpt-5-generated">데자뷰 순간</translation>
+    </message>
+    <message>
+        <source>Internet Explorer Weeeeeeees</source>
+        <translation type="gpt-5-generated">Internet Explorer 위이이이이이스</translation>
+    </message>
+    <message>
+        <source>HAL 9000 Denials</source>
+        <translation type="gpt-5-generated">HAL 9000 거부사항</translation>
+    </message>
+    <message>
+        <source>openpilot Crashes</source>
+        <translation type="gpt-5-generated">openpilot 충돌</translation>
+    </message>
+    <message>
+        <source>This Is Fine Moments</source>
+        <translation type="gpt-5-generated">괜찮았던 순간들</translation>
+    </message>
+    <message>
+        <source>To Be Continued Moments</source>
+        <translation type="gpt-5-generated">계속될 순간들</translation>
+    </message>
+    <message>
+        <source>Noices</source>
+        <translation type="gpt-5-generated">노이시스</translation>
+    </message>
+    <message>
+        <source>Attempted Frog Murders</source>
+        <translation type="gpt-5-generated">개구리 살해 시도</translation>
+    </message>
+    <message>
+        <source>Total Mail Received</source>
+        <translation type="gpt-5-generated">총 수신 메일</translation>
+    </message>
+    <message>
+        <source>% of Drive With openpilot Engaged</source>
+        <translation type="gpt-5-generated">openpilot 작동 주행 비율</translation>
+    </message>
+    <message>
+        <source>Drive Distance</source>
+        <translation type="gpt-5-generated">주행 거리</translation>
+    </message>
+    <message>
+        <source>Drive Time</source>
+        <translation type="gpt-5-generated">주행 시간</translation>
+    </message>
+    <message>
+        <source>% of Drive In "Experimental Mode"</source>
+        <translation type="gpt-5-generated">"실험 모드" 주행 비율 %</translation>
+    </message>
+    <message>
+        <source>No Random Events Played!</source>
+        <translation type="gpt-5-generated">재생된 랜덤 이벤트가 없습니다!</translation>
+    </message>
+    <message>
+        <source> kilometer</source>
+        <translation type="gpt-5-generated">킬로미터</translation>
+    </message>
+    <message>
+        <source> kilometers</source>
+        <translation type="gpt-5-generated"> 킬로미터</translation>
+    </message>
+    <message>
+        <source> mile</source>
+        <translation type="gpt-5-generated"> 마일</translation>
+    </message>
+    <message>
+        <source> miles</source>
+        <translation type="gpt-5-generated">마일</translation>
+    </message>
+    <message>
+        <source> day </source>
+        <translation type="gpt-5-generated">일</translation>
+    </message>
+    <message>
+        <source> days </source>
+        <translation type="gpt-5-generated">일</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">시간</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">시간</translation>
+    </message>
+    <message>
+        <source> minute</source>
+        <translation type="gpt-5-generated">분</translation>
+    </message>
+    <message>
+        <source> minutes</source>
+        <translation type="gpt-5-generated"> 분</translation>
+    </message>
+</context>
+<context>
     <name>FrogPilotLateralPanel</name>
     <message>
         <source>Advanced Lateral Tuning</source>
-        <translation type="gpt-5-generated">고급 횡방향 튜닝</translation>
+        <translation>고급 조향 튜닝</translation>
     </message>
     <message>
         <source>&lt;b&gt;Advanced steering control changes to fine-tune how openpilot drives.&lt;/b&gt;</source>
@@ -1018,7 +1409,7 @@
     </message>
     <message>
         <source>Lane Change Delay</source>
-        <translation type="gpt-5-generated">차선 변경 지연</translation>
+        <translation>차선 변경 지연 시간</translation>
     </message>
     <message>
         <source>&lt;b&gt;Delay between turn signal activation and the start of an automatic lane change.&lt;/b&gt;</source>
@@ -1050,7 +1441,7 @@
     </message>
     <message>
         <source>Lateral Tuning</source>
-        <translation type="gpt-5-generated">횡방향 튜닝</translation>
+        <translation>조향 튜닝</translation>
     </message>
     <message>
         <source>&lt;b&gt;Miscellaneous steering control changes&lt;/b&gt; to fine-tune how openpilot drives.</source>
@@ -1058,7 +1449,7 @@
     </message>
     <message>
         <source>Force Turn Desires Below Lane Change Speed</source>
-        <translation type="gpt-5-generated">차로 변경 속도 이하에서 강제 턴 의도</translation>
+        <translation>차선 변경 속도 제한 설정</translation>
     </message>
     <message>
         <source>&lt;b&gt;While driving below the minimum lane change speed with an active turn signal, instruct openpilot to turn left/right.&lt;/b&gt;</source>
@@ -1074,7 +1465,7 @@
     </message>
     <message>
         <source>Pause Steering Below</source>
-        <translation type="gpt-5-generated">조향 일시 중지 기준 아래</translation>
+        <translation>조향 제어 중지</translation>
     </message>
     <message>
         <source>&lt;b&gt;Pause steering below the set speed.&lt;/b&gt;</source>
@@ -1158,7 +1549,7 @@
     </message>
     <message>
         <source>Smooth Curve Handling</source>
-        <translation type="gpt-5-generated">부드러운 곡선 처리</translation>
+        <translation>부드러운 곡선 핸들링</translation>
     </message>
     <message>
         <source>&lt;b&gt;Twilsonco's torque-based adjustments to smoothen out steering in curves.&lt;/b&gt;</source>
@@ -1169,7 +1560,7 @@
     <name>FrogPilotLongitudinalPanel</name>
     <message>
         <source>Advanced Longitudinal Tuning</source>
-        <translation type="gpt-5-generated">고급 종방향 튜닝</translation>
+        <translation>고급 롱~컨트롤 튜닝</translation>
     </message>
     <message>
         <source>&lt;b&gt;Advanced acceleration and braking control changes&lt;/b&gt; to fine-tune how openpilot drives.</source>
@@ -1292,10 +1683,6 @@
         <translation type="gpt-5-generated">예상 정지까지</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Switch to "Experimental Mode" when openpilot predicts a stop within the set time.&lt;/b&gt; This is usually triggered when the model "sees" a red light or stop sign ahead.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason.&lt;/i&gt;</source>
-        <translation type="gpt-5-generated">&lt;b&gt;설정된 시간 내에 openpilot이 정지를 예측하면 "실험 모드"로 전환하세요.&lt;/b&gt; 이는 보통 모델이 앞에 있는 빨간 불이나 정지 표지를 "볼" 때 트리거됩니다.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;면책조항&lt;/b&gt;: openpilot은 신호등이나 정지 표지를 명시적으로 감지하지 않습니다. "실험 모드"에서는 openpilot이 카메라 입력만으로 종단 간 주행 결정을 내리므로, 뚜렷한 이유가 없는데도 정지할 수 있습니다.&lt;/i&gt;</translation>
-    </message>
-    <message>
         <source>Turn Signal Below</source>
         <translation type="gpt-5-generated">하단 방향지시등</translation>
     </message>
@@ -1365,7 +1752,7 @@
     </message>
     <message>
         <source>Following Distance</source>
-        <translation type="gpt-5-generated">차간 거리</translation>
+        <translation>추종 거리</translation>
     </message>
     <message>
         <source>&lt;b&gt;The minimum following distance to the lead vehicle in "Traffic Mode".&lt;/b&gt; openpilot blends between this value and the "Aggressive" profile as speed increases. Increase for more space; decrease for tighter gaps.</source>
@@ -1493,7 +1880,7 @@
     </message>
     <message>
         <source>Relaxed</source>
-        <translation type="gpt-5-generated">편안함</translation>
+        <translation>편안한</translation>
     </message>
     <message>
         <source>&lt;b&gt;Customize the "Relaxed" personality profile.&lt;/b&gt; Designed for smoother, more comfortable driving with larger gaps.</source>
@@ -1614,10 +2001,6 @@
     <message>
         <source>Force Stop at "Detected" Stop Lights/Signs</source>
         <translation type="gpt-5-generated">"감지된" 정지 신호/표지에서 강제 정지</translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;Force openpilot to stop whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason.&lt;/i&gt;</source>
-        <translation type="gpt-5-generated">&lt;b&gt;주행 모델이 빨간 신호나 정지 표지를 “감지”하면 openpilot을 강제로 정지시킵니다.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;면책조항&lt;/b&gt;: openpilot은 신호등이나 정지 표지를 명시적으로 감지하지 않습니다. “실험 모드”에서는 카메라 입력만으로 종단 간 주행 결정을 내리므로, 명확한 이유가 없어도 정지할 수 있습니다.&lt;/i&gt;</translation>
     </message>
     <message>
         <source>Increase Stopped Distance by:</source>
@@ -1909,7 +2292,7 @@
     </message>
     <message>
         <source>RESET</source>
-        <translation type="gpt-5-generated">재설정</translation>
+        <translation>초기화</translation>
     </message>
     <message>
         <source>Are you sure you want to completely reset your curvature data?</source>
@@ -1933,7 +2316,7 @@
     </message>
     <message>
         <source>Acceleration</source>
-        <translation type="gpt-5-generated">가속</translation>
+        <translation>가속페달</translation>
     </message>
     <message>
         <source>Deceleration</source>
@@ -2075,6 +2458,154 @@
         <source>&lt;b&gt;Following behavior that mimics human drivers&lt;/b&gt; by closing gaps behind faster vehicles for quicker takeoffs and dynamically adjusting the desired following distance for gentler, more efficient braking.</source>
         <translation type="gpt-5-generated">&lt;b&gt;사람 운전자와 유사한 추종 동작&lt;/b&gt;으로, 더 빠른 차량 뒤 간격을 좁혀 신속한 출발을 돕고 원하는 추종 거리를 동적으로 조절해 더욱 부드럽고 효율적인 제동을 수행합니다.</translation>
     </message>
+    <message>
+        <source>Weather Condition Offsets</source>
+        <translation type="gpt-5-generated">기상 상태 오프셋</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Automatically adjust driving behavior based on real-time weather.&lt;/b&gt; Helps maintain comfort and safety in low visibility, rain, or snow.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;실시간 날씨에 따라 운전 동작을 자동으로 조절합니다.&lt;/b&gt; 시야가 나쁘거나 비·눈이 올 때 편안함과 안전을 유지하도록 돕습니다.</translation>
+    </message>
+    <message>
+        <source>Low Visibility</source>
+        <translation type="gpt-5-generated">가시성 낮음</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for fog, haze, or other low-visibility conditions.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;안개, 연무 등 가시성이 낮은 상황에서의 주행 조정.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in low visibility.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;시야가 나쁠 때 선행 차량과의 간격을 더 넓힙니다.&lt;/b&gt; 값을 늘리면 간격이 넓어지고, 줄이면 간격이 좁아집니다.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in low visibility.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;가시성이 낮을 때 앞차 뒤에서 정차 시 추가 여유 공간을 두십시오.&lt;/b&gt; 더 넓은 공간이 필요하면 증가, 더 짧은 간격이 필요하면 감소.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in low visibility.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;시야가 낮을 때 최대 가속을 낮추십시오.&lt;/b&gt; 부드러운 출발을 원하면 증가시키고, 더 빠르지만 덜 안정적인 출발을 원하면 감소시키십시오.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in low visibility.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;가시성이 낮은 곡선 구간에서는 원하는 속도를 낮추십시오.&lt;/b&gt; 더 안전하고 부드러운 코너링을 원하면 증가시키고, 곡선에서 더 공격적인 주행을 원하면 감소시키십시오.</translation>
+    </message>
+    <message>
+        <source>Rain</source>
+        <translation type="gpt-5-generated">비</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for rainy conditions.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;비 오는 조건에서의 주행 조정.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in rain.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;비 오는 날에는 앞차와의 거리를 더 확보합니다.&lt;/b&gt; 값을 늘리면 간격이 넓어지고, 줄이면 간격이 좁아집니다.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in rain.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;비가 올 때 앞차 뒤에서 정차 시 여유 거리를 늘리십시오.&lt;/b&gt; 더 넓게 하려면 증가, 더 짧게 하려면 감소하세요.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in rain.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;비가 올 때 최대 가속을 낮추세요.&lt;/b&gt; 부드러운 출발을 원하면 높이고, 더 빠르지만 덜 안정적인 출발을 원하면 낮추세요.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in rain.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;비 오는 날 곡선 구간 주행 시 원하는 속도를 낮추십시오.&lt;/b&gt; 더 안전하고 부드러운 코너링을 원하면 증가시키고, 곡선에서 더 공격적인 주행을 원하면 감소시키십시오.</translation>
+    </message>
+    <message>
+        <source>Rainstorms</source>
+        <translation type="gpt-5-generated">폭우</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for rainstorms.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;폭우 시 운전 조정.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in a rainstorm.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;폭우 시 선행 차량과의 거리를 더 확보하세요.&lt;/b&gt; 값을 늘리면 더 넓어지고, 줄이면 간격이 더 좁아집니다.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in a rainstorm.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;폭우 속에서 앞차 뒤에 정차할 때 추가 여유 거리를 두세요.&lt;/b&gt; 더 넓게 하려면 늘리고, 더 짧게 하려면 줄이세요.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in a rainstorm.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;폭우 시 최대 가속을 낮추십시오.&lt;/b&gt; 더 부드러운 출발을 원하면 증가시키고, 더 빠르지만 덜 안정적인 출발을 원하면 감소시키십시오.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in a rainstorm.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;폭우에서 커브를 지날 때 목표 속도를 낮추세요.&lt;/b&gt; 값을 높이면 더 안전하고 부드러운 선회, 낮추면 커브에서 더 공격적인 주행이 됩니다.</translation>
+    </message>
+    <message>
+        <source>Human-Like Lane Changes</source>
+        <translation type="gpt-5-generated">사람처럼 차선 변경</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lane-change behavior that mimics human drivers&lt;/b&gt; by anticipating and tracking adjacent vehicles during lane changes.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;차선 변경 중 주변 차량을 예측하고 추적하여 사람 운전자와 유사한 차선 변경 동작&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>"Detected" Stop Lights/Signs</source>
+        <translation type="gpt-5-generated">감지된 신호등/정지 표지</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Switch to "Experimental Mode" whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;주행 모델이 빨간 신호나 정지 표지를 "감지"할 때마다 "실험 모드"로 전환하세요.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;면책조항&lt;/b&gt;: openpilot은 신호등이나 정지 표지를 명시적으로 감지하지 않습니다. "실험 모드"에서는 openpilot이 카메라 입력만으로 종단 간 주행 결정을 내리므로, 명확한 이유가 없어도 정지할 수 있습니다!&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Switch to "Experimental Mode" when openpilot predicts a stop within the set time.&lt;/b&gt; This is usually triggered when the model "sees" a red light or stop sign ahead.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;설정된 시간 내 정지가 예측될 때 "실험 모드"로 전환합니다.&lt;/b&gt; 이는 보통 모델이 앞에 있는 빨간 신호나 정지 표지판을 "볼" 때 트리거됩니다.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;면책조항&lt;/b&gt;: openpilot은 신호등이나 정지 표지판을 명시적으로 감지하지 않습니다. "실험 모드"에서는 openpilot이 카메라 입력만으로 종단 간 주행 결정을 내리므로, 분명한 이유가 없어도 정지할 수 있습니다!&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Force openpilot to stop whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;운전 모델이 빨간 신호나 정지 표지판을 “감지”하면 언제든지 openpilot을 강제로 정지합니다.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;면책조항&lt;/b&gt;: openpilot은 신호등이나 정지 표지판을 명시적으로 감지하지 않습니다. “실험 모드”에서는 카메라 입력만으로 종단간 주행 결정을 내리므로, 명확한 이유가 없어도 정지할 수 있습니다!&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>Set Your Own Key</source>
+        <translation type="gpt-5-generated">자체 키 설정</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Set your own "OpenWeatherMap" key to increase the weather update rate.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;Personal keys grant 1,000 free calls per day, allowing for updates every minute. The default key is shared and only updates every 15 minutes.&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;날씨 업데이트 빈도를 높이려면 "OpenWeatherMap" 개인 키를 설정하세요.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;개인 키는 하루 1,000회의 무료 호출이 가능하여 매분 업데이트할 수 있습니다. 기본 키는 공유되며 15분마다만 업데이트됩니다.&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>ADD</source>
+        <translation type="gpt-5-generated">추가</translation>
+    </message>
+    <message>
+        <source>Enter your "OpenWeatherMap" key</source>
+        <translation type="gpt-5-generated">"OpenWeatherMap" 키를 입력하세요</translation>
+    </message>
+    <message>
+        <source>REMOVE</source>
+        <translation type="gpt-5-generated">제거</translation>
+    </message>
+    <message>
+        <source>Invalid key!</source>
+        <translation type="gpt-5-generated">유효하지 않은 키!</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to remove your key?</source>
+        <translation type="gpt-5-generated">키를 정말 제거하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>TEST</source>
+        <translation type="gpt-5-generated">테스트</translation>
+    </message>
+    <message>
+        <source>Testing...</source>
+        <translation type="gpt-5-generated">테스트 중...</translation>
+    </message>
+    <message>
+        <source>Key is valid!</source>
+        <translation type="gpt-5-generated">키가 유효합니다!</translation>
+    </message>
+    <message>
+        <source>An error occurred: %1</source>
+        <translation type="gpt-5-generated">오류가 발생했습니다: %1</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotManageControl</name>
@@ -2163,7 +2694,7 @@
     </message>
     <message>
         <source>REMOVE</source>
-        <translation type="gpt-5-generated">제거</translation>
+        <translation>삭제</translation>
     </message>
     <message>
         <source>&lt;b&gt;Delete downloaded map data&lt;/b&gt; to free up storage space.</source>
@@ -2179,7 +2710,7 @@
     </message>
     <message>
         <source>RESET</source>
-        <translation type="gpt-5-generated">재설정</translation>
+        <translation>초기화</translation>
     </message>
     <message>
         <source>&lt;b&gt;Reset the map downloader.&lt;/b&gt; Use this if downloads are stuck or failing.</source>
@@ -2191,11 +2722,11 @@
     </message>
     <message>
         <source>Reset</source>
-        <translation type="gpt-5-generated">재설정</translation>
+        <translation>초기화</translation>
     </message>
     <message>
         <source>Resetting...</source>
-        <translation type="gpt-5-generated">재설정 중…</translation>
+        <translation>초기화 하는 중...</translation>
     </message>
     <message>
         <source>Reset!</source>
@@ -2259,11 +2790,19 @@
     </message>
     <message>
         <source>Offline...</source>
-        <translation type="gpt-5-generated">오프라인…</translation>
+        <translation type="gpt-5-generated">오프라인...</translation>
     </message>
     <message>
-        <source>CANCELLED</source>
-        <translation type="gpt-5-generated">취소됨</translation>
+        <source>0 MB</source>
+        <translation type="gpt-5-generated">0 MB</translation>
+    </message>
+    <message>
+        <source>Calculating...</source>
+        <translation type="gpt-5-generated">계산 중...</translation>
+    </message>
+    <message>
+        <source>Not parked</source>
+        <translation type="gpt-5-generated">주차되지 않음</translation>
     </message>
 </context>
 <context>
@@ -2294,7 +2833,7 @@
     </message>
     <message>
         <source>Model Randomizer</source>
-        <translation type="gpt-5-generated">모델 랜덤화기</translation>
+        <translation>모델 임의 선택</translation>
     </message>
     <message>
         <source>&lt;b&gt;Select a random driving model each drive&lt;/b&gt; and use feedback prompts at the end of the drive to help find the model that best suits you!</source>
@@ -2390,7 +2929,7 @@
     </message>
     <message>
         <source>REMOVE</source>
-        <translation type="gpt-5-generated">제거</translation>
+        <translation>삭제</translation>
     </message>
     <message>
         <source>REMOVE ALL</source>
@@ -2430,7 +2969,7 @@
     </message>
     <message>
         <source>RESET</source>
-        <translation type="gpt-5-generated">재설정</translation>
+        <translation>초기화</translation>
     </message>
     <message>
         <source>VIEW</source>
@@ -2462,7 +3001,7 @@
     </message>
     <message>
         <source>Offline...</source>
-        <translation type="gpt-5-generated">오프라인…</translation>
+        <translation type="gpt-5-generated">오프라인...</translation>
     </message>
     <message>
         <source>Update available!</source>
@@ -2475,6 +3014,38 @@
     <message>
         <source>Select a Model — 🗺️ = Navigation | 📡 = Radar | 👀 = VOACC</source>
         <translation type="gpt-5-generated">모델 선택 — 🗺️ = 내비게이션 | 📡 = 레이더 | 👀 = VOACC</translation>
+    </message>
+    <message>
+        <source>Downloading...</source>
+        <translation type="gpt-5-generated">다운로드 중...</translation>
+    </message>
+    <message>
+        <source>Not parked</source>
+        <translation type="gpt-5-generated">주차되지 않음</translation>
+    </message>
+    <message>
+        <source>Downloaded!</source>
+        <translation type="gpt-5-generated">다운로드됨!</translation>
+    </message>
+    <message>
+        <source>All models downloaded!</source>
+        <translation type="gpt-5-generated">모든 모델을 다운로드했습니다!</translation>
+    </message>
+    <message>
+        <source>Download cancelled...</source>
+        <translation type="gpt-5-generated">다운로드가 취소되었습니다...</translation>
+    </message>
+    <message>
+        <source>Download failed...</source>
+        <translation type="gpt-5-generated">다운로드 실패..."</translation>
+    </message>
+    <message>
+        <source>GitHub and GitLab are offline...</source>
+        <translation type="gpt-5-generated">GitHub와 GitLab이 오프라인입니다...</translation>
+    </message>
+    <message>
+        <source>Repository unavailable</source>
+        <translation type="gpt-5-generated">저장소를 사용할 수 없음</translation>
     </message>
 </context>
 <context>
@@ -2552,7 +3123,7 @@
     </message>
     <message>
         <source>Offline...</source>
-        <translation type="gpt-5-generated">오프라인…</translation>
+        <translation type="gpt-5-generated">오프라인...</translation>
     </message>
     <message>
         <source>Mapbox</source>
@@ -2655,11 +3226,62 @@ It will reset in %1 hours and %2 minutes.</source>
     </message>
     <message>
         <source>REMOVE</source>
-        <translation type="gpt-5-generated">제거</translation>
+        <translation>삭제</translation>
     </message>
     <message>
         <source>Completed!</source>
         <translation type="gpt-5-generated">완료됨!</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Manage your Public Mapbox Key.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;공용 Mapbox 키를 관리하세요.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>TEST</source>
+        <translation type="gpt-5-generated">테스트</translation>
+    </message>
+    <message>
+        <source>Remove your Public Mapbox Key?</source>
+        <translation type="gpt-5-generated">공개 Mapbox 키를 제거하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>Enter your Public Mapbox Key</source>
+        <translation type="gpt-5-generated">Public Mapbox 키를 입력하세요</translation>
+    </message>
+    <message>
+        <source>Testing...</source>
+        <translation type="gpt-5-generated">테스트 중...</translation>
+    </message>
+    <message>
+        <source>Key is valid!</source>
+        <translation type="gpt-5-generated">키가 유효합니다!</translation>
+    </message>
+    <message>
+        <source>Key is invalid!</source>
+        <translation type="gpt-5-generated">키가 유효하지 않습니다!</translation>
+    </message>
+    <message>
+        <source>An error occurred: %1</source>
+        <translation type="gpt-5-generated">오류가 발생했습니다: %1</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Manage your Secret Mapbox Key.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;비밀 Mapbox 키를 관리하세요.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Remove your Secret Mapbox Key?</source>
+        <translation type="gpt-5-generated">비공개 Mapbox 키를 제거하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>Enter your Secret Mapbox Key</source>
+        <translation type="gpt-5-generated">시크릿 Mapbox 키를 입력하세요</translation>
+    </message>
+</context>
+<context>
+    <name>FrogPilotOnroadWindow</name>
+    <message>
+        <source>FPS: %1 | Min: %2 | Max: %3 | Avg: %4</source>
+        <translation type="gpt-5-generated">FPS: %1 | 최소: %2 | 최대: %3 | 평균: %4</translation>
     </message>
 </context>
 <context>
@@ -2674,7 +3296,7 @@ It will reset in %1 hours and %2 minutes.</source>
     </message>
     <message>
         <source>GAS / BRAKE</source>
-        <translation type="gpt-5-generated">가속 / 브레이크</translation>
+        <translation>엑셀/브레이크</translation>
     </message>
     <message>
         <source>STEERING</source>
@@ -2750,7 +3372,7 @@ It will reset in %1 hours and %2 minutes.</source>
     </message>
     <message>
         <source>Theme and Appearance</source>
-        <translation type="gpt-5-generated">테마 및 외관</translation>
+        <translation>테마 및 모양</translation>
     </message>
     <message>
         <source>&lt;b&gt;Customize the look of the driving screen and interface, including themes!&lt;/b&gt;</source>
@@ -2774,7 +3396,7 @@ It will reset in %1 hours and %2 minutes.</source>
     </message>
     <message>
         <source>Advanced</source>
-        <translation type="gpt-5-generated">고급</translation>
+        <translation>고급 설정</translation>
     </message>
     <message>
         <source>Developer</source>
@@ -2811,7 +3433,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     <name>FrogPilotSoundsPanel</name>
     <message>
         <source>Alert Volume Controller</source>
-        <translation type="gpt-5-generated">경고 음량 컨트롤러</translation>
+        <translation>알림 볼륨 제어판</translation>
     </message>
     <message>
         <source>&lt;b&gt;Set how loud each type of openpilot alert is&lt;/b&gt; to keep routine prompts from becoming distracting.</source>
@@ -2819,7 +3441,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Disengage Volume</source>
-        <translation type="gpt-5-generated">해제 음량</translation>
+        <translation>해제 볼륨</translation>
     </message>
     <message>
         <source>&lt;b&gt;Set the volume for alerts when openpilot disengages.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Examples include: "Cruise Fault: Restart the Car", "Parking Brake Engaged", "Pedal Pressed".</source>
@@ -2827,7 +3449,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Engage Volume</source>
-        <translation type="gpt-5-generated">참여 볼륨</translation>
+        <translation>오파 작동 볼륨</translation>
     </message>
     <message>
         <source>&lt;b&gt;Set the volume for the chime when openpilot engages&lt;/b&gt;, such as after pressing the "RESUME" or "SET" steering wheel buttons.</source>
@@ -2835,7 +3457,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Prompt Volume</source>
-        <translation type="gpt-5-generated">프롬프트 볼륨</translation>
+        <translation>프롬프트(즉각) 볼륨</translation>
     </message>
     <message>
         <source>&lt;b&gt;Set the volume for prompts that need attention.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Examples include: "Car Detected in Blindspot", "Steering Temporarily Unavailable", "Turn Exceeds Steering Limit".</source>
@@ -2843,7 +3465,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Prompt Distracted Volume</source>
-        <translation type="gpt-5-generated">프롬프트 산만 볼륨</translation>
+        <translation>정신없는 프롬프트 볼륨</translation>
     </message>
     <message>
         <source>&lt;b&gt;Set the volume for prompts when openpilot detects driver distraction or unresponsiveness.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Examples include: "Pay Attention", "Touch Steering Wheel".</source>
@@ -2867,7 +3489,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Warning Immediate Volume</source>
-        <translation type="gpt-5-generated">경고 즉시 볼륨</translation>
+        <translation>즉각적인 경고 볼륨</translation>
     </message>
     <message>
         <source>&lt;b&gt;Set the volume for the loudest warnings that require urgent attention.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Examples include: "DISENGAGE IMMEDIATELY — Driver Distracted", "DISENGAGE IMMEDIATELY — Driver Unresponsive".</source>
@@ -2899,7 +3521,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Lead Departing Alert</source>
-        <translation type="gpt-5-generated">선행 차량 이탈 경고</translation>
+        <translation>앞차 출발 알림</translation>
     </message>
     <message>
         <source>&lt;b&gt;Play an alert when the lead vehicle departs from a stop.&lt;/b&gt;</source>
@@ -2946,7 +3568,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Color Scheme</source>
-        <translation type="gpt-5-generated">색 구성</translation>
+        <translation>색상 구성</translation>
     </message>
     <message>
         <source>&lt;b&gt;The color scheme used throughout openpilot.&lt;/b&gt; Use the "Theme Maker" in "The Pond" to create and share your own themes!</source>
@@ -2986,7 +3608,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Turn Signal</source>
-        <translation type="gpt-5-generated">방향지시등</translation>
+        <translation>방향 지시등</translation>
     </message>
     <message>
         <source>&lt;b&gt;Themed turn-signal animations.&lt;/b&gt; Use the "Theme Maker" in "The Pond" to create and share your own themes!</source>
@@ -2998,7 +3620,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Holiday Themes</source>
-        <translation type="gpt-5-generated">휴일 테마</translation>
+        <translation>홀리데이 테마</translation>
     </message>
     <message>
         <source>&lt;b&gt;Themes based on U.S. holidays.&lt;/b&gt; Minor holidays last one day; major holidays (Christmas, Easter, Halloween) run for a full week.</source>
@@ -3014,7 +3636,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Random Events</source>
-        <translation type="gpt-5-generated">무작위 이벤트</translation>
+        <translation>랜덤 이벤트</translation>
     </message>
     <message>
         <source>&lt;b&gt;Occasional on-screen effects triggered by driving conditions.&lt;/b&gt; These are purely a visual and don't impact how openpilot drives!</source>
@@ -3030,7 +3652,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Startup Alert</source>
-        <translation type="gpt-5-generated">시작 경고</translation>
+        <translation>시작 알림</translation>
     </message>
     <message>
         <source>&lt;b&gt;Customize the "Startup Alert" message&lt;/b&gt; shown at the start of each drive.</source>
@@ -3050,7 +3672,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Select a color scheme to delete</source>
-        <translation type="gpt-5-generated">삭제할 색 구성표를 선택하세요</translation>
+        <translation>삭제할 색 구성표 선택</translation>
     </message>
     <message>
         <source>Delete the "%1" color scheme?</source>
@@ -3062,11 +3684,11 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Select a color scheme to download</source>
-        <translation type="gpt-5-generated">다운로드할 색 구성표를 선택하세요</translation>
+        <translation>다운로드할 색 구성표 선택</translation>
     </message>
     <message>
         <source>Select a color scheme</source>
-        <translation type="gpt-5-generated">색상 테마 선택</translation>
+        <translation>색상 구성표 선택</translation>
     </message>
     <message>
         <source>Select a distance icon pack to delete</source>
@@ -3086,7 +3708,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Select an icon pack to delete</source>
-        <translation type="gpt-5-generated">삭제할 아이콘 팩을 선택하세요</translation>
+        <translation>삭제할 아이콘 팩 선택</translation>
     </message>
     <message>
         <source>Delete the "%1" icon pack?</source>
@@ -3094,7 +3716,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Select an icon pack to download</source>
-        <translation type="gpt-5-generated">다운로드할 아이콘 팩을 선택하세요</translation>
+        <translation>다운로드할 아이콘 팩 선택</translation>
     </message>
     <message>
         <source>Select an icon pack</source>
@@ -3118,7 +3740,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Select a sound pack to delete</source>
-        <translation type="gpt-5-generated">삭제할 사운드 팩을 선택하세요</translation>
+        <translation>삭제할 사운드 팩을 선택하세요.</translation>
     </message>
     <message>
         <source>Delete the "%1" sound pack?</source>
@@ -3126,7 +3748,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Select a sound pack to download</source>
-        <translation type="gpt-5-generated">다운로드할 사운드 팩을 선택하세요</translation>
+        <translation>다운로드할 사운드팩을 선택하세요.</translation>
     </message>
     <message>
         <source>Select a sound pack</source>
@@ -3134,7 +3756,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Select a steering wheel to delete</source>
-        <translation type="gpt-5-generated">삭제할 스티어링 휠을 선택하세요</translation>
+        <translation>삭제할 스티어링 휠을 선택하세요.</translation>
     </message>
     <message>
         <source>Delete the "%1" steering wheel?</source>
@@ -3142,27 +3764,27 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Select a steering wheel to download</source>
-        <translation type="gpt-5-generated">다운로드할 스티어링 휠을 선택하세요</translation>
+        <translation>다운로드할 스티어링 휠을 선택하세요.</translation>
     </message>
     <message>
         <source>Select a steering wheel</source>
-        <translation type="gpt-5-generated">스티어링 휠을 선택하세요</translation>
+        <translation>핸들을 선택하세요.</translation>
     </message>
     <message>
         <source>STOCK</source>
-        <translation type="gpt-5-generated">순정</translation>
+        <translation>스톡</translation>
     </message>
     <message>
         <source>FROGPILOT</source>
-        <translation type="gpt-5-generated">FROGPILOT</translation>
+        <translation>개구리파일럿</translation>
     </message>
     <message>
         <source>CUSTOM</source>
-        <translation type="gpt-5-generated">사용자 지정</translation>
+        <translation>커스텀</translation>
     </message>
     <message>
         <source>CLEAR</source>
-        <translation type="gpt-5-generated">지우기</translation>
+        <translation>클리어</translation>
     </message>
     <message>
         <source>Enter the text for the top half</source>
@@ -3188,6 +3810,38 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
         <source>CANCEL</source>
         <translation type="gpt-5-generated">취소</translation>
     </message>
+    <message>
+        <source>Downloading...</source>
+        <translation type="gpt-5-generated">다운로드 중...</translation>
+    </message>
+    <message>
+        <source>Idle</source>
+        <translation type="gpt-5-generated">대기</translation>
+    </message>
+    <message>
+        <source>Unpacking theme...</source>
+        <translation type="gpt-5-generated">테마 압축 해제 중...</translation>
+    </message>
+    <message>
+        <source>Downloaded!</source>
+        <translation type="gpt-5-generated">다운로드됨!</translation>
+    </message>
+    <message>
+        <source>Download cancelled...</source>
+        <translation type="gpt-5-generated">다운로드가 취소되었습니다...</translation>
+    </message>
+    <message>
+        <source>Download failed...</source>
+        <translation type="gpt-5-generated">다운로드 실패..."</translation>
+    </message>
+    <message>
+        <source>Repository unavailable</source>
+        <translation type="gpt-5-generated">저장소를 사용할 수 없습니다</translation>
+    </message>
+    <message>
+        <source>GitHub and GitLab are offline...</source>
+        <translation type="gpt-5-generated">GitHub과 GitLab이 오프라인입니다...</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotUtilitiesPanel</name>
@@ -3201,7 +3855,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Flash Panda</source>
-        <translation type="gpt-5-generated">Panda 플래시</translation>
+        <translation>플래시 판다</translation>
     </message>
     <message>
         <source>FLASH</source>
@@ -3221,11 +3875,11 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Flashing...</source>
-        <translation type="gpt-5-generated">플래싱 중...</translation>
+        <translation>플래싱하는 중...</translation>
     </message>
     <message>
         <source>Flashed!</source>
-        <translation type="gpt-5-generated">플래시됨!</translation>
+        <translation>플래싱 완료!</translation>
     </message>
     <message>
         <source>Rebooting...</source>
@@ -3245,11 +3899,11 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>ONROAD</source>
-        <translation type="gpt-5-generated">주행 중</translation>
+        <translation>온로드</translation>
     </message>
     <message>
         <source>OFF</source>
-        <translation type="gpt-5-generated">꺼짐</translation>
+        <translation>끄기</translation>
     </message>
     <message>
         <source>Report a Bug or an Issue</source>
@@ -3353,7 +4007,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>RESET</source>
-        <translation type="gpt-5-generated">재설정</translation>
+        <translation>초기화</translation>
     </message>
     <message>
         <source>&lt;b&gt;Reset all toggles to their default values.&lt;/b&gt;</source>
@@ -3365,11 +4019,11 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Reset</source>
-        <translation type="gpt-5-generated">재설정</translation>
+        <translation>초기화</translation>
     </message>
     <message>
         <source>Resetting...</source>
-        <translation type="gpt-5-generated">재설정 중…</translation>
+        <translation>초기화 하는 중...</translation>
     </message>
     <message>
         <source>Reset!</source>
@@ -3412,7 +4066,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Disable Automatic Fingerprint Detection</source>
-        <translation type="gpt-5-generated">자동 지문 감지 비활성화</translation>
+        <translation>핑거프린트 자동 인식 비활성화</translation>
     </message>
     <message>
         <source>&lt;b&gt;Force the selected fingerprint&lt;/b&gt; and prevent it from ever changing.</source>
@@ -3420,7 +4074,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Disable openpilot Longitudinal Control</source>
-        <translation type="gpt-5-generated">openpilot 종방향 제어 비활성화</translation>
+        <translation>오픈파일럿 롱~컨트롤 비활성화</translation>
     </message>
     <message>
         <source>&lt;b&gt;Disable openpilot longitudinal&lt;/b&gt; and use the car's stock ACC instead.</source>
@@ -3428,7 +4082,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Are you sure you want to completely disable openpilot longitudinal control?</source>
-        <translation type="gpt-5-generated">openpilot 종방향 제어를 완전히 비활성화하시겠습니까?</translation>
+        <translation>오픈 파일럿 롱~컨트롤을 완전히 비활성화하시겠습니까?</translation>
     </message>
     <message>
         <source>General Motors Settings</source>
@@ -3540,7 +4194,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Unlock</source>
-        <translation type="gpt-5-generated">잠금 해제</translation>
+        <translation>잠금해제</translation>
     </message>
     <message>
         <source>Never</source>
@@ -3608,7 +4262,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Yes</source>
-        <translation type="gpt-5-generated">예</translation>
+        <translation>네</translation>
     </message>
     <message>
         <source>No</source>
@@ -3629,6 +4283,54 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     <message>
         <source>comma Pedal Support</source>
         <translation type="gpt-5-generated">comma Pedal 지원</translation>
+    </message>
+    <message>
+        <source>Subaru Settings</source>
+        <translation type="gpt-5-generated">Subaru 설정</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;FrogPilot features for Subaru vehicles.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;Subaru 차량용 FrogPilot 기능.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Stop and Go</source>
+        <translation type="gpt-5-generated">정지 및 출발</translation>
+    </message>
+    <message>
+        <source>Stop and go for supported Subaru vehicles.</source>
+        <translation type="gpt-5-generated">지원되는 Subaru 차량의 정차 및 재출발.</translation>
+    </message>
+    <message>
+        <source>Acura/Honda Settings</source>
+        <translation type="gpt-5-generated">Acura/Honda 설정</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;FrogPilot features for Acura and Honda vehicles.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;Acura 및 Honda 차량을 위한 FrogPilot 기능.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Gentle Following</source>
+        <translation type="gpt-5-generated">부드러운 추종</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Reduces jerky acceleration and braking when following a lead vehicle.&lt;/b&gt; Ideal for stop-and-go traffic.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;선행 차량을 따라갈 때 급가속과 급제동을 줄입니다.&lt;/b&gt; 정체 구간에 적합합니다.</translation>
+    </message>
+    <message>
+        <source>Increased Braking Force</source>
+        <translation type="gpt-5-generated">제동력 증가</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Increases the maximum braking force for improved stopping performance.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;제동 성능 향상을 위해 최대 제동력을 증가시킵니다.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Responsive Pedal at Low Speeds</source>
+        <translation type="gpt-5-generated">저속에서 반응형 페달</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Improves acceleration from a standstill for a more responsive throttle feel in city driving.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;도심 주행에서 더 민첩한 스로틀 감각을 위해 정지 상태에서의 가속을 향상합니다.&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -3651,7 +4353,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Hide Lead Marker</source>
-        <translation type="gpt-5-generated">앞차 표시 숨기기</translation>
+        <translation>선행 차량 표시 숨기기</translation>
     </message>
     <message>
         <source>&lt;b&gt;Hide the lead-vehicle marker&lt;/b&gt; from the driving screen.</source>
@@ -3691,7 +4393,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Use Wheel Speed</source>
-        <translation type="gpt-5-generated">휠 속도 사용</translation>
+        <translation>휠 스피드 사용</translation>
     </message>
     <message>
         <source>&lt;b&gt;Use the vehicle's wheel speed&lt;/b&gt; instead of the cluster speed. This is purely a visual change and doesn't impact how openpilot drives!</source>
@@ -3707,7 +4409,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Adjacent Path Metrics</source>
-        <translation type="gpt-5-generated">인접 경로 메트릭스</translation>
+        <translation>인접 경로 기준</translation>
     </message>
     <message>
         <source>&lt;b&gt;Show the width of the adjacent lanes.&lt;/b&gt;</source>
@@ -3723,7 +4425,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Border Metrics</source>
-        <translation type="gpt-5-generated">경계 메트릭스</translation>
+        <translation>테두리 표시</translation>
     </message>
     <message>
         <source>&lt;b&gt;Show statuses along the border of the driving screen.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Blind Spot&lt;/b&gt;: The border turns red when a vehicle is in a blind spot&lt;br&gt;&lt;b&gt;Steering Torque&lt;/b&gt;: The border goes from green to red according to how much steering torque is being used&lt;br&gt;&lt;b&gt;Turn Signal&lt;/b&gt;: The border flashes yellow when a turn signal is on</source>
@@ -3731,7 +4433,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Lead Info</source>
-        <translation type="gpt-5-generated">선행 차량 정보</translation>
+        <translation>선두 차량 정보</translation>
     </message>
     <message>
         <source>&lt;b&gt;Show each tracked vehicle's distance and speed&lt;/b&gt; below its marker.</source>
@@ -3747,7 +4449,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Numerical Temperature Gauge</source>
-        <translation type="gpt-5-generated">숫자 온도 게이지</translation>
+        <translation>온도 게이지</translation>
     </message>
     <message>
         <source>&lt;b&gt;Show a numerical temperature in the sidebar&lt;/b&gt; instead of the status labels.</source>
@@ -3763,7 +4465,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Use International System of Units</source>
-        <translation type="gpt-5-generated">국제단위계(SI)를 사용하십시오</translation>
+        <translation>국제 단위 시스템 사용</translation>
     </message>
     <message>
         <source>&lt;b&gt;Display measurements using the "International System of Units" (SI)&lt;/b&gt; standard.</source>
@@ -3923,7 +4625,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Rotating Steering Wheel</source>
-        <translation type="gpt-5-generated">회전하는 스티어링 휠</translation>
+        <translation>스티어링 휠 회전</translation>
     </message>
     <message>
         <source>&lt;b&gt;Rotate the driving screen wheel&lt;/b&gt; with the physical steering wheel.</source>
@@ -3931,7 +4633,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Model UI</source>
-        <translation type="gpt-5-generated">모델 UI</translation>
+        <translation>모델UI</translation>
     </message>
     <message>
         <source>&lt;b&gt;Model visualizations&lt;/b&gt; for the driving path, lane lines, path edges, and road edges.</source>
@@ -3939,7 +4641,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Dynamic Path Width</source>
-        <translation type="gpt-5-generated">동적 경로 폭</translation>
+        <translation>동적 경로 너비</translation>
     </message>
     <message>
         <source>&lt;b&gt;Change the path width based on engagement.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Fully Engaged&lt;/b&gt;: 100%&lt;br&gt;&lt;b&gt;Always On Lateral&lt;/b&gt;: 75%&lt;br&gt;&lt;b&gt;Disengaged&lt;/b&gt;: 50%</source>
@@ -3947,7 +4649,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Lane Lines Width</source>
-        <translation type="gpt-5-generated">차선 너비</translation>
+        <translation>차선 폭</translation>
     </message>
     <message>
         <source>&lt;b&gt;Set the lane-line thickness.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Default matches the MUTCD lane-line width standard of 4 inches.</source>
@@ -3971,7 +4673,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Road Edges Width</source>
-        <translation type="gpt-5-generated">도로 가장자리 폭</translation>
+        <translation>도로 가장자리 너비</translation>
     </message>
     <message>
         <source>&lt;b&gt;Set the road-edge thickness.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Default matches half of the MUTCD lane-line width standard of 4 inches.</source>
@@ -4003,7 +4705,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Map Style</source>
-        <translation type="gpt-5-generated">지도 스타일</translation>
+        <translation>맵 스따일</translation>
     </message>
     <message>
         <source>&lt;b&gt;Select the map style&lt;/b&gt; for "Navigate on openpilot" (NOO):&lt;br&gt;&lt;br&gt;&lt;b&gt;Stock openpilot&lt;/b&gt;: Default comma.ai style&lt;br&gt;&lt;b&gt;FrogPilot&lt;/b&gt;: Official FrogPilot map style&lt;br&gt;&lt;b&gt;Mapbox Streets&lt;/b&gt;: Standard street-focused view&lt;br&gt;&lt;b&gt;Mapbox Outdoors&lt;/b&gt;: Emphasizes outdoor and terrain features&lt;br&gt;&lt;b&gt;Mapbox Light&lt;/b&gt;: Minimalist, bright theme&lt;br&gt;&lt;b&gt;Mapbox Dark&lt;/b&gt;: Minimalist, dark theme&lt;br&gt;&lt;b&gt;Mapbox Navigation Day&lt;/b&gt;: Optimized for daytime navigation&lt;br&gt;&lt;b&gt;Mapbox Navigation Night&lt;/b&gt;: Optimized for nighttime navigation&lt;br&gt;&lt;b&gt;Mapbox Satellite&lt;/b&gt;: Satellite imagery only&lt;br&gt;&lt;b&gt;Mapbox Satellite Streets&lt;/b&gt;: Hybrid satellite imagery with street labels&lt;br&gt;&lt;b&gt;Mapbox Traffic Night&lt;/b&gt;: Dark theme emphasizing traffic conditions&lt;br&gt;&lt;b&gt;Mike's Personalized Style&lt;/b&gt;: Customized hybrid satellite view</source>
@@ -4051,7 +4753,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Camera View</source>
-        <translation type="gpt-5-generated">카메라 보기</translation>
+        <translation>카메라 뷰</translation>
     </message>
     <message>
         <source>&lt;b&gt;Select the active camera view.&lt;/b&gt; This is purely a visual change and doesn't impact how openpilot drives!</source>
@@ -4083,11 +4785,11 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Steering Torque</source>
-        <translation type="gpt-5-generated">조향 토크</translation>
+        <translation>스티어링 토크</translation>
     </message>
     <message>
         <source>Turn Signal</source>
-        <translation type="gpt-5-generated">방향지시등</translation>
+        <translation>방향 지시등</translation>
     </message>
     <message>
         <source>Fahrenheit</source>
@@ -4111,11 +4813,11 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>SSD Left</source>
-        <translation type="gpt-5-generated">SSD 왼쪽</translation>
+        <translation>SSD 남은용량</translation>
     </message>
     <message>
         <source>SSD Used</source>
-        <translation type="gpt-5-generated">사용된 SSD</translation>
+        <translation>SSD 사용량</translation>
     </message>
     <message>
         <source>None</source>
@@ -4223,7 +4925,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>FrogPilot</source>
-        <translation type="gpt-5-generated">FrogPilot</translation>
+        <translation>개구리파일럿</translation>
     </message>
     <message>
         <source>Mapbox Streets</source>
@@ -4267,7 +4969,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Select a map style</source>
-        <translation type="gpt-5-generated">지도 스타일 선택</translation>
+        <translation>맵 스타일을 고르세요.</translation>
     </message>
     <message>
         <source>Auto</source>
@@ -4713,7 +5415,43 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>FrogPilot</source>
-        <translation type="gpt-5-generated">FrogPilot</translation>
+        <translation>개구리파일럿</translation>
+    </message>
+    <message>
+        <source>0 MB</source>
+        <translation type="gpt-5-generated">0 MB</translation>
+    </message>
+    <message>
+        <source> GB</source>
+        <translation type="gpt-5-generated">GB</translation>
+    </message>
+    <message>
+        <source> MB</source>
+        <translation type="gpt-5-generated">MB</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">시간</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">시간</translation>
+    </message>
+    <message>
+        <source> minute </source>
+        <translation type="gpt-5-generated">분</translation>
+    </message>
+    <message>
+        <source> minutes </source>
+        <translation type="gpt-5-generated">분</translation>
+    </message>
+    <message>
+        <source> second</source>
+        <translation type="gpt-5-generated">초</translation>
+    </message>
+    <message>
+        <source> seconds</source>
+        <translation type="gpt-5-generated"> 초</translation>
     </message>
 </context>
 <context>
@@ -4788,11 +5526,11 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>← Back</source>
-        <translation type="gpt-5-generated">← 뒤로</translation>
+        <translation>뒤로</translation>
     </message>
     <message>
         <source>FrogPilot</source>
-        <translation type="gpt-5-generated">FrogPilot</translation>
+        <translation>개구리파일럿</translation>
     </message>
     <message>
         <source>Welcome to FrogPilot! Since you're new to openpilot, the "Minimal" toggle preset has been applied, but you can change this at any time via the "Tuning Level" button!</source>
@@ -5033,11 +5771,11 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>LEFT</source>
-        <translation type="gpt-5-generated">왼쪽</translation>
+        <translation>남음</translation>
     </message>
     <message>
         <source>USED</source>
-        <translation type="gpt-5-generated">사용됨</translation>
+        <translation>사용</translation>
     </message>
 </context>
 <context>
@@ -5112,11 +5850,11 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Updates are only downloaded while the car is off or in park.</source>
-        <translation type="gpt-5-generated">업데이트는 차량이 꺼져 있거나 주차 상태일 때만 다운로드됩니다.</translation>
+        <translation>업데이트는 차량이 꺼져 있거나 주차되어 있을 때만 다운로드됩니다.</translation>
     </message>
     <message>
         <source>Automatically Update FrogPilot</source>
-        <translation type="gpt-5-generated">FrogPilot 자동 업데이트</translation>
+        <translation>개구리파일럿 자동 업데이트</translation>
     </message>
     <message>
         <source>FrogPilot will automatically update itself and it's assets when you're offroad and have an active internet connection.</source>
@@ -5128,7 +5866,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Error Log</source>
-        <translation type="gpt-5-generated">오류 로그</translation>
+        <translation>에러 로그</translation>
     </message>
     <message>
         <source>VIEW</source>
@@ -5136,7 +5874,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>View the error log for openpilot crashes.</source>
-        <translation type="gpt-5-generated">openpilot 충돌의 오류 로그를 확인합니다.</translation>
+        <translation>오픈파일럿 오류 로그를 확인하세요.</translation>
     </message>
     <message>
         <source>Do you want to perform a full factory reset? All saved assets and settings will be permanently deleted!</source>
@@ -5145,6 +5883,22 @@ This may take up to a minute.</source>
     <message>
         <source>This is a complete factory reset and cannot be undone. Are you absolutely sure you want to continue?</source>
         <translation type="gpt-5-generated">이 작업은 완전한 공장 초기화이며 되돌릴 수 없습니다. 정말 계속하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>downloading…</source>
+        <translation type="gpt-5-generated">다운로드 중…</translation>
+    </message>
+    <message>
+        <source>checking…</source>
+        <translation type="gpt-5-generated">확인 중…</translation>
+    </message>
+    <message>
+        <source>waiting for vehicle to go offroad...</source>
+        <translation type="gpt-5-generated">차량이 오프로드 상태가 될 때까지 기다리는 중...</translation>
+    </message>
+    <message>
+        <source>finalizing update...</source>
+        <translation type="gpt-5-generated">업데이트 마무리 중...</translation>
     </message>
 </context>
 <context>
@@ -5336,7 +6090,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>The driving visualization will transition to the road-facing wide-angle camera at low speeds to better show some turns. The Experimental mode logo will also be shown in the top right corner.</source>
-        <translation type="gpt-5-generated">일부 회전을 더 잘 보여주기 위해 저속에서는 주행 시각화가 도로 방향의 광각 카메라로 전환됩니다. 오른쪽 상단에는 Experimental 모드 로고도 표시됩니다.</translation>
+        <translation>주행 시각화는 저속에서 도로를 향한 광각 카메라로 전환되어 일부 회전을 더 잘 보여줍니다. 실험 모드 로고도 오른쪽 상단 모서리에 표시됩니다.</translation>
     </message>
     <message>
         <source>Blended Acc (Experimental)</source>
@@ -5454,7 +6208,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Uploading disabled</source>
-        <translation type="gpt-5-generated">업로드 비활성화됨</translation>
+        <translation>업로드 비활성화</translation>
     </message>
     <message>
         <source>Toggle off the "Turn Off Data Uploads" toggle to re-enable uploads.</source>

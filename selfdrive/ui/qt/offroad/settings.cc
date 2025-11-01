@@ -60,12 +60,6 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "../assets/offroad/icon_monitoring.png",
     },
     {
-      "RecordRoad",
-      tr("Record and Upload Road Cameras"),
-      tr("Upload data from the road cameras."),
-      "../assets/offroad/icon_monitoring.png",
-    },
-    {
       "IsMetric",
       tr("Use Metric System"),
       tr("Display speed in km/h instead of mph."),
@@ -375,6 +369,7 @@ void SettingsWindow::hideEvent(QHideEvent *event) {
   panelOpen = false;
   subPanelOpen = false;
   subSubPanelOpen = false;
+  subSubSubPanelOpen = false;
 
   updateFrogPilotToggles();
 }
@@ -415,7 +410,11 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   sidebar_layout->addSpacing(10);
   sidebar_layout->addWidget(close_btn, 0, Qt::AlignRight);
   QObject::connect(close_btn, &QPushButton::clicked, [this]() {
-    if (subSubPanelOpen) {
+    if (subSubSubPanelOpen) {
+      closeSubSubSubPanel();
+
+      subSubSubPanelOpen = false;
+    } else if (subSubPanelOpen) {
       closeSubSubPanel();
 
       subSubPanelOpen = false;
@@ -447,6 +446,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openPanel, [this]() {panelOpen=true;});
   QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openSubPanel, [this]() {subPanelOpen=true;});
   QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openSubSubPanel, [this]() {subSubPanelOpen=true;});
+  QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openSubSubSubPanel, [this]() {subSubSubPanelOpen=true;});
 
   QList<QPair<QString, QWidget *>> panels = {
     {tr("Device"), device},
@@ -535,13 +535,19 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
 
       if (panelOpen) {
         closePanel();
-
         panelOpen = false;
       }
       if (subPanelOpen) {
         closeSubPanel();
-
         subPanelOpen = false;
+      }
+      if (subSubPanelOpen) {
+        closeSubSubPanel();
+        subSubPanelOpen = false;
+      }
+      if (subSubSubPanelOpen) {
+        closeSubSubSubPanel();
+        subSubSubPanelOpen = false;
       }
       btn->setChecked(true);
       panel_widget->setCurrentWidget(w);

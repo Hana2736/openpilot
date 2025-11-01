@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
+import io
 import json
 import math
 import numpy as np
 import requests
+import shutil
 import subprocess
 import tarfile
 import threading
 import time
 import urllib.error
+import urllib.request
 import zipfile
 
 from functools import cache
@@ -19,9 +22,10 @@ from cereal import log, messaging
 from opendbc.can.parser import CANParser
 from openpilot.common.realtime import DT_DMON, DT_HW
 from openpilot.selfdrive.car.toyota.carcontroller import LOCK_CMD
+from openpilot.system.hardware import HARDWARE
 from panda import Panda
 
-from openpilot.frogpilot.common.frogpilot_variables import EARTH_RADIUS, KONIK_PATH, MAPD_PATH, MAPS_PATH, MINIMUM_LATERAL_ACCELERATION, params, params_cache, params_memory
+from openpilot.frogpilot.common.frogpilot_variables import DISCORD_WEBHOOK_URL_REPORT, EARTH_RADIUS, ERROR_LOGS_PATH, KONIK_PATH, MAPD_PATH, MAPS_PATH, params, params_cache, params_memory
 
 running_threads = {}
 
@@ -34,6 +38,7 @@ locks = {
   "lock_doors": threading.Lock(),
   "update_checks": threading.Lock(),
   "update_maps": threading.Lock(),
+  "update_openpilot": threading.Lock(),
   "update_tinygrad": threading.Lock()
 }
 
@@ -99,27 +104,52 @@ def calculate_road_curvature(modelData, v_ego):
   velocity = np.array(modelData.velocity.x)
   timebase = np.array(modelData.orientationRate.t)
 
-  # Find the g-force for the whole loop
-  lateral_acceleration = np.abs(orientation_rate * velocity)
+  lateral_acceleration = orientation_rate * velocity
+  index = np.argmax(np.abs(lateral_acceleration))
+  predicted_lateral_acc = float(lateral_acceleration[index])
+  time_to_curve = float(timebase[index])
 
-  # We want 2 mss lateral pull
-  comfort_limit = MINIMUM_LATERAL_ACCELERATION
+  return predicted_lateral_acc / max(v_ego, 1)**2, max(time_to_curve, 1)
 
-  # Where do we hit 2 mss?
-  unsafe_indices = np.where(lateral_acceleration > comfort_limit)[0]
+def capture_report(discord_user, report, frogpilot_toggles):
+  if not DISCORD_WEBHOOK_URL_REPORT:
+    return
 
-  if len(unsafe_indices) > 0:
-    # Find the time we hit that point
-    first_index = unsafe_indices[0]
-    time_to_curve = float(timebase[first_index])
-    predicted_lateral_acc = float(lateral_acceleration[first_index])
-  else:
-    # All good, no curve
-    time_to_curve = 1000.0
-    predicted_lateral_acc = 0.0
+  error_file_path = ERROR_LOGS_PATH / "error.txt"
+  error_content = "No error log found."
+  if error_file_path.exists():
+    error_content = error_file_path.read_text()[:1000]
 
-  # Return curvature (normalized) and the time to that specific intensity
-  return predicted_lateral_acc / max(v_ego, 1)**2, time_to_curve
+  toggles_bytes = io.BytesIO(json.dumps(frogpilot_toggles, indent=2).encode("utf-8"))
+
+  message = (
+    f"**🚨 New Error Report**\n\n"
+    f"**User:** `{discord_user}`\n\n"
+    f"**Report:**\n"
+    f"```{report}```\n"
+    f"**Error Log:**\n"
+    f"```{error_content}```\n"
+    f"**Toggle Settings:**\n"
+  )
+
+  try:
+    resp = requests.post(
+      DISCORD_WEBHOOK_URL_REPORT,
+      data={"content": message},
+      files={"file": ("frogpilot_toggles.json", toggles_bytes, "application/json")}
+    )
+    if resp.status_code not in (200, 204):
+      print(f"Discord notification failed: {resp.status_code} {resp.text}")
+      return
+
+    mention_resp = requests.post(
+      DISCORD_WEBHOOK_URL_REPORT,
+      json={"content": "<@&1198482895342411846>"}
+    )
+    if mention_resp.status_code not in (200, 204):
+      print(f"Discord mention failed: {mention_resp.status_code} {mention_resp.text}")
+  except Exception as exception:
+    print(f"Error sending Discord message: {exception}")
 
 def clean_model_name(name):
   return (
@@ -186,6 +216,8 @@ def is_url_pingable(url):
     if response.status_code in (405, 501):
       response = requests.get(url, headers=headers, timeout=10, allow_redirects=True, stream=True)
     return response.ok
+  except (requests.exceptions.ConnectionError, requests.exceptions.SSLError):
+    return False
   except requests.exceptions.RequestException as error:
     print(f"{error.__class__.__name__} while pinging {url}: {error}")
     return False
@@ -280,6 +312,44 @@ def update_maps(now):
     time.sleep(60)
 
   params.put("LastMapsUpdate", todays_date)
+
+def update_openpilot():
+  def update_available():
+    run_cmd(["pkill", "-SIGUSR1", "-f", "system.updated.updated"], "Updater check signal sent", "Failed to send updater check signal", report=False)
+
+    while params.get("UpdaterState", encoding="utf-8") != "checking...":
+      time.sleep(1)
+
+    while params.get("UpdaterState", encoding="utf-8") == "checking...":
+      time.sleep(1)
+
+    if not params.get_bool("UpdaterFetchAvailable"):
+      return False
+
+    while params.get("UpdaterState", encoding="utf-8") != "idle":
+      time.sleep(60)
+
+    run_cmd(["pkill", "-SIGHUP", "-f", "system.updated.updated"], "Updater refresh signal sent", "Failed to send updater refresh signal", report=False)
+
+    while not params.get_bool("UpdateAvailable"):
+      time.sleep(60)
+
+    return True
+
+  if params.get("UpdaterState", encoding="utf-8") != "idle":
+    return
+
+  if not update_available():
+    return
+
+  while params.get_bool("IsOnroad") or params_memory.get_bool("UpdateSpeedLimits") or running_threads.get("lock_doors", threading.Thread()).is_alive():
+    time.sleep(60)
+
+  while True:
+    if not update_available():
+      break
+
+  HARDWARE.reboot()
 
 @cache
 def use_konik_server():

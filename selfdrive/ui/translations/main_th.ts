@@ -423,6 +423,22 @@
         <source>Miles</source>
         <translation type="gpt-5-generated">ไมล์</translation>
     </message>
+    <message>
+        <source>ALL TIME (KONIK)</source>
+        <translation type="gpt-5-generated">ตลอดเวลา (KONIK)</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation type="gpt-5-generated">ตลอดเวลา</translation>
+    </message>
+    <message>
+        <source>PAST WEEK (KONIK)</source>
+        <translation type="gpt-5-generated">สัปดาห์ที่ผ่านมา (KONIK)</translation>
+    </message>
+    <message>
+        <source>PAST WEEK</source>
+        <translation type="gpt-5-generated">สัปดาห์ที่ผ่านมา</translation>
+    </message>
 </context>
 <context>
     <name>DriverViewWindow</name>
@@ -483,6 +499,30 @@
     <message>
         <source>LIMIT</source>
         <translation type="gpt-5-generated">จำกัด</translation>
+    </message>
+    <message>
+        <source>Desired: %1</source>
+        <translation type="gpt-5-generated">ต้องการ: %1</translation>
+    </message>
+    <message>
+        <source>s</source>
+        <translation type="gpt-5-generated">ส</translation>
+    </message>
+    <message>
+        <source>1 minute</source>
+        <translation type="gpt-5-generated">1 นาที</translation>
+    </message>
+    <message>
+        <source>%1 minutes</source>
+        <translation type="gpt-5-generated">%1 นาที</translation>
+    </message>
+    <message>
+        <source>1 second</source>
+        <translation type="gpt-5-generated">1 วินาที</translation>
+    </message>
+    <message>
+        <source>%1 seconds</source>
+        <translation type="gpt-5-generated">%1 วินาที</translation>
     </message>
 </context>
 <context>
@@ -632,7 +672,7 @@
     </message>
     <message>
         <source>Backing up...</source>
-        <translation type="gpt-5-generated">กำลังสำรองข้อมูล…</translation>
+        <translation type="gpt-5-generated">กำลังสำรองข้อมูล...</translation>
     </message>
     <message>
         <source>Compressing...</source>
@@ -693,6 +733,238 @@
     <message>
         <source>Choose a backup to delete</source>
         <translation type="gpt-5-generated">เลือกข้อมูลสำรองที่จะลบ</translation>
+    </message>
+    <message>
+        <source>FrogPilot Stats</source>
+        <translation type="gpt-5-generated">สถิติ FrogPilot</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;View your collected FrogPilot stats.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ดูสถิติ FrogPilot ที่คุณเก็บรวบรวม&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation type="gpt-5-generated">รีเซ็ต</translation>
+    </message>
+    <message>
+        <source>VIEW</source>
+        <translation type="gpt-5-generated">ดู</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to reset all of your FrogPilot stats?</source>
+        <translation type="gpt-5-generated">คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสถิติ FrogPilot ทั้งหมดของคุณ?</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="gpt-5-generated">รีเซ็ต</translation>
+    </message>
+    <message>
+        <source>Total Emergency Brake Alerts</source>
+        <translation type="gpt-5-generated">การเตือนเบรกฉุกเฉินทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Time Using "Always On Lateral"</source>
+        <translation type="gpt-5-generated">เวลาที่ใช้ "Always On Lateral"</translation>
+    </message>
+    <message>
+        <source>Favorite Set Speed</source>
+        <translation type="gpt-5-generated">ความเร็วที่ตั้งค่าโปรด</translation>
+    </message>
+    <message>
+        <source>Total Disengagements</source>
+        <translation type="gpt-5-generated">การยกเลิกทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Total Engagements</source>
+        <translation type="gpt-5-generated">จำนวนการมีส่วนร่วมทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Time Using "Experimental Mode"</source>
+        <translation type="gpt-5-generated">เวลาที่ใช้ “โหมดทดลอง”</translation>
+    </message>
+    <message>
+        <source>Total Frog Chirps</source>
+        <translation type="gpt-5-generated">จำนวนเสียงร้องกบทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Total Frog Hops</source>
+        <translation type="gpt-5-generated">จำนวนการกระโดดของกบทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Total Drives</source>
+        <translation type="gpt-5-generated">การขับทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Total Distance Driven</source>
+        <translation type="gpt-5-generated">ระยะทางทั้งหมดที่ขับ</translation>
+    </message>
+    <message>
+        <source>Total Driving Time</source>
+        <translation type="gpt-5-generated">เวลาขับขี่ทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Total Frog Squeaks</source>
+        <translation type="gpt-5-generated">จำนวนเสียงเอี๊ยดกบทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Total Goat Screams</source>
+        <translation type="gpt-5-generated">จำนวนเสียงแพะร้องทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Highest Acceleration Rate</source>
+        <translation type="gpt-5-generated">อัตราเร่งสูงสุด</translation>
+    </message>
+    <message>
+        <source>Time Using Lateral Control</source>
+        <translation type="gpt-5-generated">เวลาที่ใช้การควบคุมด้านข้าง</translation>
+    </message>
+    <message>
+        <source>Longest Distance Without an Override</source>
+        <translation type="gpt-5-generated">ระยะทางยาวที่สุดโดยไม่ต้องแทรกแซง</translation>
+    </message>
+    <message>
+        <source>Time Using Longitudinal Control</source>
+        <translation type="gpt-5-generated">เวลาใช้งานการควบคุมตามยาว</translation>
+    </message>
+    <message>
+        <source>Driving Models:</source>
+        <translation type="gpt-5-generated">โมเดลการขับขี่</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation type="gpt-5-generated">เดือน</translation>
+    </message>
+    <message>
+        <source>Total Overrides</source>
+        <translation type="gpt-5-generated">จำนวนการแทรกแซงทั้งหมด</translation>
+    </message>
+    <message>
+        <source>Time Overriding openpilot</source>
+        <translation type="gpt-5-generated">แทนที่เวลา openpilot</translation>
+    </message>
+    <message>
+        <source>Random Events:</source>
+        <translation type="gpt-5-generated">เหตุการณ์สุ่ม</translation>
+    </message>
+    <message>
+        <source>Time Stopped</source>
+        <translation type="gpt-5-generated">เวลาหยุด</translation>
+    </message>
+    <message>
+        <source>Time Spent at Stoplights</source>
+        <translation type="gpt-5-generated">เวลาที่ใช้รอไฟแดง</translation>
+    </message>
+    <message>
+        <source>Total Time Tracked</source>
+        <translation type="gpt-5-generated">เวลาที่ติดตามทั้งหมด</translation>
+    </message>
+    <message>
+        <source>UwUs</source>
+        <translation type="gpt-5-generated">UwUs</translation>
+    </message>
+    <message>
+        <source>Loch Ness Encounters</source>
+        <translation type="gpt-5-generated">การเผชิญหน้าทะเลสาบล็อกเนส</translation>
+    </message>
+    <message>
+        <source>Visits to 1955</source>
+        <translation type="gpt-5-generated">การเข้าชมถึง 1955</translation>
+    </message>
+    <message>
+        <source>Deja Vu Moments</source>
+        <translation type="gpt-5-generated">ช่วงเดจาวู</translation>
+    </message>
+    <message>
+        <source>Internet Explorer Weeeeeeees</source>
+        <translation type="gpt-5-generated">Internet Explorer วี๊~~~~~</translation>
+    </message>
+    <message>
+        <source>HAL 9000 Denials</source>
+        <translation type="gpt-5-generated">การปฏิเสธของ HAL 9000</translation>
+    </message>
+    <message>
+        <source>openpilot Crashes</source>
+        <translation type="gpt-5-generated">openpilot ขัดข้อง</translation>
+    </message>
+    <message>
+        <source>This Is Fine Moments</source>
+        <translation type="gpt-5-generated">ช่วงเวลาที่ทุกอย่างยังโอเค</translation>
+    </message>
+    <message>
+        <source>To Be Continued Moments</source>
+        <translation type="gpt-5-generated">ช่วงเวลาที่ต้องติดตามต่อ</translation>
+    </message>
+    <message>
+        <source>Noices</source>
+        <translation type="gpt-5-generated">เสียงรบกวน</translation>
+    </message>
+    <message>
+        <source>Attempted Frog Murders</source>
+        <translation type="gpt-5-generated">พยายามฆ่ากบ</translation>
+    </message>
+    <message>
+        <source>Total Mail Received</source>
+        <translation type="gpt-5-generated">อีเมลที่ได้รับทั้งหมด</translation>
+    </message>
+    <message>
+        <source> kilometer</source>
+        <translation type="gpt-5-generated">กิโลเมตร</translation>
+    </message>
+    <message>
+        <source> kilometers</source>
+        <translation type="gpt-5-generated">กิโลเมตร</translation>
+    </message>
+    <message>
+        <source> mile</source>
+        <translation type="gpt-5-generated"> ไมล์</translation>
+    </message>
+    <message>
+        <source> miles</source>
+        <translation type="gpt-5-generated"> ไมล์</translation>
+    </message>
+    <message>
+        <source> day </source>
+        <translation type="gpt-5-generated">วัน</translation>
+    </message>
+    <message>
+        <source> days </source>
+        <translation type="gpt-5-generated">วัน</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">ชั่วโมง</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">ชั่วโมง</translation>
+    </message>
+    <message>
+        <source> minute</source>
+        <translation type="gpt-5-generated">นาที</translation>
+    </message>
+    <message>
+        <source> minutes</source>
+        <translation type="gpt-5-generated">นาที</translation>
+    </message>
+    <message>
+        <source>km/h</source>
+        <translation type="gpt-5-generated">กม./ชม.</translation>
+    </message>
+    <message>
+        <source>mph</source>
+        <translation type="gpt-5-generated">ไมล์/ชม.</translation>
+    </message>
+    <message>
+        <source>m/s²</source>
+        <translation type="gpt-5-generated">ม./วินาที²</translation>
+    </message>
+    <message>
+        <source>Total </source>
+        <translation type="gpt-5-generated">รวม</translation>
+    </message>
+    <message>
+        <source>% of </source>
+        <translation type="gpt-5-generated">% ของ</translation>
     </message>
 </context>
 <context>
@@ -872,6 +1144,125 @@
     <message>
         <source> seconds</source>
         <translation type="gpt-5-generated">วินาที</translation>
+    </message>
+</context>
+<context>
+    <name>FrogPilotDriveSummary</name>
+    <message>
+        <source>Random Events Summary</source>
+        <translation type="gpt-5-generated">สรุปเหตุการณ์สุ่ม</translation>
+    </message>
+    <message>
+        <source>Drive Summary</source>
+        <translation type="gpt-5-generated">สรุปการขับขี่</translation>
+    </message>
+    <message>
+        <source>UwUs</source>
+        <translation type="gpt-5-generated">UwUs</translation>
+    </message>
+    <message>
+        <source>Loch Ness Encounters</source>
+        <translation type="gpt-5-generated">การเผชิญหน้าที่ทะเลสาบเนสส์</translation>
+    </message>
+    <message>
+        <source>Visits to 1955</source>
+        <translation type="gpt-5-generated">จำนวนการเข้าชมถึง 1955</translation>
+    </message>
+    <message>
+        <source>Deja Vu Moments</source>
+        <translation type="gpt-5-generated">ช่วงเดจาวู</translation>
+    </message>
+    <message>
+        <source>Internet Explorer Weeeeeeees</source>
+        <translation type="gpt-5-generated">Internet Explorer วีีีีีีีีีีีีส์</translation>
+    </message>
+    <message>
+        <source>HAL 9000 Denials</source>
+        <translation type="gpt-5-generated">การปฏิเสธของ HAL 9000</translation>
+    </message>
+    <message>
+        <source>openpilot Crashes</source>
+        <translation type="gpt-5-generated">openpilot ขัดข้อง</translation>
+    </message>
+    <message>
+        <source>This Is Fine Moments</source>
+        <translation type="gpt-5-generated">ช่วงเวลา "ทุกอย่างปกติดี"</translation>
+    </message>
+    <message>
+        <source>To Be Continued Moments</source>
+        <translation type="gpt-5-generated">ช่วงต่อเนื่องที่จะดำเนินต่อไป</translation>
+    </message>
+    <message>
+        <source>Noices</source>
+        <translation type="gpt-5-generated">เสียงดัง</translation>
+    </message>
+    <message>
+        <source>Attempted Frog Murders</source>
+        <translation type="gpt-5-generated">พยายามฆ่าเม่นอ๊บ</translation>
+    </message>
+    <message>
+        <source>Total Mail Received</source>
+        <translation type="gpt-5-generated">จดหมายที่ได้รับทั้งหมด</translation>
+    </message>
+    <message>
+        <source>% of Drive With openpilot Engaged</source>
+        <translation type="gpt-5-generated">% ของการขับขี่ที่เปิดใช้ openpilot</translation>
+    </message>
+    <message>
+        <source>Drive Distance</source>
+        <translation type="gpt-5-generated">ระยะทางขับขี่</translation>
+    </message>
+    <message>
+        <source>Drive Time</source>
+        <translation type="gpt-5-generated">เวลาในการขับขี่</translation>
+    </message>
+    <message>
+        <source>% of Drive In "Experimental Mode"</source>
+        <translation type="gpt-5-generated">% ของการขับขี่ใน "โหมดทดลองใช้"</translation>
+    </message>
+    <message>
+        <source>No Random Events Played!</source>
+        <translation type="gpt-5-generated">ไม่มีเหตุการณ์สุ่มถูกเล่น!</translation>
+    </message>
+    <message>
+        <source> kilometer</source>
+        <translation type="gpt-5-generated">กิโลเมตร</translation>
+    </message>
+    <message>
+        <source> kilometers</source>
+        <translation type="gpt-5-generated"> กิโลเมตร</translation>
+    </message>
+    <message>
+        <source> mile</source>
+        <translation type="gpt-5-generated"> ไมล์</translation>
+    </message>
+    <message>
+        <source> miles</source>
+        <translation type="gpt-5-generated"> ไมล์</translation>
+    </message>
+    <message>
+        <source> day </source>
+        <translation type="gpt-5-generated">วัน</translation>
+    </message>
+    <message>
+        <source> days </source>
+        <translation type="gpt-5-generated">วัน</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">ชั่วโมง</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">ชั่วโมง</translation>
+    </message>
+    <message>
+        <source> minute</source>
+        <translation type="gpt-5-generated">นาที</translation>
+    </message>
+    <message>
+        <source> minutes</source>
+        <translation type="gpt-5-generated"> นาที</translation>
     </message>
 </context>
 <context>
@@ -1292,10 +1683,6 @@
         <translation type="gpt-5-generated">คาดการณ์หยุดใน</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Switch to "Experimental Mode" when openpilot predicts a stop within the set time.&lt;/b&gt; This is usually triggered when the model "sees" a red light or stop sign ahead.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason.&lt;/i&gt;</source>
-        <translation type="gpt-5-generated">&lt;b&gt;สลับเป็น "โหมดทดลอง" เมื่อ openpilot คาดการณ์ว่าจะต้องหยุดภายในเวลาที่กำหนด&lt;/b&gt; มักจะทริกเกอร์เมื่อโมเดล "เห็น" ไฟแดงหรือป้ายหยุดข้างหน้า&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;ข้อจำกัดความรับผิด&lt;/b&gt;: openpilot ไม่ได้ตรวจจับสัญญาณไฟจราจรหรือป้ายหยุดโดยตรง ใน "โหมดทดลอง" openpilot ตัดสินใจขับขี่แบบ end-to-end จากภาพจากกล้อง ซึ่งหมายความว่าอาจหยุดแม้ไม่มีเหตุผลชัดเจน&lt;/i&gt;</translation>
-    </message>
-    <message>
         <source>Turn Signal Below</source>
         <translation type="gpt-5-generated">ไฟเลี้ยวด้านล่าง</translation>
     </message>
@@ -1614,10 +2001,6 @@
     <message>
         <source>Force Stop at "Detected" Stop Lights/Signs</source>
         <translation type="gpt-5-generated">หยุดบังคับที่ไฟ/ป้ายหยุดที่ "ตรวจพบ"</translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;Force openpilot to stop whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason.&lt;/i&gt;</source>
-        <translation type="gpt-5-generated">&lt;b&gt;บังคับให้ openpilot หยุดทุกครั้งที่โมเดลการขับขี่ “ตรวจพบ” ไฟแดงหรือป้ายหยุด&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;ข้อจำกัดความรับผิดชอบ&lt;/b&gt;: openpilot ไม่ได้ตรวจจับสัญญาณไฟจราจรหรือป้ายหยุดโดยตรง ใน “โหมดทดลอง (Experimental Mode)” openpilot ตัดสินใจขับขี่แบบปลายทางถึงปลายทางจากภาพกล้อง ซึ่งหมายความว่าอาจหยุดแม้เมื่อไม่มีเหตุผลชัดเจน&lt;/i&gt;</translation>
     </message>
     <message>
         <source>Increase Stopped Distance by:</source>
@@ -2075,6 +2458,154 @@
         <source>&lt;b&gt;Following behavior that mimics human drivers&lt;/b&gt; by closing gaps behind faster vehicles for quicker takeoffs and dynamically adjusting the desired following distance for gentler, more efficient braking.</source>
         <translation type="gpt-5-generated">&lt;b&gt;พฤติกรรมการตามที่เลียนแบบผู้ขับขี่มนุษย์&lt;/b&gt; โดยปิดช่องว่างด้านหลังรถที่เร็วกว่าเพื่อออกตัวได้เร็วขึ้น และปรับระยะห่างที่ต้องการแบบไดนามิกเพื่อการเบรกที่นุ่มนวลและมีประสิทธิภาพมากขึ้น</translation>
     </message>
+    <message>
+        <source>Weather Condition Offsets</source>
+        <translation type="gpt-5-generated">การชดเชยสภาพอากาศ</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Automatically adjust driving behavior based on real-time weather.&lt;/b&gt; Helps maintain comfort and safety in low visibility, rain, or snow.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ปรับพฤติกรรมการขับขี่อัตโนมัติตามสภาพอากาศแบบเรียลไทม์&lt;/b&gt; ช่วยคงความสบายและความปลอดภัยในสภาพทัศนวิสัยต่ำ ฝน หรือหิมะ</translation>
+    </message>
+    <message>
+        <source>Low Visibility</source>
+        <translation type="gpt-5-generated">ทัศนวิสัยต่ำ</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for fog, haze, or other low-visibility conditions.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;การขับขี่ปรับสำหรับสภาพหมอก ควัน หรือสภาพที่ทัศนวิสัยต่ำอื่นๆ&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in low visibility.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;เพิ่มระยะห่างด้านหลังรถคันหน้าเมื่อทัศนวิสัยต่ำ&lt;/b&gt; เพิ่มเพื่อเว้นระยะมากขึ้น; ลดเพื่อให้ช่องว่างแคบลง</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in low visibility.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;เพิ่มระยะกันชนพิเศษเมื่อหยุดอยู่หลังรถคันหน้าในสภาพทัศนวิสัยต่ำ&lt;/b&gt; เพิ่มเพื่อเว้นระยะมากขึ้น; ลดเพื่อให้ช่องว่างสั้นลง.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in low visibility.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ลดการเร่งสูงสุดเมื่อทัศนวิสัยต่ำ&lt;/b&gt; เพิ่มค่าสำหรับการออกตัวนุ่มนวล ลดค่าสำหรับการออกตัวที่รวดเร็วกว่าแต่เสถียรน้อยกว่า</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in low visibility.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ลดความเร็วที่ต้องการขณะขับผ่านโค้งในสภาพทัศนวิสัยต่ำ&lt;/b&gt; เพิ่มเพื่อให้เลี้ยวได้ปลอดภัยและนุ่มนวลขึ้น; ลดเพื่อการขับที่ดุดันมากขึ้นในโค้ง.</translation>
+    </message>
+    <message>
+        <source>Rain</source>
+        <translation type="gpt-5-generated">ฝน</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for rainy conditions.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ปรับการขับขี่สำหรับสภาพฝนตก&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in rain.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;เพิ่มระยะห่างด้านหลังรถคันหน้าเมื่อฝนตก&lt;/b&gt; เพิ่มเพื่อเว้นระยะมากขึ้น; ลดเพื่อช่องว่างแคบลง</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in rain.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;เพิ่มระยะเผื่อเมื่อจอดหลังรถคันหน้าในฝน&lt;/b&gt; เพิ่มเพื่อให้มีพื้นที่มากขึ้น ลดเพื่อให้ช่องว่างสั้นลง</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in rain.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ลดอัตราเร่งสูงสุดเมื่อฝนตก&lt;/b&gt; เพิ่มเพื่อการออกตัวนุ่มนวลขึ้น; ลดเพื่อการออกตัวเร็วขึ้นแต่เสถียรภาพน้อยลง</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in rain.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ลดความเร็วที่ต้องการเมื่อขับผ่านโค้งในฝน&lt;/b&gt; เพิ่มเพื่อให้เลี้ยวปลอดภัย นุ่มนวลขึ้น; ลดเพื่อการขับที่ดุดันมากขึ้นในโค้ง.</translation>
+    </message>
+    <message>
+        <source>Rainstorms</source>
+        <translation type="gpt-5-generated">พายุฝน</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for rainstorms.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;การขับขี่ที่ปรับสำหรับพายุฝน&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in a rainstorm.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;เพิ่มระยะห่างด้านหลังรถคันหน้าในช่วงพายุฝน&lt;/b&gt; เพิ่มเพื่อเว้นระยะมากขึ้น; ลดเพื่อให้ช่องว่างแคบลง</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in a rainstorm.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;เพิ่มระยะเผื่อเมื่อหยุดอยู่หลังรถคันหน้าในพายุฝน&lt;/b&gt; เพิ่มเพื่อให้มีระยะมากขึ้น; ลดเพื่อให้ช่องว่างสั้นลง</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in a rainstorm.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ลดความเร่งสูงสุดเมื่อเกิดพายุฝน&lt;/b&gt; เพิ่มเพื่อออกตัวนุ่มนวลขึ้น; ลดเพือ่ออกตัวเร็วขึ้นแต่เสถียรน้อยลง</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in a rainstorm.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ลดความเร็วที่ต้องการเมื่อขับผ่านโค้งท่ามกลางพายุฝน&lt;/b&gt; เพิ่มเพื่อการเข้าโค้งที่ปลอดภัยและนุ่มนวล ลดเพื่อการขับขี่ในโค้งที่ดุดันมากขึ้น</translation>
+    </message>
+    <message>
+        <source>Human-Like Lane Changes</source>
+        <translation type="gpt-5-generated">การเปลี่ยนเลนเหมือนมนุษย์</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lane-change behavior that mimics human drivers&lt;/b&gt; by anticipating and tracking adjacent vehicles during lane changes.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;พฤติกรรมเปลี่ยนเลนที่เลียนแบบผู้ขับขี่มนุษย์&lt;/b&gt; โดยคาดการณ์และติดตามรถในเลนข้างเคียงระหว่างการเปลี่ยนเลน</translation>
+    </message>
+    <message>
+        <source>"Detected" Stop Lights/Signs</source>
+        <translation type="gpt-5-generated">ตรวจพบสัญญาณไฟ/ป้ายหยุด</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Switch to "Experimental Mode" whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;สลับไปยัง "โหมดทดลอง" เมื่อใดก็ตามที่แบบจำลองการขับขี่ "ตรวจพบ" ไฟแดงหรือป้ายหยุด&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;ข้อจำกัดความรับผิดชอบ&lt;/b&gt;: openpilot ไม่ได้ตรวจจับสัญญาณไฟจราจรหรือป้ายหยุดโดยตรง ใน "โหมดทดลอง" openpilot ตัดสินใจขับขี่แบบ end-to-end จากข้อมูลกล้อง ซึ่งหมายความว่าอาจหยุดแม้ไม่มีเหตุผลชัดเจน!&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Switch to "Experimental Mode" when openpilot predicts a stop within the set time.&lt;/b&gt; This is usually triggered when the model "sees" a red light or stop sign ahead.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;สลับไปใช้ "โหมดทดลอง" เมื่อ openpilot คาดการณ์ว่าจะต้องหยุดภายในเวลาที่ตั้งไว้&lt;/b&gt; โดยปกติจะเกิดขึ้นเมื่อโมเดล “เห็น” ไฟแดงหรือป้ายหยุดด้านหน้า&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;ข้อจำกัดความรับผิดชอบ&lt;/b&gt;: openpilot ไม่ได้ตรวจจับสัญญาณไฟจราจรหรือป้ายหยุดโดยตรง ใน “โหมดทดลอง” openpilot ตัดสินใจขับขี่แบบ end-to-end จากภาพกล้อง ซึ่งหมายความว่าอาจหยุดแม้ไม่มีเหตุผลชัดเจน!&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Force openpilot to stop whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;บังคับให้ openpilot หยุดทุกครั้งที่แบบจำลองการขับขี่ “ตรวจพบ” ไฟแดงหรือป้ายหยุด&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;ข้อจำกัดความรับผิดชอบ&lt;/b&gt;: openpilot ไม่ได้ตรวจจับสัญญาณไฟจราจรหรือป้ายหยุดโดยตรง ใน “โหมดทดลอง” openpilot ตัดสินใจขับขี่แบบ end-to-end จากภาพกล้อง ซึ่งหมายความว่ามันอาจหยุดแม้ไม่มีเหตุผลชัดเจน!&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>Set Your Own Key</source>
+        <translation type="gpt-5-generated">ตั้งคีย์ของคุณเอง</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Set your own "OpenWeatherMap" key to increase the weather update rate.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;Personal keys grant 1,000 free calls per day, allowing for updates every minute. The default key is shared and only updates every 15 minutes.&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ตั้งค่า "OpenWeatherMap" คีย์ของคุณเองเพื่อเพิ่มความถี่ในการอัปเดตสภาพอากาศ&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;คีย์ส่วนบุคคลให้สิทธิ์ใช้งานฟรี 1,000 ครั้งต่อวัน อนุญาตให้อัปเดตได้ทุกนาที คีย์เริ่มต้นถูกใช้งานร่วมกันและอัปเดตทุก 15 นาทีเท่านั้น&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>ADD</source>
+        <translation type="gpt-5-generated">เพิ่ม</translation>
+    </message>
+    <message>
+        <source>Enter your "OpenWeatherMap" key</source>
+        <translation type="gpt-5-generated">ป้อนคีย์ "OpenWeatherMap" ของคุณ</translation>
+    </message>
+    <message>
+        <source>REMOVE</source>
+        <translation type="gpt-5-generated">เอาออก</translation>
+    </message>
+    <message>
+        <source>Invalid key!</source>
+        <translation type="gpt-5-generated">คีย์ไม่ถูกต้อง!</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to remove your key?</source>
+        <translation type="gpt-5-generated">คุณแน่ใจหรือไม่ว่าต้องการลบกุญแจของคุณ?</translation>
+    </message>
+    <message>
+        <source>TEST</source>
+        <translation type="gpt-5-generated">ทดสอบ</translation>
+    </message>
+    <message>
+        <source>Testing...</source>
+        <translation type="gpt-5-generated">กำลังทดสอบ...</translation>
+    </message>
+    <message>
+        <source>Key is valid!</source>
+        <translation type="gpt-5-generated">คีย์ถูกต้อง!</translation>
+    </message>
+    <message>
+        <source>An error occurred: %1</source>
+        <translation type="gpt-5-generated">เกิดข้อผิดพลาด: %1</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotManageControl</name>
@@ -2262,8 +2793,16 @@
         <translation type="gpt-5-generated">ออฟไลน์...</translation>
     </message>
     <message>
-        <source>CANCELLED</source>
-        <translation type="gpt-5-generated">ยกเลิก</translation>
+        <source>0 MB</source>
+        <translation type="gpt-5-generated">0 MB</translation>
+    </message>
+    <message>
+        <source>Calculating...</source>
+        <translation type="gpt-5-generated">กำลังคำนวณ...</translation>
+    </message>
+    <message>
+        <source>Not parked</source>
+        <translation type="gpt-5-generated">ไม่ได้จอด</translation>
     </message>
 </context>
 <context>
@@ -2476,6 +3015,38 @@
         <source>Select a Model — 🗺️ = Navigation | 📡 = Radar | 👀 = VOACC</source>
         <translation type="gpt-5-generated">เลือกโมเดล — 🗺️ = นำทาง | 📡 = เรดาร์ | 👀 = VOACC</translation>
     </message>
+    <message>
+        <source>Downloading...</source>
+        <translation type="gpt-5-generated">กำลังดาวน์โหลด...</translation>
+    </message>
+    <message>
+        <source>Not parked</source>
+        <translation type="gpt-5-generated">ไม่ได้จอดรถ</translation>
+    </message>
+    <message>
+        <source>Downloaded!</source>
+        <translation type="gpt-5-generated">ดาวน์โหลดแล้ว!</translation>
+    </message>
+    <message>
+        <source>All models downloaded!</source>
+        <translation type="gpt-5-generated">ดาวน์โหลดโมเดลทั้งหมดแล้ว!</translation>
+    </message>
+    <message>
+        <source>Download cancelled...</source>
+        <translation type="gpt-5-generated">ยกเลิกการดาวน์โหลดแล้ว...</translation>
+    </message>
+    <message>
+        <source>Download failed...</source>
+        <translation type="gpt-5-generated">ดาวน์โหลดล้มเหลว...</translation>
+    </message>
+    <message>
+        <source>GitHub and GitLab are offline...</source>
+        <translation type="gpt-5-generated">GitHub และ GitLab ออฟไลน์อยู่...</translation>
+    </message>
+    <message>
+        <source>Repository unavailable</source>
+        <translation type="gpt-5-generated">ที่เก็บข้อมูลไม่พร้อมใช้งาน</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotModelReview</name>
@@ -2661,6 +3232,57 @@ It will reset in %1 hours and %2 minutes.</source>
     <message>
         <source>Completed!</source>
         <translation type="gpt-5-generated">เสร็จสิ้น!</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Manage your Public Mapbox Key.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;จัดการคีย์ Mapbox สาธารณะของคุณ&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>TEST</source>
+        <translation type="gpt-5-generated">ทดสอบ</translation>
+    </message>
+    <message>
+        <source>Remove your Public Mapbox Key?</source>
+        <translation type="gpt-5-generated">ลบคีย์ Mapbox สาธารณะของคุณหรือไม่?</translation>
+    </message>
+    <message>
+        <source>Enter your Public Mapbox Key</source>
+        <translation type="gpt-5-generated">ป้อนคีย์ Mapbox สาธารณะของคุณ</translation>
+    </message>
+    <message>
+        <source>Testing...</source>
+        <translation type="gpt-5-generated">กำลังทดสอบ...</translation>
+    </message>
+    <message>
+        <source>Key is valid!</source>
+        <translation type="gpt-5-generated">คีย์ถูกต้อง!</translation>
+    </message>
+    <message>
+        <source>Key is invalid!</source>
+        <translation type="gpt-5-generated">กุญแจไม่ถูกต้อง!</translation>
+    </message>
+    <message>
+        <source>An error occurred: %1</source>
+        <translation type="gpt-5-generated">เกิดข้อผิดพลาด: %1</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Manage your Secret Mapbox Key.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;จัดการคีย์ลับ Mapbox ของคุณ&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Remove your Secret Mapbox Key?</source>
+        <translation type="gpt-5-generated">ลบ Secret Mapbox Key ของคุณหรือไม่?</translation>
+    </message>
+    <message>
+        <source>Enter your Secret Mapbox Key</source>
+        <translation type="gpt-5-generated">ป้อน Secret Mapbox Key ของคุณ</translation>
+    </message>
+</context>
+<context>
+    <name>FrogPilotOnroadWindow</name>
+    <message>
+        <source>FPS: %1 | Min: %2 | Max: %3 | Avg: %4</source>
+        <translation type="gpt-5-generated">FPS: %1 | ต่ำสุด: %2 | สูงสุด: %3 | เฉลี่ย: %4</translation>
     </message>
 </context>
 <context>
@@ -3189,6 +3811,38 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
         <source>CANCEL</source>
         <translation type="gpt-5-generated">ยกเลิก</translation>
     </message>
+    <message>
+        <source>Downloading...</source>
+        <translation type="gpt-5-generated">กำลังดาวน์โหลด...</translation>
+    </message>
+    <message>
+        <source>Idle</source>
+        <translation type="gpt-5-generated">ว่าง</translation>
+    </message>
+    <message>
+        <source>Unpacking theme...</source>
+        <translation type="gpt-5-generated">กำลังแตกไฟล์ธีม...</translation>
+    </message>
+    <message>
+        <source>Downloaded!</source>
+        <translation type="gpt-5-generated">ดาวน์โหลดแล้ว!</translation>
+    </message>
+    <message>
+        <source>Download cancelled...</source>
+        <translation type="gpt-5-generated">ยกเลิกการดาวน์โหลดแล้ว...</translation>
+    </message>
+    <message>
+        <source>Download failed...</source>
+        <translation type="gpt-5-generated">ดาวน์โหลดล้มเหลว...</translation>
+    </message>
+    <message>
+        <source>Repository unavailable</source>
+        <translation type="gpt-5-generated">ที่เก็บไม่พร้อมใช้งาน</translation>
+    </message>
+    <message>
+        <source>GitHub and GitLab are offline...</source>
+        <translation type="gpt-5-generated">GitHub และ GitLab ออฟไลน์อยู่...</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotUtilitiesPanel</name>
@@ -3222,7 +3876,7 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     </message>
     <message>
         <source>Flashing...</source>
-        <translation type="gpt-5-generated">กำลังกะพริบ…</translation>
+        <translation type="gpt-5-generated">กำลังกะพริบ...</translation>
     </message>
     <message>
         <source>Flashed!</source>
@@ -3630,6 +4284,54 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
     <message>
         <source>comma Pedal Support</source>
         <translation type="gpt-5-generated">รองรับ comma Pedal</translation>
+    </message>
+    <message>
+        <source>Subaru Settings</source>
+        <translation type="gpt-5-generated">การตั้งค่า Subaru</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;FrogPilot features for Subaru vehicles.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;คุณสมบัติ FrogPilot สำหรับรถยนต์ Subaru&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Stop and Go</source>
+        <translation type="gpt-5-generated">หยุดและเคลื่อนตัว</translation>
+    </message>
+    <message>
+        <source>Stop and go for supported Subaru vehicles.</source>
+        <translation type="gpt-5-generated">ฟังก์ชันหยุดและออกตัวสำหรับรถ Subaru ที่รองรับ.</translation>
+    </message>
+    <message>
+        <source>Acura/Honda Settings</source>
+        <translation type="gpt-5-generated">การตั้งค่า Acura/Honda</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;FrogPilot features for Acura and Honda vehicles.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ฟีเจอร์ FrogPilot สำหรับรถยนต์ Acura และ Honda&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Gentle Following</source>
+        <translation type="gpt-5-generated">การติดตามอย่างนุ่มนวล</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Reduces jerky acceleration and braking when following a lead vehicle.&lt;/b&gt; Ideal for stop-and-go traffic.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ลดการเร่งและการเบรกที่กระตุกเมื่อขับตามรถคันหน้า&lt;/b&gt; เหมาะสำหรับการจราจรแบบหยุด-เคลื่อนตัว</translation>
+    </message>
+    <message>
+        <source>Increased Braking Force</source>
+        <translation type="gpt-5-generated">แรงเบรกเพิ่มขึ้น</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Increases the maximum braking force for improved stopping performance.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;เพิ่มแรงเบรกสูงสุดเพื่อให้หยุดได้มีประสิทธิภาพยิ่งขึ้น&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Responsive Pedal at Low Speeds</source>
+        <translation type="gpt-5-generated">แป้นคันเร่งตอบสนองที่ความเร็วต่ำ</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Improves acceleration from a standstill for a more responsive throttle feel in city driving.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;ปรับปรุงอัตราเร่งจากหยุดนิ่งเพื่อให้คันเร่งตอบสนองมากขึ้นในการขับขี่ในเมือง&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -4716,6 +5418,42 @@ Developer - Highly customizable settings for seasoned enthusiasts</source>
         <source>FrogPilot</source>
         <translation type="gpt-5-generated">FrogPilot</translation>
     </message>
+    <message>
+        <source>0 MB</source>
+        <translation type="gpt-5-generated">0 MB</translation>
+    </message>
+    <message>
+        <source> GB</source>
+        <translation type="gpt-5-generated">GB</translation>
+    </message>
+    <message>
+        <source> MB</source>
+        <translation type="gpt-5-generated"> MB</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">ชั่วโมง</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">ชั่วโมง</translation>
+    </message>
+    <message>
+        <source> minute </source>
+        <translation type="gpt-5-generated">นาที</translation>
+    </message>
+    <message>
+        <source> minutes </source>
+        <translation type="gpt-5-generated">นาที</translation>
+    </message>
+    <message>
+        <source> second</source>
+        <translation type="gpt-5-generated">วินาที</translation>
+    </message>
+    <message>
+        <source> seconds</source>
+        <translation type="gpt-5-generated"> วินาที</translation>
+    </message>
 </context>
 <context>
     <name>Reset</name>
@@ -5146,6 +5884,22 @@ This may take up to a minute.</source>
     <message>
         <source>This is a complete factory reset and cannot be undone. Are you absolutely sure you want to continue?</source>
         <translation type="gpt-5-generated">นี่เป็นการรีเซ็ตเป็นค่าโรงงานแบบสมบูรณ์และไม่สามารถยกเลิกได้ คุณแน่ใจอย่างยิ่งว่าต้องการดำเนินการต่อหรือไม่?</translation>
+    </message>
+    <message>
+        <source>downloading…</source>
+        <translation type="gpt-5-generated">กำลังดาวน์โหลด…</translation>
+    </message>
+    <message>
+        <source>checking…</source>
+        <translation type="gpt-5-generated">กำลังตรวจสอบ…</translation>
+    </message>
+    <message>
+        <source>waiting for vehicle to go offroad...</source>
+        <translation type="gpt-5-generated">กำลังรอให้รถออกนอกถนน...</translation>
+    </message>
+    <message>
+        <source>finalizing update...</source>
+        <translation type="gpt-5-generated">กำลังสรุปการอัปเดต...</translation>
     </message>
 </context>
 <context>

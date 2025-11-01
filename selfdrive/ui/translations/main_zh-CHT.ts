@@ -423,6 +423,22 @@
         <source>Miles</source>
         <translation type="gpt-5-generated">英里</translation>
     </message>
+    <message>
+        <source>ALL TIME (KONIK)</source>
+        <translation type="gpt-5-generated">全時（KONIK）</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation type="gpt-5-generated">全時</translation>
+    </message>
+    <message>
+        <source>PAST WEEK (KONIK)</source>
+        <translation type="gpt-5-generated">過去一週（KONIK）</translation>
+    </message>
+    <message>
+        <source>PAST WEEK</source>
+        <translation type="gpt-5-generated">過去一週</translation>
+    </message>
 </context>
 <context>
     <name>DriverViewWindow</name>
@@ -484,6 +500,30 @@
         <source>LIMIT</source>
         <translation type="gpt-5-generated">限制</translation>
     </message>
+    <message>
+        <source>Desired: %1</source>
+        <translation type="gpt-5-generated">期望：%1</translation>
+    </message>
+    <message>
+        <source>s</source>
+        <translation type="gpt-5-generated">s</translation>
+    </message>
+    <message>
+        <source>1 minute</source>
+        <translation type="gpt-5-generated">1 分鐘</translation>
+    </message>
+    <message>
+        <source>%1 minutes</source>
+        <translation type="gpt-5-generated">%1 分鐘</translation>
+    </message>
+    <message>
+        <source>1 second</source>
+        <translation type="gpt-5-generated">1 秒</translation>
+    </message>
+    <message>
+        <source>%1 seconds</source>
+        <translation type="gpt-5-generated">%1 秒</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotConfirmationDialog</name>
@@ -532,7 +572,7 @@
     </message>
     <message>
         <source>Deleting...</source>
-        <translation type="gpt-5-generated">正在刪除…</translation>
+        <translation type="gpt-5-generated">正在刪除...</translation>
     </message>
     <message>
         <source>Deleted!</source>
@@ -600,7 +640,7 @@
     </message>
     <message>
         <source>Renaming...</source>
-        <translation type="gpt-5-generated">正在重新命名…</translation>
+        <translation type="gpt-5-generated">正在重新命名...</translation>
     </message>
     <message>
         <source>Renamed!</source>
@@ -632,11 +672,11 @@
     </message>
     <message>
         <source>Backing up...</source>
-        <translation type="gpt-5-generated">正在備份…</translation>
+        <translation type="gpt-5-generated">正在備份...</translation>
     </message>
     <message>
         <source>Compressing...</source>
-        <translation type="gpt-5-generated">正在壓縮…</translation>
+        <translation type="gpt-5-generated">正在壓縮...</translation>
     </message>
     <message>
         <source>Backup created!</source>
@@ -668,11 +708,11 @@
     </message>
     <message>
         <source>Restoring...</source>
-        <translation type="gpt-5-generated">正在還原…</translation>
+        <translation type="gpt-5-generated">正在還原...</translation>
     </message>
     <message>
         <source>Extracting...</source>
-        <translation type="gpt-5-generated">正在解壓縮…</translation>
+        <translation type="gpt-5-generated">正在解壓縮...</translation>
     </message>
     <message>
         <source>Restored!</source>
@@ -680,7 +720,7 @@
     </message>
     <message>
         <source>Rebooting...</source>
-        <translation type="gpt-5-generated">正在重新啟動…</translation>
+        <translation type="gpt-5-generated">正在重新啟動...</translation>
     </message>
     <message>
         <source>Toggle Backups</source>
@@ -693,6 +733,238 @@
     <message>
         <source>Choose a backup to delete</source>
         <translation type="gpt-5-generated">選擇要刪除的備份</translation>
+    </message>
+    <message>
+        <source>FrogPilot Stats</source>
+        <translation type="gpt-5-generated">FrogPilot 統計</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;View your collected FrogPilot stats.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;查看你收集的 FrogPilot 統計資料。&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation type="gpt-5-generated">重設</translation>
+    </message>
+    <message>
+        <source>VIEW</source>
+        <translation type="gpt-5-generated">檢視</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to reset all of your FrogPilot stats?</source>
+        <translation type="gpt-5-generated">您確定要重設您所有的 FrogPilot 統計資料嗎？</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="gpt-5-generated">重設</translation>
+    </message>
+    <message>
+        <source>Total Emergency Brake Alerts</source>
+        <translation type="gpt-5-generated">緊急煞車警報總數</translation>
+    </message>
+    <message>
+        <source>Time Using "Always On Lateral"</source>
+        <translation type="gpt-5-generated">使用「始終啟用橫向控制」的時間</translation>
+    </message>
+    <message>
+        <source>Favorite Set Speed</source>
+        <translation type="gpt-5-generated">最愛設定速度</translation>
+    </message>
+    <message>
+        <source>Total Disengagements</source>
+        <translation type="gpt-5-generated">總解除接管數</translation>
+    </message>
+    <message>
+        <source>Total Engagements</source>
+        <translation type="gpt-5-generated">總互動次數</translation>
+    </message>
+    <message>
+        <source>Time Using "Experimental Mode"</source>
+        <translation type="gpt-5-generated">使用「實驗模式」時間</translation>
+    </message>
+    <message>
+        <source>Total Frog Chirps</source>
+        <translation type="gpt-5-generated">青蛙鳴叫總數</translation>
+    </message>
+    <message>
+        <source>Total Frog Hops</source>
+        <translation type="gpt-5-generated">青蛙總跳躍數</translation>
+    </message>
+    <message>
+        <source>Total Drives</source>
+        <translation type="gpt-5-generated">總駕駛次數</translation>
+    </message>
+    <message>
+        <source>Total Distance Driven</source>
+        <translation type="gpt-5-generated">總行駛距離</translation>
+    </message>
+    <message>
+        <source>Total Driving Time</source>
+        <translation type="gpt-5-generated">總駕駛時間</translation>
+    </message>
+    <message>
+        <source>Total Frog Squeaks</source>
+        <translation type="gpt-5-generated">青蛙吱吱聲總數</translation>
+    </message>
+    <message>
+        <source>Total Goat Screams</source>
+        <translation type="gpt-5-generated">山羊尖叫總數</translation>
+    </message>
+    <message>
+        <source>Highest Acceleration Rate</source>
+        <translation type="gpt-5-generated">最高加速率</translation>
+    </message>
+    <message>
+        <source>Time Using Lateral Control</source>
+        <translation type="gpt-5-generated">使用橫向控制的時間</translation>
+    </message>
+    <message>
+        <source>Longest Distance Without an Override</source>
+        <translation type="gpt-5-generated">最長未接管距離</translation>
+    </message>
+    <message>
+        <source>Time Using Longitudinal Control</source>
+        <translation type="gpt-5-generated">縱向控制使用時間</translation>
+    </message>
+    <message>
+        <source>Driving Models:</source>
+        <translation type="gpt-5-generated">駕駛模型：</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation type="gpt-5-generated">月</translation>
+    </message>
+    <message>
+        <source>Total Overrides</source>
+        <translation type="gpt-5-generated">總覆寫數</translation>
+    </message>
+    <message>
+        <source>Time Overriding openpilot</source>
+        <translation type="gpt-5-generated">時間覆寫 openpilot</translation>
+    </message>
+    <message>
+        <source>Random Events:</source>
+        <translation type="gpt-5-generated">隨機事件</translation>
+    </message>
+    <message>
+        <source>Time Stopped</source>
+        <translation type="gpt-5-generated">時間已停止</translation>
+    </message>
+    <message>
+        <source>Time Spent at Stoplights</source>
+        <translation type="gpt-5-generated">停在紅綠燈的時間</translation>
+    </message>
+    <message>
+        <source>Total Time Tracked</source>
+        <translation type="gpt-5-generated">總計追蹤時間</translation>
+    </message>
+    <message>
+        <source>UwUs</source>
+        <translation type="gpt-5-generated">UwUs</translation>
+    </message>
+    <message>
+        <source>Loch Ness Encounters</source>
+        <translation type="gpt-5-generated">尼斯湖邂逅</translation>
+    </message>
+    <message>
+        <source>Visits to 1955</source>
+        <translation type="gpt-5-generated">造訪至 1955</translation>
+    </message>
+    <message>
+        <source>Deja Vu Moments</source>
+        <translation type="gpt-5-generated">似曾相識時刻</translation>
+    </message>
+    <message>
+        <source>Internet Explorer Weeeeeeees</source>
+        <translation type="gpt-5-generated">Internet Explorer 嗚———</translation>
+    </message>
+    <message>
+        <source>HAL 9000 Denials</source>
+        <translation type="gpt-5-generated">HAL 9000 拒絕</translation>
+    </message>
+    <message>
+        <source>openpilot Crashes</source>
+        <translation type="gpt-5-generated">openpilot 當機</translation>
+    </message>
+    <message>
+        <source>This Is Fine Moments</source>
+        <translation type="gpt-5-generated">這沒問題的時刻</translation>
+    </message>
+    <message>
+        <source>To Be Continued Moments</source>
+        <translation type="gpt-5-generated">待續時刻</translation>
+    </message>
+    <message>
+        <source>Noices</source>
+        <translation type="gpt-5-generated">雜訊</translation>
+    </message>
+    <message>
+        <source>Attempted Frog Murders</source>
+        <translation type="gpt-5-generated">企圖謀殺青蛙</translation>
+    </message>
+    <message>
+        <source>Total Mail Received</source>
+        <translation type="gpt-5-generated">收到郵件總數</translation>
+    </message>
+    <message>
+        <source> kilometer</source>
+        <translation type="gpt-5-generated">公里</translation>
+    </message>
+    <message>
+        <source> kilometers</source>
+        <translation type="gpt-5-generated"> 公里</translation>
+    </message>
+    <message>
+        <source> mile</source>
+        <translation type="gpt-5-generated"> 英里</translation>
+    </message>
+    <message>
+        <source> miles</source>
+        <translation type="gpt-5-generated">英里</translation>
+    </message>
+    <message>
+        <source> day </source>
+        <translation type="gpt-5-generated">日</translation>
+    </message>
+    <message>
+        <source> days </source>
+        <translation type="gpt-5-generated">天</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">小時</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">小時</translation>
+    </message>
+    <message>
+        <source> minute</source>
+        <translation type="gpt-5-generated"> 分鐘</translation>
+    </message>
+    <message>
+        <source> minutes</source>
+        <translation type="gpt-5-generated"> 分鐘</translation>
+    </message>
+    <message>
+        <source>km/h</source>
+        <translation type="gpt-5-generated">公里/小時</translation>
+    </message>
+    <message>
+        <source>mph</source>
+        <translation type="gpt-5-generated">英里/小時</translation>
+    </message>
+    <message>
+        <source>m/s²</source>
+        <translation type="gpt-5-generated">m/s²</translation>
+    </message>
+    <message>
+        <source>Total </source>
+        <translation type="gpt-5-generated">總計</translation>
+    </message>
+    <message>
+        <source>% of </source>
+        <translation type="gpt-5-generated">% 的</translation>
     </message>
 </context>
 <context>
@@ -872,6 +1144,125 @@
     <message>
         <source> seconds</source>
         <translation type="gpt-5-generated"> 秒</translation>
+    </message>
+</context>
+<context>
+    <name>FrogPilotDriveSummary</name>
+    <message>
+        <source>Random Events Summary</source>
+        <translation type="gpt-5-generated">隨機事件摘要</translation>
+    </message>
+    <message>
+        <source>Drive Summary</source>
+        <translation type="gpt-5-generated">行駛摘要</translation>
+    </message>
+    <message>
+        <source>UwUs</source>
+        <translation type="gpt-5-generated">UwUs</translation>
+    </message>
+    <message>
+        <source>Loch Ness Encounters</source>
+        <translation type="gpt-5-generated">尼斯湖邂逅</translation>
+    </message>
+    <message>
+        <source>Visits to 1955</source>
+        <translation type="gpt-5-generated">造訪次數：1955</translation>
+    </message>
+    <message>
+        <source>Deja Vu Moments</source>
+        <translation type="gpt-5-generated">似曾相識時刻</translation>
+    </message>
+    <message>
+        <source>Internet Explorer Weeeeeeees</source>
+        <translation type="gpt-5-generated">Internet Explorer Weeeeeeees</translation>
+    </message>
+    <message>
+        <source>HAL 9000 Denials</source>
+        <translation type="gpt-5-generated">HAL 9000 拒絕</translation>
+    </message>
+    <message>
+        <source>openpilot Crashes</source>
+        <translation type="gpt-5-generated">openpilot 當機</translation>
+    </message>
+    <message>
+        <source>This Is Fine Moments</source>
+        <translation type="gpt-5-generated">這沒問題的時刻</translation>
+    </message>
+    <message>
+        <source>To Be Continued Moments</source>
+        <translation type="gpt-5-generated">待續時刻</translation>
+    </message>
+    <message>
+        <source>Noices</source>
+        <translation type="gpt-5-generated">噪音</translation>
+    </message>
+    <message>
+        <source>Attempted Frog Murders</source>
+        <translation type="gpt-5-generated">企圖青蛙謀殺</translation>
+    </message>
+    <message>
+        <source>Total Mail Received</source>
+        <translation type="gpt-5-generated">收到郵件總數</translation>
+    </message>
+    <message>
+        <source>% of Drive With openpilot Engaged</source>
+        <translation type="gpt-5-generated">開啟 openpilot 的駕駛百分比</translation>
+    </message>
+    <message>
+        <source>Drive Distance</source>
+        <translation type="gpt-5-generated">行駛距離</translation>
+    </message>
+    <message>
+        <source>Drive Time</source>
+        <translation type="gpt-5-generated">駕駛時間</translation>
+    </message>
+    <message>
+        <source>% of Drive In "Experimental Mode"</source>
+        <translation type="gpt-5-generated">在「實驗模式」中的駕駛百分比</translation>
+    </message>
+    <message>
+        <source>No Random Events Played!</source>
+        <translation type="gpt-5-generated">未播放隨機事件！</translation>
+    </message>
+    <message>
+        <source> kilometer</source>
+        <translation type="gpt-5-generated">公里</translation>
+    </message>
+    <message>
+        <source> kilometers</source>
+        <translation type="gpt-5-generated">公里</translation>
+    </message>
+    <message>
+        <source> mile</source>
+        <translation type="gpt-5-generated">英里</translation>
+    </message>
+    <message>
+        <source> miles</source>
+        <translation type="gpt-5-generated"> 英里</translation>
+    </message>
+    <message>
+        <source> day </source>
+        <translation type="gpt-5-generated">天</translation>
+    </message>
+    <message>
+        <source> days </source>
+        <translation type="gpt-5-generated">天</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">小時</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">小時</translation>
+    </message>
+    <message>
+        <source> minute</source>
+        <translation type="gpt-5-generated"> 分鐘</translation>
+    </message>
+    <message>
+        <source> minutes</source>
+        <translation type="gpt-5-generated"> 分鐘</translation>
     </message>
 </context>
 <context>
@@ -1292,10 +1683,6 @@
         <translation type="gpt-5-generated">預測停車於</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Switch to "Experimental Mode" when openpilot predicts a stop within the set time.&lt;/b&gt; This is usually triggered when the model "sees" a red light or stop sign ahead.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason.&lt;/i&gt;</source>
-        <translation type="gpt-5-generated">&lt;b&gt;當 openpilot 預測在設定的時間內需要停車時，切換到「實驗模式」。&lt;/b&gt; 這通常在模型「看到」前方有紅燈或停止標誌時觸發。&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;免責聲明&lt;/b&gt;：openpilot 不會明確偵測交通號誌或停止標誌。在「實驗模式」中，openpilot 會從相機輸入進行端到端駕駛決策，這表示即使沒有明確理由也可能會停車。&lt;/i&gt;</translation>
-    </message>
-    <message>
         <source>Turn Signal Below</source>
         <translation type="gpt-5-generated">轉向燈在下方</translation>
     </message>
@@ -1614,10 +2001,6 @@
     <message>
         <source>Force Stop at "Detected" Stop Lights/Signs</source>
         <translation type="gpt-5-generated">在「已偵測到」紅綠燈／停車標誌處強制停車</translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;Force openpilot to stop whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason.&lt;/i&gt;</source>
-        <translation type="gpt-5-generated">&lt;b&gt;當駕駛模型「偵測到」紅燈或停車標誌時，強制 openpilot 停車。&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;免責聲明&lt;/b&gt;：openpilot 並不會明確偵測號誌或停車標誌。在「實驗模式」中，openpilot 會根據攝影機輸入端到端做出駕駛決策，這表示即使沒有明確理由也可能停車。&lt;/i&gt;</translation>
     </message>
     <message>
         <source>Increase Stopped Distance by:</source>
@@ -2075,6 +2458,154 @@
         <source>&lt;b&gt;Following behavior that mimics human drivers&lt;/b&gt; by closing gaps behind faster vehicles for quicker takeoffs and dynamically adjusting the desired following distance for gentler, more efficient braking.</source>
         <translation type="gpt-5-generated">&lt;b&gt;模仿人類駕駛的跟車行為&lt;/b&gt;，在後方有更快車輛時縮小間距以更快起步，並動態調整期望跟車距離，以實現更柔順且更高效的制動。</translation>
     </message>
+    <message>
+        <source>Weather Condition Offsets</source>
+        <translation type="gpt-5-generated">天氣條件偏移</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Automatically adjust driving behavior based on real-time weather.&lt;/b&gt; Helps maintain comfort and safety in low visibility, rain, or snow.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;根據即時天氣自動調整駕駛行為。&lt;/b&gt; 有助於在能見度低、下雨或下雪時維持舒適與安全。</translation>
+    </message>
+    <message>
+        <source>Low Visibility</source>
+        <translation type="gpt-5-generated">能見度低</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for fog, haze, or other low-visibility conditions.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;針對霧、霾或其他低能見度狀況的駕駛調整。&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in low visibility.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在能見度低的情況下，與前車保持額外距離。&lt;/b&gt; 增加以擴大間距；減少以縮小間距。</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in low visibility.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在能見度低的情況下，停在車輛後方時請增加額外緩衝距離。&lt;/b&gt; 增加以留出更多空間；減少以縮短縫隙。</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in low visibility.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在能見度低時降低最大加速度。&lt;/b&gt; 增加以獲得較柔和的起步；減少則可更快但較不穩定地起步。</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in low visibility.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在能見度低的彎道路段行駛時，請降低期望速度。&lt;/b&gt; 提高可獲得更安全、較平順的轉彎；降低則在彎道中會更具侵略性。</translation>
+    </message>
+    <message>
+        <source>Rain</source>
+        <translation type="gpt-5-generated">雨</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for rainy conditions.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;雨天行車調整。&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in rain.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;下雨時在前車後方留出更多距離。&lt;/b&gt; 增加以留更多空間；減少以縮短車距。</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in rain.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在雨天停在車輛後方時增加額外緩衝距離。&lt;/b&gt; 增加以取得更大空間；減少以縮短車距。</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in rain.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在雨天降低最大加速度。&lt;/b&gt; 提高可使起步更柔和；降低可使起步更迅速但穩定性較差。</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in rain.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在雨中通過彎道時降低期望車速。&lt;/b&gt; 提高可使轉彎更安全、更平順；降低則在彎道中更具侵略性。</translation>
+    </message>
+    <message>
+        <source>Rainstorms</source>
+        <translation type="gpt-5-generated">暴雨</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Driving adjustments for rainstorms.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;暴雨駕駛調整。&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra space behind lead vehicles in a rainstorm.&lt;/b&gt; Increase for more space; decrease for tighter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在暴雨中與前車保持額外距離。&lt;/b&gt; 增加以獲得更大間距；減少以縮小車距。</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Add extra buffer when stopped behind vehicles in a rainstorm.&lt;/b&gt; Increase for more room; decrease for shorter gaps.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在暴雨中停在車輛後方時增加額外緩衝距離。&lt;/b&gt; 增加以留出更多空間；減少以縮短間距。</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the maximum acceleration in a rainstorm.&lt;/b&gt; Increase for softer takeoffs; decrease for quicker but less stable takeoffs.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在暴雨中降低最大加速度。&lt;/b&gt; 增加可使起步更柔順；減少可使起步更迅速但穩定性較差。</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lower the desired speed while driving through curves in a rainstorm.&lt;/b&gt; Increase for safer, gentler turns; decrease for more aggressive driving in curves.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在暴雨中行經彎道時降低期望車速。&lt;/b&gt; 提高可使轉彎更安全、更平順；降低則在彎道中更具侵略性。</translation>
+    </message>
+    <message>
+        <source>Human-Like Lane Changes</source>
+        <translation type="gpt-5-generated">類似人類的變換車道</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Lane-change behavior that mimics human drivers&lt;/b&gt; by anticipating and tracking adjacent vehicles during lane changes.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;模仿人類駕駛的變換車道行為&lt;/b&gt;，在變換車道時預判並追蹤相鄰車輛。</translation>
+    </message>
+    <message>
+        <source>"Detected" Stop Lights/Signs</source>
+        <translation type="gpt-5-generated">偵測到的紅綠燈／停車標誌</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Switch to "Experimental Mode" whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;每當駕駛模型「偵測到」紅燈或停車標誌時，切換到「實驗模式」。&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;免責聲明&lt;/b&gt;：openpilot 並不會明確偵測號誌燈或停車標誌。在「實驗模式」中，openpilot 會根據相機輸入做端到端駕駛決策，這表示即使沒有明確理由也可能會煞停！&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Switch to "Experimental Mode" when openpilot predicts a stop within the set time.&lt;/b&gt; This is usually triggered when the model "sees" a red light or stop sign ahead.&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;當 openpilot 預測在設定時間內會停車時，切換至「實驗模式」。&lt;/b&gt; 這通常在模型「看到」前方紅燈或停車標誌時觸發。&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;免責聲明&lt;/b&gt;：openpilot 並不會明確偵測交通號誌或停車標誌。在「實驗模式」中，openpilot 會從相機輸入進行端到端駕駛決策，這表示即使沒有明確原因也可能會停車！&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Force openpilot to stop whenever the driving model "detects" a red light or stop sign.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;Disclaimer&lt;/b&gt;: openpilot does not explicitly detect traffic lights or stop signs. In "Experimental Mode", openpilot makes end-to-end driving decisions from camera input, which means it may stop even when there's no clear reason!&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;每當駕駛模型「偵測」到紅燈或停車標誌時，強制 openpilot 停車。&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;&lt;b&gt;免責聲明&lt;/b&gt;：openpilot 不會明確偵測交通號誌或停車標誌。在「實驗模式」中，openpilot 依據攝影機輸入進行端到端的駕駛決策，這表示即使沒有明確理由也可能會停車！&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>Set Your Own Key</source>
+        <translation type="gpt-5-generated">設定您自己的金鑰</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Set your own "OpenWeatherMap" key to increase the weather update rate.&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;Personal keys grant 1,000 free calls per day, allowing for updates every minute. The default key is shared and only updates every 15 minutes.&lt;/i&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;設定您自己的「OpenWeatherMap」金鑰以提高天氣更新頻率。&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;個人金鑰每天可享有 1,000 次免費呼叫，允許每分鐘更新一次。預設金鑰為共享，僅每 15 分鐘更新一次。&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>ADD</source>
+        <translation type="gpt-5-generated">新增</translation>
+    </message>
+    <message>
+        <source>Enter your "OpenWeatherMap" key</source>
+        <translation type="gpt-5-generated">輸入你的「OpenWeatherMap」金鑰</translation>
+    </message>
+    <message>
+        <source>REMOVE</source>
+        <translation type="gpt-5-generated">移除</translation>
+    </message>
+    <message>
+        <source>Invalid key!</source>
+        <translation type="gpt-5-generated">金鑰無效！</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to remove your key?</source>
+        <translation type="gpt-5-generated">您確定要移除您的金鑰嗎？</translation>
+    </message>
+    <message>
+        <source>TEST</source>
+        <translation type="gpt-5-generated">測試</translation>
+    </message>
+    <message>
+        <source>Testing...</source>
+        <translation type="gpt-5-generated">測試中…</translation>
+    </message>
+    <message>
+        <source>Key is valid!</source>
+        <translation type="gpt-5-generated">金鑰有效！</translation>
+    </message>
+    <message>
+        <source>An error occurred: %1</source>
+        <translation type="gpt-5-generated">發生錯誤：%1</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotManageControl</name>
@@ -2195,7 +2726,7 @@
     </message>
     <message>
         <source>Resetting...</source>
-        <translation type="gpt-5-generated">正在重設…</translation>
+        <translation type="gpt-5-generated">正在重設...</translation>
     </message>
     <message>
         <source>Reset!</source>
@@ -2203,7 +2734,7 @@
     </message>
     <message>
         <source>Rebooting...</source>
-        <translation type="gpt-5-generated">正在重新啟動…</translation>
+        <translation type="gpt-5-generated">正在重新啟動...</translation>
     </message>
     <message>
         <source>Storage Used</source>
@@ -2259,11 +2790,19 @@
     </message>
     <message>
         <source>Offline...</source>
-        <translation type="gpt-5-generated">離線中…</translation>
+        <translation type="gpt-5-generated">離線中...</translation>
     </message>
     <message>
-        <source>CANCELLED</source>
-        <translation type="gpt-5-generated">已取消</translation>
+        <source>0 MB</source>
+        <translation type="gpt-5-generated">0 MB</translation>
+    </message>
+    <message>
+        <source>Calculating...</source>
+        <translation type="gpt-5-generated">正在計算中…</translation>
+    </message>
+    <message>
+        <source>Not parked</source>
+        <translation type="gpt-5-generated">未停車</translation>
     </message>
 </context>
 <context>
@@ -2378,7 +2917,7 @@
     </message>
     <message>
         <source>Updating...</source>
-        <translation type="gpt-5-generated">正在更新…</translation>
+        <translation type="gpt-5-generated">正在更新...</translation>
     </message>
     <message>
         <source>Select a driving model to download</source>
@@ -2450,7 +2989,7 @@
     </message>
     <message>
         <source>Cancelling...</source>
-        <translation type="gpt-5-generated">正在取消…</translation>
+        <translation type="gpt-5-generated">正在取消...</translation>
     </message>
     <message>
         <source>Updating Tinygrad will delete existing Tinygrad-based driving models and need to be re-downloaded. Proceed?</source>
@@ -2462,7 +3001,7 @@
     </message>
     <message>
         <source>Offline...</source>
-        <translation type="gpt-5-generated">離線中…</translation>
+        <translation type="gpt-5-generated">離線中...</translation>
     </message>
     <message>
         <source>Update available!</source>
@@ -2475,6 +3014,38 @@
     <message>
         <source>Select a Model — 🗺️ = Navigation | 📡 = Radar | 👀 = VOACC</source>
         <translation type="gpt-5-generated">選擇模型 — 🗺️ = 導航 | 📡 = 雷達 | 👀 = VOACC</translation>
+    </message>
+    <message>
+        <source>Downloading...</source>
+        <translation type="gpt-5-generated">正在下載…</translation>
+    </message>
+    <message>
+        <source>Not parked</source>
+        <translation type="gpt-5-generated">未停車</translation>
+    </message>
+    <message>
+        <source>Downloaded!</source>
+        <translation type="gpt-5-generated">已下載！</translation>
+    </message>
+    <message>
+        <source>All models downloaded!</source>
+        <translation type="gpt-5-generated">所有模型已下載！</translation>
+    </message>
+    <message>
+        <source>Download cancelled...</source>
+        <translation type="gpt-5-generated">下載已取消…</translation>
+    </message>
+    <message>
+        <source>Download failed...</source>
+        <translation type="gpt-5-generated">下載失敗…</translation>
+    </message>
+    <message>
+        <source>GitHub and GitLab are offline...</source>
+        <translation type="gpt-5-generated">GitHub 和 GitLab 離線中…</translation>
+    </message>
+    <message>
+        <source>Repository unavailable</source>
+        <translation type="gpt-5-generated">存放庫不可用</translation>
     </message>
 </context>
 <context>
@@ -2552,7 +3123,7 @@
     </message>
     <message>
         <source>Offline...</source>
-        <translation type="gpt-5-generated">離線中…</translation>
+        <translation type="gpt-5-generated">離線中...</translation>
     </message>
     <message>
         <source>Mapbox</source>
@@ -2620,7 +3191,7 @@
     </message>
     <message>
         <source>Cancelled...</source>
-        <translation type="gpt-5-generated">已取消…</translation>
+        <translation type="gpt-5-generated">已取消...</translation>
     </message>
     <message>
         <source>You've hit today's request limit.
@@ -2661,6 +3232,57 @@ It will reset in %1 hours and %2 minutes.</source>
     <message>
         <source>Completed!</source>
         <translation type="gpt-5-generated">已完成！</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Manage your Public Mapbox Key.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;管理您的公開 Mapbox 金鑰。&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>TEST</source>
+        <translation type="gpt-5-generated">測試</translation>
+    </message>
+    <message>
+        <source>Remove your Public Mapbox Key?</source>
+        <translation type="gpt-5-generated">移除你的 Mapbox 公開金鑰？</translation>
+    </message>
+    <message>
+        <source>Enter your Public Mapbox Key</source>
+        <translation type="gpt-5-generated">輸入您的 Mapbox 公開金鑰</translation>
+    </message>
+    <message>
+        <source>Testing...</source>
+        <translation type="gpt-5-generated">測試中…</translation>
+    </message>
+    <message>
+        <source>Key is valid!</source>
+        <translation type="gpt-5-generated">金鑰有效！</translation>
+    </message>
+    <message>
+        <source>Key is invalid!</source>
+        <translation type="gpt-5-generated">金鑰無效！</translation>
+    </message>
+    <message>
+        <source>An error occurred: %1</source>
+        <translation type="gpt-5-generated">發生錯誤：%1</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Manage your Secret Mapbox Key.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;管理您的 Mapbox 祕密金鑰。&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Remove your Secret Mapbox Key?</source>
+        <translation type="gpt-5-generated">要移除您的 Secret Mapbox 金鑰嗎？</translation>
+    </message>
+    <message>
+        <source>Enter your Secret Mapbox Key</source>
+        <translation type="gpt-5-generated">輸入您的秘密 Mapbox 金鑰</translation>
+    </message>
+</context>
+<context>
+    <name>FrogPilotOnroadWindow</name>
+    <message>
+        <source>FPS: %1 | Min: %2 | Max: %3 | Avg: %4</source>
+        <translation type="gpt-5-generated">FPS：%1｜最低：%2｜最高：%3｜平均：%4</translation>
     </message>
 </context>
 <context>
@@ -3189,6 +3811,38 @@ Developer - 為資深愛好者提供高度自訂的設定</translation>
         <source>CANCEL</source>
         <translation type="gpt-5-generated">取消</translation>
     </message>
+    <message>
+        <source>Downloading...</source>
+        <translation type="gpt-5-generated">正在下載...</translation>
+    </message>
+    <message>
+        <source>Idle</source>
+        <translation type="gpt-5-generated">閒置</translation>
+    </message>
+    <message>
+        <source>Unpacking theme...</source>
+        <translation type="gpt-5-generated">正在解壓佈景主題…</translation>
+    </message>
+    <message>
+        <source>Downloaded!</source>
+        <translation type="gpt-5-generated">已下載！</translation>
+    </message>
+    <message>
+        <source>Download cancelled...</source>
+        <translation type="gpt-5-generated">下載已取消…</translation>
+    </message>
+    <message>
+        <source>Download failed...</source>
+        <translation type="gpt-5-generated">下載失敗…</translation>
+    </message>
+    <message>
+        <source>Repository unavailable</source>
+        <translation type="gpt-5-generated">儲存庫不可用</translation>
+    </message>
+    <message>
+        <source>GitHub and GitLab are offline...</source>
+        <translation type="gpt-5-generated">GitHub 和 GitLab 已離線…</translation>
+    </message>
 </context>
 <context>
     <name>FrogPilotUtilitiesPanel</name>
@@ -3222,7 +3876,7 @@ Developer - 為資深愛好者提供高度自訂的設定</translation>
     </message>
     <message>
         <source>Flashing...</source>
-        <translation type="gpt-5-generated">正在刷寫…</translation>
+        <translation type="gpt-5-generated">正在刷寫...</translation>
     </message>
     <message>
         <source>Flashed!</source>
@@ -3230,7 +3884,7 @@ Developer - 為資深愛好者提供高度自訂的設定</translation>
     </message>
     <message>
         <source>Rebooting...</source>
-        <translation type="gpt-5-generated">正在重新啟動…</translation>
+        <translation type="gpt-5-generated">正在重新啟動...</translation>
     </message>
     <message>
         <source>Force Drive State</source>
@@ -3370,7 +4024,7 @@ Developer - 為資深愛好者提供高度自訂的設定</translation>
     </message>
     <message>
         <source>Resetting...</source>
-        <translation type="gpt-5-generated">正在重設…</translation>
+        <translation type="gpt-5-generated">正在重設...</translation>
     </message>
     <message>
         <source>Reset!</source>
@@ -3630,6 +4284,54 @@ Developer - 為資深愛好者提供高度自訂的設定</translation>
     <message>
         <source>comma Pedal Support</source>
         <translation type="gpt-5-generated">comma Pedal 支援</translation>
+    </message>
+    <message>
+        <source>Subaru Settings</source>
+        <translation type="gpt-5-generated">Subaru 設定</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;FrogPilot features for Subaru vehicles.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;適用於 Subaru 車輛的 FrogPilot 功能。&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Stop and Go</source>
+        <translation type="gpt-5-generated">走走停停</translation>
+    </message>
+    <message>
+        <source>Stop and go for supported Subaru vehicles.</source>
+        <translation type="gpt-5-generated">支援的 Subaru 車輛具備走走停停功能。</translation>
+    </message>
+    <message>
+        <source>Acura/Honda Settings</source>
+        <translation type="gpt-5-generated">Acura/Honda 設定</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;FrogPilot features for Acura and Honda vehicles.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;適用於 Acura 和 Honda 車輛的 FrogPilot 功能。&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Gentle Following</source>
+        <translation type="gpt-5-generated">溫和跟車</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Reduces jerky acceleration and braking when following a lead vehicle.&lt;/b&gt; Ideal for stop-and-go traffic.</source>
+        <translation type="gpt-5-generated">&lt;b&gt;在跟隨前車時減少加減速的頓挫。&lt;/b&gt; 適合走走停停的車流。</translation>
+    </message>
+    <message>
+        <source>Increased Braking Force</source>
+        <translation type="gpt-5-generated">增加制動力</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Increases the maximum braking force for improved stopping performance.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;提高最大制動力以改善煞車效能。&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Responsive Pedal at Low Speeds</source>
+        <translation type="gpt-5-generated">低速時的靈敏油門</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Improves acceleration from a standstill for a more responsive throttle feel in city driving.&lt;/b&gt;</source>
+        <translation type="gpt-5-generated">&lt;b&gt;提升從靜止起步的加速表現，讓市區行駛的油門反應更靈敏。&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -4415,7 +5117,7 @@ Developer - 為資深愛好者提供高度自訂的設定</translation>
     <name>Installer</name>
     <message>
         <source>Installing...</source>
-        <translation>安裝中…</translation>
+        <translation>安裝中...</translation>
     </message>
 </context>
 <context>
@@ -4716,6 +5418,42 @@ Developer - 為資深愛好者提供高度自訂的設定</translation>
         <source>FrogPilot</source>
         <translation type="gpt-5-generated">FrogPilot</translation>
     </message>
+    <message>
+        <source>0 MB</source>
+        <translation type="gpt-5-generated">0 MB</translation>
+    </message>
+    <message>
+        <source> GB</source>
+        <translation type="gpt-5-generated">GB</translation>
+    </message>
+    <message>
+        <source> MB</source>
+        <translation type="gpt-5-generated">MB</translation>
+    </message>
+    <message>
+        <source> hour </source>
+        <translation type="gpt-5-generated">小時</translation>
+    </message>
+    <message>
+        <source> hours </source>
+        <translation type="gpt-5-generated">小時</translation>
+    </message>
+    <message>
+        <source> minute </source>
+        <translation type="gpt-5-generated">分鐘</translation>
+    </message>
+    <message>
+        <source> minutes </source>
+        <translation type="gpt-5-generated">分鐘</translation>
+    </message>
+    <message>
+        <source> second</source>
+        <translation type="gpt-5-generated">秒</translation>
+    </message>
+    <message>
+        <source> seconds</source>
+        <translation type="gpt-5-generated"> 秒</translation>
+    </message>
 </context>
 <context>
     <name>Reset</name>
@@ -4750,7 +5488,7 @@ Developer - 為資深愛好者提供高度自訂的設定</translation>
     <message>
         <source>Resetting device...
 This may take up to a minute.</source>
-        <translation>重置中…
+        <translation>重置中...
 這可能需要一分鐘的時間。</translation>
     </message>
     <message>
@@ -4872,7 +5610,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Downloading...</source>
-        <translation>下載中…</translation>
+        <translation>下載中...</translation>
     </message>
     <message>
         <source>Download Failed</source>
@@ -5147,6 +5885,22 @@ This may take up to a minute.</source>
         <source>This is a complete factory reset and cannot be undone. Are you absolutely sure you want to continue?</source>
         <translation type="gpt-5-generated">這是完整的出廠重設，且無法復原。你確定要繼續嗎？</translation>
     </message>
+    <message>
+        <source>downloading…</source>
+        <translation type="gpt-5-generated">正在下載…</translation>
+    </message>
+    <message>
+        <source>checking…</source>
+        <translation type="gpt-5-generated">正在檢查…</translation>
+    </message>
+    <message>
+        <source>waiting for vehicle to go offroad...</source>
+        <translation type="gpt-5-generated">正在等待車輛離開道路…</translation>
+    </message>
+    <message>
+        <source>finalizing update...</source>
+        <translation type="gpt-5-generated">正在完成更新…</translation>
+    </message>
 </context>
 <context>
     <name>SshControl</name>
@@ -5420,7 +6174,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Loading...</source>
-        <translation>載入中…</translation>
+        <translation>載入中...</translation>
     </message>
     <message>
         <source>Reboot</source>

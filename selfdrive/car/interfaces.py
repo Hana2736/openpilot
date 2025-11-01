@@ -21,6 +21,7 @@ from openpilot.selfdrive.car.honda.values import CAR as HondaCAR, HONDA_BOSCH
 from openpilot.selfdrive.car.hyundai.hyundaicanfd import CanBus
 from openpilot.selfdrive.car.hyundai.values import CAR as HyundaiCAR, CANFD_CAR, HyundaiFrogPilotFlags
 from openpilot.selfdrive.car.mock.values import CAR as MockCAR
+from openpilot.selfdrive.car.subaru.values import CAR as SubaruCAR, SubaruFlags
 from openpilot.selfdrive.car.toyota.values import CAR as ToyotaCAR, TSS2_CAR, UNSUPPORTED_DSU_CAR, ToyotaFrogPilotFlags
 from openpilot.selfdrive.car.values import PLATFORMS
 from openpilot.selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, get_friction
@@ -36,7 +37,7 @@ EventName = car.CarEvent.EventName
 
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS
 ACCEL_MAX = 2.0
-ACCEL_MIN = -2.95
+ACCEL_MIN = -3.5
 FRICTION_THRESHOLD = 0.3
 
 TORQUE_PARAMS_PATH = os.path.join(BASEDIR, 'selfdrive/car/torque_data/params.toml')
@@ -154,6 +155,11 @@ class CarInterfaceBase(ABC):
     ret.rotationalInertia = scale_rot_inertia(ret.mass, ret.wheelbase)
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront, ret.tireStiffnessFactor)
 
+    # FrogPilot variables
+    toggles_to_check = ("force_torque_controller", "nnff", "nnff_lite")
+    if ret.steerControlType != car.CarParams.SteerControlType.angle and any(getattr(frogpilot_toggles, toggle, False) for toggle in toggles_to_check):
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+
     return ret
 
   @classmethod
@@ -205,6 +211,10 @@ class CarInterfaceBase(ABC):
           if 0x544 in fingerprint[0]:
             fp_ret.fpFlags |= HyundaiFrogPilotFlags.NAV_MSG.value
 
+      elif platform in SubaruCAR:
+        if not (CP.flags & SubaruFlags.GLOBAL_GEN2 or CP.flags & SubaruFlags.HYBRID) and frogpilot_toggles.subaru_sng:
+          fp_ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_SNG
+
       elif platform in ToyotaCAR:
         if candidate == ToyotaCAR.TOYOTA_PRIUS:
           if 0x23 in fingerprint[0]:
@@ -215,14 +225,6 @@ class CarInterfaceBase(ABC):
 
         fp_ret.canUsePedal = not CP.autoResumeSng
         fp_ret.canUseSDSU = not CP.enableDsu and candidate not in UNSUPPORTED_DSU_CAR and candidate not in TSS2_CAR
-
-      if CP.steerControlType != car.CarParams.SteerControlType.angle:
-        if CP.lateralTuning.which() == "pid" and (frogpilot_toggles.force_torque_controller or frogpilot_toggles.nnff or frogpilot_toggles.nnff_lite):
-          CarInterfaceBase.configure_torque_tune(candidate, fp_ret.lateralTuning)
-        elif CP.lateralTuning.which() == "torque":
-          CarInterfaceBase.configure_torque_tune(candidate, fp_ret.lateralTuning)
-        else:
-          fp_ret.lateralTuning.init("pid")
 
       fp_ret.openpilotLongitudinalControlDisabled = frogpilot_toggles.disable_openpilot_long
 
@@ -285,7 +287,6 @@ class CarInterfaceBase(ABC):
     ret.vEgoStopping = 0.5
     ret.vEgoStarting = 0.5
     ret.stoppingControl = True
-    ret.longitudinalTuning.kf = 1.
     ret.longitudinalTuning.kpBP = [0.]
     ret.longitudinalTuning.kpV = [0.]
     ret.longitudinalTuning.kiBP = [0.]
@@ -301,9 +302,6 @@ class CarInterfaceBase(ABC):
 
     tune.init('torque')
     tune.torque.useSteeringAngle = use_steering_angle
-    tune.torque.kf = 1.0
-    tune.torque.kp = 1.0
-    tune.torque.ki = 0.3
     tune.torque.friction = params['FRICTION']
     tune.torque.latAccelFactor = params['LAT_ACCEL_FACTOR']
     tune.torque.latAccelOffset = 0.0

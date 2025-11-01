@@ -15,17 +15,47 @@
 
 bool nnffLogFileExists(const QString &carFingerprint) {
   static QStringList files;
+  static QMap<QString, QString> substitutes;
+
   if (files.isEmpty()) {
     QFileInfoList fileInfoList = QDir(QStringLiteral("../../frogpilot/assets/nnff_models")).entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
     for (const QFileInfo &fileInfo : fileInfoList) {
       files.append(fileInfo.completeBaseName());
     }
+
+    QFile sub_file(QStringLiteral("../../selfdrive/car/torque_data/substitute.toml"));
+    if (sub_file.open(QIODevice::ReadOnly)) {
+      QTextStream in(&sub_file);
+      while (!in.atEnd()) {
+        QString line = in.readLine().trimmed();
+        if (line.startsWith("#") || line.startsWith("legend") || !line.contains("=")) {
+          continue;
+        }
+
+        QStringList parts = line.split("=");
+        if (parts.size() == 2) {
+          QString key = parts[0].trimmed().remove('"');
+          QString value = parts[1].trimmed().remove('"');
+          if (!key.isEmpty() && !value.isEmpty()) {
+            substitutes[key] = value;
+          }
+        }
+      }
+    }
   }
 
-  for (const QString &file : files) {
-    if (file.startsWith(carFingerprint)) {
-      std::cout << "NNFF supports fingerprint: " << file.toStdString() << std::endl;
-      return true;
+  QStringList fingerprintsToCheck;
+  fingerprintsToCheck.append(carFingerprint);
+  if (substitutes.contains(carFingerprint)) {
+    fingerprintsToCheck.append(substitutes.value(carFingerprint));
+  }
+
+  for (const QString &fingerprint : fingerprintsToCheck) {
+    for (const QString &file : files) {
+      if (file.startsWith(fingerprint)) {
+        std::cout << "NNFF model found for fingerprint: " << fingerprint.toStdString() << std::endl;
+        return true;
+      }
     }
   }
 
@@ -33,6 +63,7 @@ bool nnffLogFileExists(const QString &carFingerprint) {
 }
 
 void FrogPilotSettingsWindow::createPanelButtons(FrogPilotListWidget *list) {
+  FrogPilotDataPanel *frogpilotDataPanel = new FrogPilotDataPanel(this);
   FrogPilotDevicePanel *frogpilotDevicePanel = new FrogPilotDevicePanel(this);
   FrogPilotLateralPanel *frogpilotLateralPanel = new FrogPilotLateralPanel(this);
   FrogPilotLongitudinalPanel *frogpilotLongitudinalPanel = new FrogPilotLongitudinalPanel(this);
@@ -49,7 +80,7 @@ void FrogPilotSettingsWindow::createPanelButtons(FrogPilotListWidget *list) {
     {{tr("MANAGE"), frogpilotSoundsPanel}},
     {{tr("DRIVING MODEL"), frogpilotModelPanel}, {tr("GAS / BRAKE"), frogpilotLongitudinalPanel}, {tr("STEERING"), frogpilotLateralPanel}},
     {{tr("MAP DATA"), frogpilotMapsPanel}, {tr("NAVIGATION"), frogpilotNavigationPanel}},
-    {{tr("DATA"), new FrogPilotDataPanel(this)}, {tr("DEVICE CONTROLS"), frogpilotDevicePanel}, {tr("UTILITIES"), new FrogPilotUtilitiesPanel(this)}},
+    {{tr("DATA"), frogpilotDataPanel}, {tr("DEVICE CONTROLS"), frogpilotDevicePanel}, {tr("UTILITIES"), new FrogPilotUtilitiesPanel(this)}},
     {{tr("APPEARANCE"), frogpilotVisualsPanel}, {tr("THEME"), frogpilotThemesPanel}},
     {{tr("VEHICLE SETTINGS"), frogpilotVehiclesPanel}, {tr("WHEEL CONTROLS"), frogpilotWheelPanel}}
   };
@@ -107,10 +138,12 @@ void FrogPilotSettingsWindow::createPanelButtons(FrogPilotListWidget *list) {
     list->addItem(panelButton);
   }
 
+  QObject::connect(frogpilotDataPanel, &FrogPilotDataPanel::openSubPanel, this, &FrogPilotSettingsWindow::openSubPanel);
   QObject::connect(frogpilotDevicePanel, &FrogPilotDevicePanel::openSubPanel, this, &FrogPilotSettingsWindow::openSubPanel);
   QObject::connect(frogpilotLateralPanel, &FrogPilotLateralPanel::openSubPanel, this, &FrogPilotSettingsWindow::openSubPanel);
   QObject::connect(frogpilotLongitudinalPanel, &FrogPilotLongitudinalPanel::openSubPanel, this, &FrogPilotSettingsWindow::openSubPanel);
   QObject::connect(frogpilotLongitudinalPanel, &FrogPilotLongitudinalPanel::openSubSubPanel, this, &FrogPilotSettingsWindow::openSubSubPanel);
+  QObject::connect(frogpilotLongitudinalPanel, &FrogPilotLongitudinalPanel::openSubSubSubPanel, this, &FrogPilotSettingsWindow::openSubSubSubPanel);
   QObject::connect(frogpilotMapsPanel, &FrogPilotMapsPanel::openSubPanel, this, &FrogPilotSettingsWindow::openSubPanel);
   QObject::connect(frogpilotModelPanel, &FrogPilotModelPanel::openSubPanel, this, &FrogPilotSettingsWindow::openSubPanel);
   QObject::connect(frogpilotNavigationPanel, &FrogPilotNavigationPanel::closeSubPanel, this, &FrogPilotSettingsWindow::closeSubPanel);
@@ -153,7 +186,7 @@ FrogPilotSettingsWindow::FrogPilotSettingsWindow(SettingsWindow *parent) : QFram
                                                 "Standard - Recommended for most users for a balanced experience\n"
                                                 "Advanced - Fine-tuning for experienced users\n"
                                                 "Developer - Highly customizable settings for seasoned enthusiasts"),
-                                              "../../frogpilot/assets/toggle_icons/icon_customization.png", togglePresets, true);
+                                              "../../frogpilot/assets/toggle_icons/icon_tuning.png", togglePresets, true);
   QObject::connect(togglePreset, &FrogPilotButtonsControl::buttonClicked, [this](int id) {
     tuningLevel = id;
 
@@ -176,6 +209,7 @@ FrogPilotSettingsWindow::FrogPilotSettingsWindow(SettingsWindow *parent) : QFram
   QObject::connect(parent, &SettingsWindow::closePanel, this, &FrogPilotSettingsWindow::closePanel);
   QObject::connect(parent, &SettingsWindow::closeSubPanel, this, &FrogPilotSettingsWindow::closeSubPanel);
   QObject::connect(parent, &SettingsWindow::closeSubSubPanel, this, &FrogPilotSettingsWindow::closeSubSubPanel);
+  QObject::connect(parent, &SettingsWindow::closeSubSubSubPanel, this, &FrogPilotSettingsWindow::closeSubSubSubPanel);
   QObject::connect(parent, &SettingsWindow::updateMetric, this, &FrogPilotSettingsWindow::updateMetric);
   QObject::connect(parent, &SettingsWindow::updateTuningLevel, this, &FrogPilotSettingsWindow::updateTuningLevel);
   QObject::connect(uiState(), &UIState::offroadTransition, this, &FrogPilotSettingsWindow::updateVariables);
@@ -260,6 +294,7 @@ void FrogPilotSettingsWindow::updateVariables() {
     std::string carFingerprint = CP.getCarFingerprint();
     carMake = CP.getCarName();
 
+    friction = CP.getLateralTuning().getTorque().getFriction();
     hasBSM = CP.getEnableBsm();
     hasDashSpeedLimits = carMake == "ford" || carMake == "hyundai" || carMake == "toyota";
     hasExperimentalOpenpilotLongitudinal = CP.getExperimentalLongitudinalAvailable();
@@ -276,14 +311,18 @@ void FrogPilotSettingsWindow::updateVariables() {
     isGM = carMake == "gm";
     isHKG = carMake == "hyundai";
     isHKGCanFd = isHKG && safetyModel == cereal::CarParams::SafetyModel::HYUNDAI_CANFD;
-    isMazda = carMake == "mazda";
+    isHonda = carMake == "honda";
+    isHondaNidec = isHonda && safetyModel == cereal::CarParams::SafetyModel::HONDA_NIDEC;
     isSubaru = carMake == "subaru";
+    isTorqueCar = CP.getLateralTuning().which() == cereal::CarParams::LateralTuning::TORQUE;
     isToyota = carMake == "toyota";
     isTSK = CP.getSecOcRequired();
     isVolt = carFingerprint == "CHEVROLET_VOLT";
+    latAccelFactor = CP.getLateralTuning().getTorque().getLatAccelFactor();
     longitudinalActuatorDelay = CP.getLongitudinalActuatorDelay();
     startAccel = CP.getStartAccel();
     steerActuatorDelay = CP.getSteerActuatorDelay();
+    steerKp = CP.getLateralTuning().which() == cereal::CarParams::LateralTuning::PID ? CP.getLateralTuning().getPid().getKpV()[0] : 1.0;
     steerRatio = CP.getSteerRatio();
     stopAccel = CP.getStopAccel();
     stoppingDecelRate = CP.getStoppingDecelRate();
@@ -388,12 +427,17 @@ void FrogPilotSettingsWindow::updateVariables() {
 
     canUsePedal = FPCP.getCanUsePedal();
     canUseSDSU = FPCP.getCanUseSDSU();
-    friction = FPCP.getLateralTuning().getTorque().getFriction();
-    hasAutoTune = (carMake == "hyundai" || carMake == "toyota") && FPCP.getLateralTuning().which() == cereal::FrogPilotCarParams::LateralTuning::TORQUE;
-    isTorqueCar = FPCP.getLateralTuning().which() == cereal::FrogPilotCarParams::LateralTuning::TORQUE;
-    latAccelFactor = FPCP.getLateralTuning().getTorque().getLatAccelFactor();
     openpilotLongitudinalControlDisabled = FPCP.getOpenpilotLongitudinalControlDisabled();
-    steerKp = FPCP.getLateralTuning().getTorque().getKp();
+  }
+
+  std::string liveTorqueParameters = params.get("LiveTorqueParameters");
+  if (!liveTorqueParameters.empty()) {
+    AlignedBuffer aligned_buf;
+    capnp::FlatArrayMessageReader reader(aligned_buf.align(liveTorqueParameters.data(), liveTorqueParameters.size()));
+    cereal::Event::Reader event = reader.getRoot<cereal::Event>();
+    cereal::LiveTorqueParametersData::Reader LTP = event.getLiveTorqueParameters();
+
+    hasAutoTune = LTP.getUseParams();
   }
 
   isC3 = util::read_file("/sys/firmware/devicetree/base/model").find("tici") != std::string::npos;

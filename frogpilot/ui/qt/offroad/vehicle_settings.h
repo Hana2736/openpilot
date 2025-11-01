@@ -19,28 +19,15 @@ private:
   void updateToggles();
 
   bool forceOpenDescriptions;
-  bool hasExperimentalOpenpilotLongitudinal;
-  bool hasOpenpilotLongitudinal;
-  bool hasPedal;
-  bool hasSNG;
-  bool isC3;
-  bool isGM;
-  bool isHKG;
-  bool isHKGCanFd;
-  bool isMazda;
-  bool isToyota;
-  bool isVolt;
-  bool openpilotLongitudinalControlDisabled;
   bool started;
-
-  int tuningLevel;
 
   std::map<QString, AbstractControl*> toggles;
 
   QSet<QString> gmKeys = {"ExperimentalGMTune", "LongPitch", "VoltSNG"};
   QSet<QString> hkgKeys = {"NewLongAPI", "TacoTuneHacks"};
-  QSet<QString> longitudinalKeys = {"ExperimentalGMTune", "FrogsGoMoosTweak", "LongPitch", "NewLongAPI", "SNGHack", "VoltSNG"};
-  QSet<QString> mazdaKeys = {"BlendedACC", "TorqueInterceptorEnabled", "RadarInterceptorEnabled", "NoMRCC", "NoFSC", "ManualTransmission"};
+  QSet<QString> hondaKeys = {"HondaAltTune", "HondaLowSpeedPedal", "HondaMaxBrake"};
+  QSet<QString> longitudinalKeys = {"ExperimentalGMTune", "FrogsGoMoosTweak", "HondaAltTune", "HondaMaxBrake", "HondaLowSpeedPedal", "LongPitch", "NewLongAPI", "SNGHack", "SubaruSNG", "VoltSNG"};
+  QSet<QString> subaruKeys = {"SubaruSNG"};
   QSet<QString> toyotaKeys = {"ClusterOffset", "FrogsGoMoosTweak", "LockDoorsTimer", "SNGHack", "ToyotaDoors"};
   QSet<QString> vehicleInfoKeys = {"BlindSpotSupport", "HardwareDetected", "OpenpilotLongitudinal", "PedalSupport", "RadarSupport", "SDSUSupport", "SNGSupport"};
 
