@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import datetime
 import json
+import os
 import time
-
-import openpilot.system.sentry as sentry
 
 from cereal import messaging
 from openpilot.common.realtime import DT_MDL, Priority, Ratekeeper, config_realtime_process
@@ -12,10 +11,11 @@ from openpilot.common.time import system_time_valid
 from openpilot.frogpilot.assets.model_manager import MODEL_DOWNLOAD_ALL_PARAM, MODEL_DOWNLOAD_PARAM, ModelManager
 from openpilot.frogpilot.assets.theme_manager import THEME_COMPONENT_PARAMS, ThemeManager
 from openpilot.frogpilot.common.frogpilot_functions import backup_toggles
-from openpilot.frogpilot.common.frogpilot_utilities import flash_panda, is_url_pingable, lock_doors, run_thread_with_lock, update_maps
-from openpilot.frogpilot.common.frogpilot_variables import ERROR_LOGS_PATH, FrogPilotVariables, get_frogpilot_toggles, params_cache, params_memory
+from openpilot.frogpilot.common.frogpilot_utilities import capture_report, flash_panda, is_url_pingable, lock_doors, run_thread_with_lock, update_maps, update_openpilot
+from openpilot.frogpilot.common.frogpilot_variables import ERROR_LOGS_PATH, FrogPilotVariables, get_frogpilot_toggles, params, params_cache, params_memory
 from openpilot.frogpilot.controls.frogpilot_planner import FrogPilotPlanner
-from openpilot.frogpilot.controls.lib.frogpilot_tracking import FrogPilotTracking
+from openpilot.frogpilot.system.frogpilot_stats import send_stats
+from openpilot.frogpilot.system.frogpilot_tracking import FrogPilotTracking
 
 ASSET_CHECK_RATE = (1 / DT_MDL)
 
@@ -34,7 +34,7 @@ def assets_checks(model_manager, theme_manager, frogpilot_toggles):
 
   report_data = json.loads(params_memory.get("IssueReported", encoding="utf-8") or "{}")
   if report_data:
-    sentry.capture_report(report_data["DiscordUser"], report_data["Issue"], vars(frogpilot_toggles))
+    capture_report(report_data["DiscordUser"], report_data["Issue"], vars(frogpilot_toggles))
     params_memory.remove("IssueReported")
 
   for asset_type, asset_param in THEME_COMPONENT_PARAMS.items():
@@ -50,6 +50,9 @@ def update_checks(model_manager, now, theme_manager, frogpilot_toggles, boot_run
   theme_manager.update_themes(frogpilot_toggles, boot_run)
 
   run_thread_with_lock("update_maps", update_maps, (now,))
+
+  if frogpilot_toggles.automatic_updates:
+    run_thread_with_lock("update_openpilot", update_openpilot)
 
   time.sleep(1)
 
@@ -68,7 +71,7 @@ def frogpilot_thread():
   model_manager = ModelManager()
   theme_manager = ThemeManager()
 
-  toggles_last_updated = datetime.datetime.now(datetime.UTC)
+  toggles_last_updated = datetime.datetime.now(datetime.timezone.utc)
 
   pm = messaging.PubMaster(["frogpilotPlan"])
   sm = messaging.SubMaster(["carControl", "carState", "controlsState", "deviceState", "driverMonitoringState",
@@ -85,7 +88,7 @@ def frogpilot_thread():
   while True:
     sm.update()
 
-    now = datetime.datetime.now(datetime.UTC)
+    now = datetime.datetime.now(datetime.timezone.utc)
 
     started = sm["deviceState"].started
 
@@ -101,8 +104,8 @@ def frogpilot_thread():
       if frogpilot_toggles.random_themes:
         theme_manager.update_active_theme(time_validated, frogpilot_toggles, randomize_theme=True)
 
-      # if time_validated and is_url_pingable(os.environ.get("STATS_URL", "")):
-      #   send_stats()
+      if time_validated and is_url_pingable(os.environ.get("STATS_URL", "")):
+        send_stats()
 
     elif started and not started_previously:
       if error_log.is_file():
