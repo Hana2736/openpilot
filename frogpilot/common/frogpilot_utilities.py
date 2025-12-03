@@ -99,12 +99,27 @@ def calculate_road_curvature(modelData, v_ego):
   velocity = np.array(modelData.velocity.x)
   timebase = np.array(modelData.orientationRate.t)
 
-  lateral_acceleration = orientation_rate * velocity
-  index = np.argmax(np.abs(lateral_acceleration))
-  predicted_lateral_acc = float(lateral_acceleration[index])
-  time_to_curve = float(timebase[index])
+  # Find the g-force for the whole loop
+  lateral_acceleration = np.abs(orientation_rate * velocity)
 
-  return predicted_lateral_acc / max(v_ego, 1)**2, max(time_to_curve, 1)
+  # We want 2 mss lateral pull
+  comfort_limit = 2.0
+
+  # Where do we hit 2 mss?
+  unsafe_indices = np.where(lateral_acceleration > comfort_limit)[0]
+
+  if len(unsafe_indices) > 0:
+    # Find the time we hit that point
+    first_index = unsafe_indices[0]
+    time_to_curve = float(timebase[first_index])
+    predicted_lateral_acc = float(lateral_acceleration[first_index])
+  else:
+    # All good, no curve
+    time_to_curve = 1000.0
+    predicted_lateral_acc = 0.0
+
+  # Return curvature (normalized) and the time to that specific intensity
+  return predicted_lateral_acc / max(v_ego, 1)**2, time_to_curve
 
 def clean_model_name(name):
   return (
