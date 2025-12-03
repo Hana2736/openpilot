@@ -78,7 +78,6 @@ class LatControlTorque(LatControl):
       CENTERING_GAIN_V = [0.15, 0.12, 0.08, 0.05]  # correction gains
       centering_gain = np.interp(CS.vEgo, CENTERING_GAIN_BP, CENTERING_GAIN_V)
       lane_centering_correction = centering_gain * accel_error
-      # ------------------------------------------------------
 
       # Remove nnff for Mazda
       if False: # self.nnff_loaded and frogpilot_toggles.nnff or frogpilot_toggles.nnff_lite:
