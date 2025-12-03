@@ -131,8 +131,8 @@ class ConditionalExperimentalMode:
         # stopped lead
         lead_is_stopped = lead.vLead < 2.0
 
-        # lead is beyond the stop point beyond 5.5m
-        stop_is_distinct = model_length < (lead.dRel - 5.5)
+        # lead is beyond the stop point beyond 3m
+        stop_is_distinct = model_length < (lead.dRel - 3.0)
 
         # stop if we have a lead that we dont care about
         should_stop_for_light = light_detected and (lead_is_stopped or stop_is_distinct)
@@ -144,7 +144,7 @@ class ConditionalExperimentalMode:
       self.stop_light_detected = False
   def get_safe_stop_time(self, raw_value):
     """
-    Stop time for stopped leads and red light/stop sign. Return 6 seconds if we have a shit config. (So we dont rear-end someone)
+    Stop time for stopped leads and red light/stop sign. Return 10 seconds if we have a shit config. (So we dont rear-end someone)
     """
     fallback_value = 10
 
@@ -184,11 +184,11 @@ class ConditionalExperimentalMode:
       # Pull the braking limit from the car controller base (2.95 m/ss)
       safe_decel = abs(ACCEL_MIN) * 0.925 # Take the car's max braking, and give a bit of wiggle room just in case
 
-      # 1. Time threshold ()
+      # Time calc
       d_time = velocity * time_threshold
 
-      # 2. Physics Limit (v^2 / 2a)
+      # Physics Limit (v^2 / 2a)
       d_physics = (velocity ** 2) / (2 * safe_decel)
 
-      # Return the larger distance (forcing us to engage EARLIER if we are going too fast)
+      # Return the larger distance, so we brake early if needed
       return max(d_time, d_physics)

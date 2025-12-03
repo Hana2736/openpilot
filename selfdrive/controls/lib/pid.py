@@ -50,18 +50,33 @@ class PIDController:
     self.f = feedforward * self.k_f
     self.d = error_rate * self.k_d
 
-    i_candidate = self.i if freeze_integrator else self.i + error * self.k_i * self.i_rate
+    if not freeze_integrator:
+      i_candidate = self.i + error * self.k_i * self.i_rate
+    else:
+      i_candidate = self.i
+
+    # Unclipped control with candidate integral
     u = self.p + i_candidate + self.d + self.f
+
+    # Saturated output
     u_sat = np.clip(u, self.neg_limit, self.pos_limit)
 
+    # Anti-windup: only integrate if
+    # - we're not saturating, OR
+    # - the integral change moves us OUT of saturation.
     if u == u_sat:
+      # not saturated -> accept integral update
       self.i = i_candidate
     else:
+      # saturated high, only allow integral if error < 0 (pull down)
       if u > self.pos_limit and error < 0:
         self.i = i_candidate
+      # saturated low, only allow integral if error > 0 (push up)
       elif u < self.neg_limit and error > 0:
         self.i = i_candidate
+      # else: reject this integral step (hold self.i)
 
+    # Final control with updated integral
     control = self.p + self.i + self.d + self.f
     self.control = np.clip(control, self.neg_limit, self.pos_limit)
     return self.control
