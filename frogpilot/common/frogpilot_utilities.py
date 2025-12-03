@@ -21,7 +21,7 @@ from openpilot.common.realtime import DT_DMON, DT_HW
 from openpilot.selfdrive.car.toyota.carcontroller import LOCK_CMD
 from panda import Panda
 
-from openpilot.frogpilot.common.frogpilot_variables import EARTH_RADIUS, KONIK_PATH, MAPD_PATH, MAPS_PATH, params, params_cache, params_memory
+from openpilot.frogpilot.common.frogpilot_variables import EARTH_RADIUS, KONIK_PATH, MAPD_PATH, MAPS_PATH, MINIMUM_LATERAL_ACCELERATION, params, params_cache, params_memory
 
 running_threads = {}
 
@@ -103,7 +103,7 @@ def calculate_road_curvature(modelData, v_ego):
   lateral_acceleration = np.abs(orientation_rate * velocity)
 
   # We want 2 mss lateral pull
-  comfort_limit = 2.0
+  comfort_limit = MINIMUM_LATERAL_ACCELERATION
 
   # Where do we hit 2 mss?
   unsafe_indices = np.where(lateral_acceleration > comfort_limit)[0]
