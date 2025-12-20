@@ -1,73 +1,70 @@
-name: Schedule FrogPilot Update
+name: "Schedule FrogPilot Update"
+run-name: "Schedule FrogPilot update for ${{ inputs.scheduled_date }}"
 
 on:
   workflow_dispatch:
     inputs:
       scheduled_date:
-        description: "Enter the date to update the \"FrogPilot\" branch (YYYY-MM-DD)"
+        description: Enter the date to update the FrogPilot branch (YYYY-MM-DD)
         required: true
+        type: string
+
+permissions:
+  contents: write
 
 env:
-  BRANCH: FrogPilot-Staging
-  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  BRANCH_STAGING: ${{ vars.BRANCH_STAGING || 'FrogPilot-Staging' }}
+  TZ: America/Phoenix
+
+concurrency:
+  group: schedule-frogpilot-update-staging
 
 jobs:
-  schedule-update:
+  schedule_update:
+    name: "Schedule staging release handoff"
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Configure Git Identity
-        run: |
-          git config --global user.name "James"
-          git config --global user.email "91348155+FrogAi@users.noreply.github.com"
-
-      - name: Checkout ${{ env.BRANCH }}
-        uses: actions/checkout@v3
+      - name: "Checkout staging branch"
+        uses: actions/checkout@v6
         with:
-          persist-credentials: false
-          ref: ${{ env.BRANCH }}
-          fetch-depth: 3
+          ref: ${{ env.BRANCH_STAGING }}
 
-      - name: Schedule Update for ${{ github.event.inputs.scheduled_date }}
+      - name: "Schedule staging release handoff"
+        env:
+          INPUT_SCHEDULED_DATE: ${{ inputs.scheduled_date }}
         run: |
-          echo "${{ github.event.inputs.scheduled_date }}" > .github/update_date
-          git add .github/update_date
+          scheduled_date="$INPUT_SCHEDULED_DATE"
 
-      - name: Get Target Commit (Second Most Recent)
-        id: get_target
-        run: |
-          TARGET_COMMIT=$(git rev-parse HEAD~1)
-
-          AUTHOR_DATE=$(git show -s --format=%aD "$TARGET_COMMIT")
-          COMMITTER_DATE=$(git show -s --format=%cD "$TARGET_COMMIT")
-
-          echo "AUTHOR_DATE=$AUTHOR_DATE" >> $GITHUB_ENV
-          echo "COMMITTER_DATE=$COMMITTER_DATE" >> $GITHUB_ENV
-          echo "TARGET_COMMIT=$TARGET_COMMIT" >> $GITHUB_ENV
-
-      - name: Create Fixup Commit if Changes Exist
-        id: fixup_commit
-        run: |
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Changes found, creating fixup commit."
-            git commit --fixup="${{ env.TARGET_COMMIT }}"
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          if [[ -z "${{ vars.GIT_NAME }}" || -z "${{ vars.GIT_EMAIL }}" ]]; then
+            echo "Repository variables GIT_NAME and GIT_EMAIL must be set."
+            exit 1
           fi
 
-      - name: Autosquash Fixup into Target Commit
-        if: steps.fixup_commit.outputs.has_changes == 'true'
-        run: |
-          GIT_SEQUENCE_EDITOR=: git rebase --autosquash -i HEAD~3
+          git config user.name "${{ vars.GIT_NAME }}"
+          git config user.email "${{ vars.GIT_EMAIL }}"
 
-      - name: Restore Timestamps on Final Two Commits
-        if: steps.fixup_commit.outputs.has_changes == 'true'
-        run: |
-          git rebase --exec "GIT_COMMITTER_DATE='${{ env.COMMITTER_DATE }}' git commit --amend --no-edit --date='${{ env.AUTHOR_DATE }}'" HEAD~2
+          if ! parsed_date=$(TZ="$TZ" date -d "$scheduled_date" +%F 2>/dev/null); then
+            echo "scheduled_date must be a valid YYYY-MM-DD date."
+            exit 1
+          fi
 
-      - name: Push Updated ${{ env.BRANCH }} Branch
-        if: steps.fixup_commit.outputs.has_changes == 'true'
-        run: |
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
-          git push origin "${{ env.BRANCH }}" --force-with-lease
+          today=$(TZ="$TZ" date +%F)
+          if [[ "$parsed_date" < "$today" ]]; then
+            echo "scheduled_date must be today or later in $TZ."
+            exit 1
+          fi
+
+          printf "%s\n" "$parsed_date" > ".github/update_date"
+          git add ".github/update_date"
+
+          if git diff --cached --quiet; then
+            echo "No schedule change detected."
+            exit 0
+          fi
+
+          GIT_AUTHOR_DATE="$(git log -1 --format=%aI)" \
+          GIT_COMMITTER_DATE="$(git log -1 --format=%cI)" \
+          git commit --amend --no-edit
+
+          git push --force-with-lease origin "HEAD:refs/heads/$BRANCH_STAGING"

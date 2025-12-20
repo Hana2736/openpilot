@@ -1,262 +1,239 @@
-name: Compile FrogPilot
+name: "Compile FrogPilot"
+run-name: >-
+  Compile ${{
+    inputs.publish_frogpilot && (vars.BRANCH_RELEASE || 'FrogPilot')
+    || inputs.publish_staging && (vars.BRANCH_STAGING || 'FrogPilot-Staging')
+    || inputs.publish_testing && (vars.BRANCH_TESTING || 'FrogPilot-Testing')
+    || inputs.publish_custom_branch
+    || github.ref_name
+  }}
 
 on:
   workflow_dispatch:
     inputs:
+      not_vetted:
+        description: This branch is not vetted
+        type: boolean
+      publish_custom_branch:
+        description: Custom branch name
+        type: string
+      publish_frogpilot:
+        description: Push to FrogPilot
+        type: boolean
+      publish_staging:
+        description: Push to FrogPilot-Staging
+        type: boolean
+      publish_testing:
+        description: Push to FrogPilot-Testing
+        type: boolean
       runner:
-        description: "Select runner"
-        required: true
-        default: "c3"
-        type: choice
+        default: c3
+        description: Select runner
         options:
           - c3
           - c3x
-      not_vetted:
-        description: "This branch is not vetted"
-        required: false
-        default: false
-        type: boolean
-      publish_frogpilot:
-        description: "Push to FrogPilot"
-        required: false
-        default: false
-        type: boolean
-      publish_staging:
-        description: "Push to FrogPilot-Staging"
-        required: false
-        default: false
-        type: boolean
-      publish_testing:
-        description: "Push to FrogPilot-Testing"
-        required: false
-        default: false
-        type: boolean
-      publish_custom_branch:
-        description: "Push to custom branch:"
-        required: false
-        default: ""
-        type: string
-      update_translations:
-        description: "Update missing/outdated translations"
-        required: false
-        default: false
-        type: boolean
-      vet_existing_translations:
-        description: "Vet existing translations"
-        required: false
-        default: false
-        type: boolean
+        required: true
+        type: choice
 
 env:
-  BASEDIR: ${{ github.workspace }}
+  BRANCH_RELEASE: ${{ vars.BRANCH_RELEASE || 'FrogPilot' }}
+  BRANCH_STAGING: ${{ vars.BRANCH_STAGING || 'FrogPilot-Staging' }}
+  BRANCH_TESTING: ${{ vars.BRANCH_TESTING || 'FrogPilot-Testing' }}
   BUILD_DIR: /data/openpilot
-  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  INPUT_CUSTOM_BRANCH: ${{ inputs.publish_custom_branch }}
+
+permissions: {}
+
+concurrency:
+  group: compile-frogpilot-${{ github.ref_name }}
 
 jobs:
-  get_branch:
+  build_and_push:
+    name: "Compile FrogPilot"
     runs-on:
       - self-hosted
-      - ${{ github.event.inputs.runner }}
-    outputs:
-      branch: ${{ steps.get_branch.outputs.branch }}
-      python_version: ${{ steps.get_python_version.outputs.python_version }}
+      - ${{ inputs.runner }}
+    timeout-minutes: 180
+    concurrency:
+      group: compile-frogpilot-runner-${{ inputs.runner }}
     steps:
-      - name: Get Current Branch
-        id: get_branch
+      - name: "Validate inputs"
         run: |
-          cd $BUILD_DIR
-          echo "branch=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Get Python Version
-        id: get_python_version
-        run: |
-          echo "python_version=$(tr -d '[:space:]' < "$BUILD_DIR/.python-version")" >> $GITHUB_OUTPUT
-
-  translate:
-    if: inputs.update_translations
-    needs: get_branch
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure Git Identity
-        run: |
-          git config --global user.name "James"
-          git config --global user.email "91348155+FrogAi@users.noreply.github.com"
-
-      - name: Checkout Required Files
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.get_branch.outputs.branch }}
-          sparse-checkout: |
-            frogpilot/ui/
-            selfdrive/controls/lib/alerts_offroad.json
-            selfdrive/ui/
-            selfdrive/ui/update_translations.py
-            selfdrive/ui/translations/
-            selfdrive/ui/translations/auto_translate.py
-
-      - name: Set Up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ needs.get_branch.outputs.python_version }}
-
-      - name: Install Dependencies
-        run: |
-          pip install requests
-          sudo apt update && sudo apt install -y qttools5-dev-tools
-
-      - name: Update Translations
-        run: python selfdrive/ui/update_translations.py --vanish
-
-      - name: Update Missing Translations
-        continue-on-error: true
-        timeout-minutes: 300
-        run: python selfdrive/ui/translations/auto_translate.py --all-files
-
-      - name: Vet Existing Translations
-        if: inputs.vet_existing_translations
-        continue-on-error: true
-        timeout-minutes: 300
-        run: python selfdrive/ui/translations/auto_translate.py --all-files --vet-translations
-
-      - name: Commit and Push Translations
-        run: |
-          if git diff --quiet selfdrive/ui/translations/*.ts; then
-            echo "No translation updates detected."
-            exit 0
+          if [[ "${{ github.ref_type }}" != "branch" ]]; then
+            echo "This workflow only supports branch dispatches."
+            exit 1
           fi
 
-          git fetch --unshallow origin ${{ needs.get_branch.outputs.branch }}
-          git checkout ${{ needs.get_branch.outputs.branch }}
-          git add selfdrive/ui/translations/*.ts
-          git commit --amend --no-edit
-          git push --force origin ${{ needs.get_branch.outputs.branch }}
+          if [[ -z "${{ vars.GIT_NAME }}" || -z "${{ vars.GIT_EMAIL }}" ]]; then
+            echo "Repository variables GIT_NAME and GIT_EMAIL must be set."
+            exit 1
+          fi
 
-  build_and_push:
-    needs: [get_branch, translate]
-    if: always()
-    runs-on:
-      - self-hosted
-      - ${{ github.event.inputs.runner }}
-    permissions:
-      contents: write
-    defaults:
-      run:
-        working-directory: ${{ env.BUILD_DIR }}
-    steps:
-      - name: Configure Git
+          if [[ -n "$INPUT_CUSTOM_BRANCH" ]]; then
+            git check-ref-format --branch "$INPUT_CUSTOM_BRANCH" >/dev/null
+          fi
+
+      - name: "Set up build environment"
+        env:
+          WORKFLOW_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          git config --global http.postBuffer 104857600
-          git config --global user.name "James"
-          git config --global user.email "91348155+FrogAi@users.noreply.github.com"
-          git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/FrogAi/FrogPilot.git
+          echo "[-] Setting up repo T=$SECONDS"
+          sudo rm -rf "$BUILD_DIR"
+          sudo mkdir -p "$BUILD_DIR"
+          sudo chown -R "$(whoami):$(whoami)" "$BUILD_DIR"
+          cd "$BUILD_DIR"
 
-      - name: Sync Translation Updates
-        if: inputs.update_translations
+          git init
+          git config user.name "${{ vars.GIT_NAME }}"
+          git config user.email "${{ vars.GIT_EMAIL }}"
+          git remote add origin "https://x-access-token:${WORKFLOW_TOKEN}@github.com/${{ github.repository }}.git"
+          git fetch --no-tags origin "${{ github.ref_name }}"
+          git checkout -B "${{ github.ref_name }}" "origin/${{ github.ref_name }}"
+
+      - name: "Prepare source"
         run: |
-          git fetch origin ${{ needs.get_branch.outputs.branch }}
-          git reset --hard FETCH_HEAD
+          cd "$BUILD_DIR"
 
-      - name: Take Ownership of Build Directory
-        run: sudo chown -R $(whoami):$(whoami) .
+          if [[ ! -f "release/release_files.py" ]]; then
+            echo "release/release_files.py not found — source branch may already be compiled."
+            exit 1
+          fi
 
-      - name: Clean Build Artifacts
+          SOURCE_DIR=$(mktemp -d)
+          echo "SOURCE_DIR=$SOURCE_DIR" >> "$GITHUB_ENV"
+
+          echo "[-] copying files T=$SECONDS"
+          find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec mv {} "$SOURCE_DIR/" \;
+
+          cd "$SOURCE_DIR"
+          python3 ./release/release_files.py | xargs -d '\n' cp -pR --parents -t "$BUILD_DIR/"
+
+          cd "$BUILD_DIR"
+
+          rm -f panda/board/obj/panda.bin.signed
+          rm -f panda/board/obj/panda_h7.bin.signed
+
+          rm -f ".github/update_date"
+          if [[ "${{ inputs.publish_staging }}" == "true" ]]; then
+            if git fetch --no-tags --depth=1 origin "$BRANCH_STAGING" 2>/dev/null; then
+              if git show "FETCH_HEAD:.github/update_date" > ".github/update_date" 2>/dev/null; then
+                echo "Restored .github/update_date from $BRANCH_STAGING."
+              else
+                rm -f ".github/update_date"
+                echo "No .github/update_date found on $BRANCH_STAGING."
+              fi
+            else
+              echo "Branch $BRANCH_STAGING not found, skipping update_date restore."
+            fi
+          fi
+
+          rm -f not_vetted
+          if [[ "${{ inputs.not_vetted }}" == "true" ]]; then
+            touch not_vetted
+          fi
+
+      - name: "Build release"
         run: |
-          rm -f .clang-tidy
-          rm -f .dockerignore
-          rm -f .editorconfig
-          rm -f .gitattributes
-          rm -f .gitmodules
-          rm -f .lfsconfig
-          rm -f .overlay_init
-          rm -f .pre-commit-config.yaml
-          rm -f .sconsign.dblite
-          rm -f codecov.yml
-          rm -f conftest.py
-          rm -f poetry.lock
-          rm -f pyproject.toml
-          rm -f teleoprtc
-          rm -f Dockerfile.openpilot
-          rm -f Dockerfile.openpilot_base
-          rm -f Jenkinsfile
+          cd "$BUILD_DIR"
 
-          rm -f panda/board/obj/.placeholder
-          rm -f panda/board/obj/bootstub.panda.elf
-          rm -f panda/board/obj/bootstub.panda_h7.elf
-          rm -f panda/board/obj/panda.bin
-          rm -f panda/board/obj/panda.elf
-          rm -f panda/board/obj/panda_h7.bin
-          rm -f panda/board/obj/panda_h7.elf
-          rm -f panda/board/obj/version
+          export UV_INSTALL_DIR=/data/uv
+          export UV_CACHE_DIR=/data/uv-cache
+          export PATH="/data/uv:$PATH"
+          if ! command -v uv &>/dev/null; then
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+          fi
+          uv sync --frozen
+
+          source .venv/bin/activate
+          export PYTHONPATH="$BUILD_DIR"
+          scons -j$(nproc) --minimal || scons -j$(( $(nproc) / 2 )) --minimal || scons -j1 --minimal
+          scons -j$(nproc) panda/ || scons -j$(( $(nproc) / 2 )) panda/ || scons -j1 panda/
+
+          submodules=$(git submodule status)
+          if [[ -n "$submodules" ]]; then
+            echo "submodules found:"
+            echo "$submodules"
+            exit 1
+          fi
 
           find . -name '*.a' -delete
           find . -name '*.o' -delete
-          find . -name '*.onnx' -delete
           find . -name '*.os' -delete
           find . -name '*.pyc' -delete
+          find . -name '__pycache__' -delete
           find . -name 'moc_*' -delete
 
-          rm -rf .devcontainer/
-          rm -rf .vscode/
-          rm -rf body/
-          rm -rf opendbc/generator/
-          rm -rf release/
-          rm -rf scripts/
-          rm -rf site_scons/
-          rm -rf teleoprtc_repo/
+          git checkout third_party/
+          find third_party/ -name '*Darwin*' -exec rm -r {} +
+          find third_party/ -name '*x86*' -exec rm -r {} +
 
-          find .github -mindepth 1 -maxdepth 1 ! -name 'workflows' -exec rm -rf {} +
-          find .github/workflows -mindepth 1 ! \( \
-            -type f \( \
-              -name 'compile_frogpilot.yaml' -o \
-              -name 'review_pull_request.yaml' -o \
-              -name 'schedule_update.yaml' -o \
-              -name 'update_pr_branch.yaml' -o \
-              -name 'update_release_branch.yaml' -o \
-              -name 'update_tinygrad.yaml' \
-            \) \
-          \) -exec rm -rf {} +
+          find . -name '*.egg-info' -exec rm -rf {} + 2>/dev/null || true
+          find . -name '*.md' ! -name 'RELEASES.md' -delete
+          find . \( -name '*_test.py' -o -name 'conftest.py' -o -name 'test_*.py' \) -delete
+          find . \( -name '.dockerignore' -o -name '.editorconfig' -o -name '.pre-commit-config.yaml' -o -name '.pylintrc' -o -name 'Dockerfile*' \) -delete
+          find . -mindepth 2 -type d -name '.github' -exec rm -rf {} + 2>/dev/null || true
+          find . -type d \( -name 'docs' -o -name 'test' -o -name 'tests' \) -exec rm -rf {} + 2>/dev/null || true
+          find selfdrive/modeld/models/ -name '*.onnx' -delete
 
-          find panda/board/jungle -type f ! -name '__init__.py' -delete
-          find panda/board/jungle -type d -empty -delete
-
-          find third_party/ -name '*x86*' -exec rm -rf {} +
-          find third_party/ -name '*Darwin*' -exec rm -rf {} +
-
-          find . -name 'SConstruct' -delete
-          find . -name 'SConscript' -delete
-
-          find . -type d \( -iname "debug" -o -iname "test" -o -iname "tests" \) -exec rm -rf {} +
-          find . -type d -empty ! -path "./.git*" -delete
-          find . -type d -name '__pycache__' -exec rm -rf {} +
-          find . -type f -regex '.*matlab.*\.md' -delete
+          rm -rf \
+            .github/ISSUE_TEMPLATE/ \
+            .sconsign.dblite \
+            .venv \
+            Jenkinsfile \
+            opendbc_repo/.uv-opendbc-only/ \
+            release/ \
+            selfdrive/debug/ \
+            third_party/bootstrap/ \
+            third_party/catch2/ \
+            tinygrad_repo/examples/ \
+            tinygrad_repo/extra/ \
+            tools/cabana/ \
+            tools/car_porting/ \
+            tools/lib/ \
+            tools/replay/ \
+            tools/sim/
+          rm -f \
+            .github/labeler.yaml \
+            .github/pull_request_template.md \
+            uv.lock
 
           touch prebuilt
-          [ "${{ inputs.not_vetted }}" = "true" ] && touch not_vetted || true
 
-      - name: Add Update Date File
-        if: inputs.publish_staging
-        continue-on-error: true
-        run: |
-          curl -fLsS https://raw.githubusercontent.com/FrogAi/FrogPilot/FrogPilot-Staging/.github/update_date -o .github/update_date || echo "No update_date found, skipping..."
-
-      - name: Commit and Push Build
-        run: |
-          git add -f .
+          git add --all --force
           git commit -m "Compile FrogPilot"
-          git push --force origin HEAD
 
-          if [ "${{ inputs.publish_frogpilot }}" = "true" ]; then
-            git push --force origin HEAD:FrogPilot
+      - name: "Publish to target branches"
+        run: |
+          cd "$BUILD_DIR"
+
+          targets=("${{ github.ref_name }}")
+          if [[ "${{ inputs.publish_frogpilot }}" == "true" ]]; then
+            targets+=("$BRANCH_RELEASE")
+          fi
+          if [[ "${{ inputs.publish_staging }}" == "true" ]]; then
+            targets+=("$BRANCH_STAGING")
+          fi
+          if [[ "${{ inputs.publish_testing }}" == "true" ]]; then
+            targets+=("$BRANCH_TESTING")
+          fi
+          if [[ -n "$INPUT_CUSTOM_BRANCH" ]]; then
+            targets+=("$INPUT_CUSTOM_BRANCH")
           fi
 
-          if [ "${{ inputs.publish_staging }}" = "true" ]; then
-            git push --force origin HEAD:FrogPilot-Staging
-          fi
+          for target in "${targets[@]}"; do
+            echo "[-] pushing $target T=$SECONDS"
+            if expected_ref=$(git ls-remote --exit-code --heads origin "$target" 2>/dev/null | awk '{print $1}'); then
+              git push \
+                --force-with-lease="refs/heads/$target:$expected_ref" \
+                origin "HEAD:refs/heads/$target"
+            else
+              git push origin "HEAD:refs/heads/$target"
+            fi
+          done
 
-          if [ "${{ inputs.publish_testing }}" = "true" ]; then
-            git push --force origin HEAD:FrogPilot-Testing
-          fi
+          echo "[-] done T=$SECONDS"
 
-          if [ -n "${{ inputs.publish_custom_branch }}" ]; then
-            git push --force origin HEAD:"${{ inputs.publish_custom_branch }}"
-          fi
+      - name: "Cleanup"
+        if: always()
+        run: |
+          sudo rm -rf "$SOURCE_DIR"
