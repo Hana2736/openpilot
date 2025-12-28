@@ -182,7 +182,7 @@ class ConditionalExperimentalMode:
         return 0
       # Mazda limits to 3 m/ss
       # Pull the braking limit from the car controller base (2.95 m/ss)
-      safe_decel = abs(ACCEL_MIN) * 0.925 # Take the car's max braking, and give a bit of wiggle room just in case
+      safe_decel = abs(ACCEL_MIN) * 0.90 # Take the car's max braking, and give a bit of wiggle room just in case
 
       # Time calc
       d_time = velocity * time_threshold
