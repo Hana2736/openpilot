@@ -99,7 +99,7 @@ class ConditionalExperimentalMode:
       safe_stopped_dist = self.get_safe_distance(relative_speed, wanted_stop_time)
 
       # Is the lead stopped? Will we make it within 9 sec? Do we need to brake early?
-      lead_is_stopped = lead.vLead < 2
+      lead_is_stopped = lead.vLead < 3
       lead_is_in_range = lead_distance < safe_stopped_dist
 
       stopped_lead = lead_is_stopped and lead_is_in_range and frogpilot_toggles.conditional_stopped_lead
@@ -129,7 +129,7 @@ class ConditionalExperimentalMode:
         lead = self.frogpilot_planner.lead_one
 
         # stopped lead
-        lead_is_stopped = lead.vLead < 2.0
+        lead_is_stopped = lead.vLead < 3.0
 
         # lead is beyond the stop point beyond 3m
         stop_is_distinct = model_length < (lead.dRel - 3.0)
