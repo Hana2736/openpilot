@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+import math
 from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.realtime import DT_MDL
 from openpilot.common.numpy_fast import interp
 from openpilot.common.conversions import Conversions as CV
+from openpilot.selfdrive.car.interfaces import ACCEL_MIN
 
 from openpilot.frogpilot.common.frogpilot_variables import CITY_SPEED_LIMIT, CRUISING_SPEED, THRESHOLD, params_memory, scale_threshold
 
@@ -122,42 +124,57 @@ class ConditionalExperimentalMode:
 
   def update_conditions(self, v_ego, sm, frogpilot_toggles):
     self.curve_detection(v_ego, frogpilot_toggles)
-    self.slow_lead(frogpilot_toggles, v_ego)
+    self.slow_lead(v_ego, frogpilot_toggles)
     self.stop_sign_and_light(v_ego, sm, frogpilot_toggles.conditional_model_stop_time)
 
   def curve_detection(self, v_ego, frogpilot_toggles):
     self.curvature_filter.update(self.frogpilot_planner.road_curvature_detected or self.frogpilot_planner.driving_in_curve)
     self.curve_detected = self.curvature_filter.x >= THRESHOLD and v_ego > CRUISING_SPEED
 
-  def slow_lead(self, frogpilot_toggles, v_ego):
+  def slow_lead(self, v_ego, frogpilot_toggles):
     if self.frogpilot_planner.tracking_lead:
-      slower_lead = frogpilot_toggles.conditional_slower_lead and self.frogpilot_planner.frogpilot_following.slower_lead
-      stopped_lead = frogpilot_toggles.conditional_stopped_lead and self.frogpilot_planner.lead_one.vLead < 1
-      lead_threshold = scale_threshold(v_ego)
+      lead = self.frogpilot_planner.lead_one
+      lead_distance = lead.dRel
+      relative_speed = v_ego - lead.vLead
+
+      # Physics-based safe stop time calculation
+      wanted_stop_time = self.get_safe_stop_time(frogpilot_toggles.conditional_model_stop_time)
+      safe_approach_dist = self.get_safe_distance(relative_speed, wanted_stop_time * (2.0/3.0))
+
+      # Slower lead detection: are we closing quickly on them?
+      closing_quickly = relative_speed > (CRUISING_SPEED * 0.75)  # ~8.5 mph faster than them
+      close_proximity = lead_distance < safe_approach_dist
+      slower_lead = closing_quickly and close_proximity and frogpilot_toggles.conditional_slower_lead
+
+      # Stopped lead detection with physics-based distance
+      safe_stopped_dist = self.get_safe_distance(relative_speed, wanted_stop_time)
+      lead_is_stopped = lead.vLead < 3  # 3 m/s tolerance for stopped detection
+      lead_is_in_range = lead_distance < safe_stopped_dist
+      stopped_lead = lead_is_stopped and lead_is_in_range and frogpilot_toggles.conditional_stopped_lead
 
       # Adjust threshold based on lead probability for vision-only accuracy
-      lead_prob = getattr(self.frogpilot_planner.lead_one, 'modelProb', 1.0)
-      adjusted_threshold = lead_threshold * (1.0 + 0.2 * (1.0 - lead_prob))  # Higher threshold for lower confidence
+      lead_prob = getattr(lead, 'modelProb', 1.0)
+      lead_threshold = scale_threshold(v_ego) * (1.0 + 0.2 * (1.0 - lead_prob))
 
       self.slow_lead_filter.update(slower_lead or stopped_lead)
-      self.slow_lead_detected = self.slow_lead_filter.x >= adjusted_threshold
+      self.slow_lead_detected = self.slow_lead_filter.x >= lead_threshold
     else:
       self.slow_lead_filter.x = 0
       self.slow_lead_detected = False
 
   def stop_sign_and_light(self, v_ego, sm, model_time):
     if not sm["frogpilotCarState"].trafficModeEnabled:
-      speed_mph = v_ego * CV.MS_TO_MPH  # Convert m/s to mph
+      speed_mph = v_ego * CV.MS_TO_MPH
 
       # Interp for smooth scaling in 35-45 mph
       bp = [0, 35, 45]
-      low_filter_time = 0.0  # No filtering under 35 mph
-      tuned_filter_time_curves = self.FILTER_TIME_CURVES[1]  # At 35-55 mph
+      low_filter_time = 0.0
+      tuned_filter_time_curves = self.FILTER_TIME_CURVES[1]
       tuned_filter_time_leads = self.FILTER_TIME_LEADS[1]
       tuned_filter_time_lights = self.FILTER_TIME_LIGHTS[1]
       low_boost = 1.0
       tuned_boost = self.LIGHT_BOOSTS[1]
-      low_cap_factor = 0.0  # No cap under 35 mph
+      low_cap_factor = 0.0
       tuned_cap_factor = 1.0
 
       filter_time_curves = interp(speed_mph, bp, [low_filter_time, low_filter_time, tuned_filter_time_curves])
@@ -172,20 +189,82 @@ class ConditionalExperimentalMode:
       self.stop_light_filter = FirstOrderFilter(self.stop_light_filter.x, filter_time_lights, DT_MDL)
 
       # Disable stoplight detection at very high speeds to prevent false positives
-      if speed_mph > 75:  # Disable above 75 mph
+      if speed_mph > 75:
         self.stop_light_filter.x = 0
         self.stop_light_detected = False
         return
 
+      model_length = self.frogpilot_planner.model_length
+
+      # Physics-based safe stop distance calculation
+      safe_stop_dist = self.get_safe_distance(v_ego, self.get_safe_stop_time(model_time))
+
       # Adjust model time with interp boost and gradual cap
       adjusted_model_time = model_time * light_boost
       if cap_factor > 0:
-        adjusted_model_time = min(adjusted_model_time, self.LIGHT_MAX_TIME * cap_factor + model_time * (1 - cap_factor))  # Gradual cap
+        adjusted_model_time = min(adjusted_model_time, self.LIGHT_MAX_TIME * cap_factor + model_time * (1 - cap_factor))
 
-      model_stopping = self.frogpilot_planner.model_length < v_ego * adjusted_model_time
+      model_stopping = model_length < max(v_ego * adjusted_model_time, safe_stop_dist)
 
       self.stop_light_filter.update(self.frogpilot_planner.model_stopped or model_stopping)
-      self.stop_light_detected = self.stop_light_filter.x >= THRESHOLD**2 and not self.frogpilot_planner.tracking_lead
+      light_detected = self.stop_light_filter.x >= THRESHOLD**2
+
+      should_stop_for_light = light_detected
+
+      # When following a lead, only trigger if stop is distinct from lead position
+      if self.frogpilot_planner.tracking_lead:
+        lead = self.frogpilot_planner.lead_one
+        lead_is_stopped = lead.vLead < 3.0
+        # Stop is distinct if model stop point is beyond lead by more than 3m
+        stop_is_distinct = model_length < (lead.dRel - 3.0)
+        should_stop_for_light = light_detected and (lead_is_stopped or stop_is_distinct)
+
+      self.stop_light_detected = should_stop_for_light
     else:
       self.stop_light_filter.x = 0
       self.stop_light_detected = False
+
+  def get_safe_stop_time(self, raw_value):
+    """
+    Stop time for stopped leads and red light/stop sign.
+    Return 10 seconds if we have an invalid config to avoid rear-ending someone.
+    """
+    fallback_value = 10
+
+    try:
+      if raw_value is None:
+        return fallback_value
+
+      val = float(raw_value)
+
+      if math.isnan(val) or math.isinf(val):
+        return fallback_value
+
+      # Guard against template val (0 or 1)
+      if val <= 1.5:
+        return fallback_value
+
+      return val
+
+    except (ValueError, TypeError):
+      return fallback_value
+
+  def get_safe_distance(self, velocity, time_threshold):
+    """
+    Return the safe stopping distance based on physics.
+    If we can't stop in the target time at max decel, brake earlier.
+    """
+    if velocity <= 0:
+      return 0
+
+    # Use car's max braking with wiggle room
+    safe_decel = abs(ACCEL_MIN) * 0.90
+
+    # Time-based distance
+    d_time = velocity * time_threshold
+
+    # Physics limit: v^2 / (2 * a)
+    d_physics = (velocity ** 2) / (2 * safe_decel)
+
+    # Return the larger distance so we brake early if needed
+    return max(d_time, d_physics)

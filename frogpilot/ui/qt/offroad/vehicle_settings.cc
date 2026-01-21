@@ -152,16 +152,19 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
 
   FrogPilotListWidget *gmList = new FrogPilotListWidget(this);
   FrogPilotListWidget *hkgList = new FrogPilotListWidget(this);
+  FrogPilotListWidget *mazdaList = new FrogPilotListWidget(this);
   FrogPilotListWidget *toyotaList = new FrogPilotListWidget(this);
   FrogPilotListWidget *vehicleInfoList = new FrogPilotListWidget(this);
 
   ScrollView *gmPanel = new ScrollView(gmList, this);
   ScrollView *hkgPanel = new ScrollView(hkgList, this);
+  ScrollView *mazdaPanel = new ScrollView(mazdaList, this);
   ScrollView *toyotaPanel = new ScrollView(toyotaList, this);
   ScrollView *vehicleInfoPanel = new ScrollView(vehicleInfoList, this);
 
   vehiclesLayout->addWidget(gmPanel);
   vehiclesLayout->addWidget(hkgPanel);
+  vehiclesLayout->addWidget(mazdaPanel);
   vehiclesLayout->addWidget(toyotaPanel);
   vehiclesLayout->addWidget(vehicleInfoPanel);
 
@@ -175,6 +178,14 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"HKGToggles", tr("Hyundai/Kia/Genesis Settings"), tr("<b>FrogPilot features for Genesis, Hyundai, and Kia vehicles.</b>"), ""},
     {"NewLongAPI", tr("comma's New Longitudinal API"), tr("<b>comma's new gas and brake control system</b> that improves acceleration and braking but may cause issues on some Genesis/Hyundai/Kia vehicles."), ""},
     {"TacoTuneHacks", tr("\"Taco Bell Run\" Torque Hack"), tr("<b>The steering torque hack from comma's 2022 \"Taco Bell Run\".</b> Designed to increase steering torque at low speeds for left and right turns."), ""},
+
+    {"MazdaToggles", tr("Mazda Settings"), tr("<b>FrogPilot features for Mazda vehicles.</b>"), ""},
+    {"BlendedACC", tr("Blended ACC (Experimental)"), tr("<b>Blend stock MRCC and Experimental Mode longitudinal control.</b> Provides smooth transitions between stock and openpilot control."), ""},
+    {"TorqueInterceptorEnabled", tr("Torque Interceptor Installed"), tr("<b>Enable the torque interceptor</b> to control the steering wheel. Only enable if you have installed a torque interceptor."), ""},
+    {"RadarInterceptorEnabled", tr("Radar Interceptor Installed"), tr("<b>Enable the radar interceptor</b> for longitudinal control. Only enable if you have installed a radar interceptor."), ""},
+    {"NoMRCC", tr("No Stock MRCC"), tr("<b>Enable if your car does not have stock MRCC</b> (Mazda Radar Cruise Control)."), ""},
+    {"NoFSC", tr("No Stock FSC"), tr("<b>Enable if your car does not have stock FSC</b> (Front Sensing Camera)."), ""},
+    {"ManualTransmission", tr("Manual Transmission"), tr("<b>Enable if your car has a manual transmission.</b>"), ""},
 
     {"ToyotaToggles", tr("Toyota/Lexus Settings"), tr("<b>FrogPilot features for Lexus and Toyota vehicles.</b>"), ""},
     {"ToyotaDoors", tr("Automatically Lock/Unlock Doors"), tr("<b>Automatically lock/unlock doors</b> when shifting in and out of drive."), ""},
@@ -212,6 +223,14 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
         vehiclesLayout->setCurrentWidget(hkgPanel);
       });
       vehicleToggle = hkgButton;
+
+    } else if (param == "MazdaToggles") {
+      ButtonControl *mazdaButton = new ButtonControl(title, tr("MANAGE"), desc);
+      QObject::connect(mazdaButton, &ButtonControl::clicked, [vehiclesLayout, mazdaPanel, this]() {
+        openDescriptions(forceOpenDescriptions, toggles);
+        vehiclesLayout->setCurrentWidget(mazdaPanel);
+      });
+      vehicleToggle = mazdaButton;
 
     } else if (param == "ToyotaToggles") {
       ButtonControl *toyotaButton = new ButtonControl(title, tr("MANAGE"), desc);
@@ -259,6 +278,8 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
       gmList->addItem(vehicleToggle);
     } else if (hkgKeys.contains(param)) {
       hkgList->addItem(vehicleToggle);
+    } else if (mazdaKeys.contains(param)) {
+      mazdaList->addItem(vehicleToggle);
     } else if (toyotaKeys.contains(param)) {
       toyotaList->addItem(vehicleToggle);
     } else if (vehicleInfoKeys.contains(param)) {
@@ -336,6 +357,7 @@ void FrogPilotVehiclesPanel::showEvent(QShowEvent *event) {
   isGM = parent->isGM;
   isHKG = parent->isHKG;
   isHKGCanFd = parent->isHKGCanFd;
+  isMazda = parent->isMazda;
   isToyota = parent->isToyota;
   isVolt = parent->isVolt;
   openpilotLongitudinalControlDisabled = parent->openpilotLongitudinalControlDisabled || params.getBool("DisableOpenpilotLongitudinal");
@@ -385,6 +407,8 @@ void FrogPilotVehiclesPanel::updateToggles() {
       setVisible &= isGM;
     } else if (hkgKeys.contains(key)) {
       setVisible &= isHKG;
+    } else if (mazdaKeys.contains(key)) {
+      setVisible &= isMazda;
     } else if (toyotaKeys.contains(key)) {
       setVisible &= isToyota;
     } else if (vehicleInfoKeys.contains(key)) {
@@ -422,6 +446,8 @@ void FrogPilotVehiclesPanel::updateToggles() {
         toggles["GMToggles"]->setVisible(true);
       } else if (hkgKeys.contains(key)) {
         toggles["HKGToggles"]->setVisible(true);
+      } else if (mazdaKeys.contains(key)) {
+        toggles["MazdaToggles"]->setVisible(true);
       } else if (toyotaKeys.contains(key)) {
         toggles["ToyotaToggles"]->setVisible(true);
       } else if (vehicleInfoKeys.contains(key)) {

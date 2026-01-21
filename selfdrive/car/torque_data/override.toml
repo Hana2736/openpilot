@@ -73,6 +73,11 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "LEXUS_GS_F" = [2.5, 2.5, 0.08]
 "HYUNDAI_STARIA_4TH_GEN" = [1.8, 2.0, 0.15]
 
+# Mazda GEN2 cars
+"MAZDA_3_2019" = [1.45, 3.0, 0.33]
+"MAZDA_CX_30" = [1.45, 3.0, 0.33]
+"MAZDA_CX_50" = [1.45, 3.0, 0.33]
+
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]
 
