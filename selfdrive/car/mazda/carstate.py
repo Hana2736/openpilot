@@ -7,6 +7,11 @@ from openpilot.selfdrive.car.interfaces import CarStateBase
 from openpilot.selfdrive.car.mazda.values import DBC, LKAS_LIMITS, MazdaFlags, TI_STATE, CarControllerParams
 from openpilot.common.realtime import DT_CTRL
 
+# Tire size correction factor for non-stock wheels
+# Stock: 647mm diameter / 2033mm circumference
+# Current: 659mm diameter / 2069mm circumference
+TIRE_SIZE_FACTOR = 2069.0 / 2033.0  # ~1.0177
+
 class CarState(CarStateBase):
   def __init__(self, CP, FPCP):
     super().__init__(CP, FPCP)
@@ -53,10 +58,10 @@ class CarState(CarStateBase):
     self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]
 
     ret.wheelSpeeds = self.get_wheel_speeds(
-      cp.vl["WHEEL_SPEEDS"]["FL"],
-      cp.vl["WHEEL_SPEEDS"]["FR"],
-      cp.vl["WHEEL_SPEEDS"]["RL"],
-      cp.vl["WHEEL_SPEEDS"]["RR"],
+      cp.vl["WHEEL_SPEEDS"]["FL"] * TIRE_SIZE_FACTOR,
+      cp.vl["WHEEL_SPEEDS"]["FR"] * TIRE_SIZE_FACTOR,
+      cp.vl["WHEEL_SPEEDS"]["RL"] * TIRE_SIZE_FACTOR,
+      cp.vl["WHEEL_SPEEDS"]["RR"] * TIRE_SIZE_FACTOR,
     )
     ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
@@ -168,15 +173,14 @@ class CarState(CarStateBase):
     fp_ret = custom.FrogPilotCarState.new_message()
 
     ret.wheelSpeeds = self.get_wheel_speeds(
-        cp_cam.vl["WHEEL_SPEEDS"]["FL"],
-        cp_cam.vl["WHEEL_SPEEDS"]["FR"],
-        cp_cam.vl["WHEEL_SPEEDS"]["RL"],
-        cp_cam.vl["WHEEL_SPEEDS"]["RR"],
+        cp_cam.vl["WHEEL_SPEEDS"]["FL"] * TIRE_SIZE_FACTOR,
+        cp_cam.vl["WHEEL_SPEEDS"]["FR"] * TIRE_SIZE_FACTOR,
+        cp_cam.vl["WHEEL_SPEEDS"]["RL"] * TIRE_SIZE_FACTOR,
+        cp_cam.vl["WHEEL_SPEEDS"]["RR"] * TIRE_SIZE_FACTOR,
     )
 
     ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw) # Doesn't match cluster speed exactly
-    #ret.vEgoCluster = ret.vEgo * (2179/2285) #For alt tire size
+    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(100, cp.vl["BLINK_INFO"]["LEFT_BLINK"] == 1,
                                                                       cp.vl["BLINK_INFO"]["RIGHT_BLINK"] == 1)
