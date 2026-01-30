@@ -23,6 +23,17 @@ class Gen2LongitudinalParams:
   coast_intercept: float
   handoff_deadzone: float
 
+class MazdaFlags(IntFlag):
+  # Static flags
+  # Gen 1 hardware: same CAN messages and same camera
+  GEN1 = 1
+  GEN2 = 2
+  TORQUE_INTERCEPTOR = 4
+  RADAR_INTERCEPTOR = 8
+  NO_FSC = 16
+  NO_MRCC = 32
+  MANUAL_TRANSMISSION = 64
+
 # Tuning block
 GEN2_LONG_TUNING = {
   MazdaFlags.GEN2: Gen2LongitudinalParams(
@@ -85,17 +96,6 @@ class MazdaCarDocs(CarDocs):
 class MazdaCarSpecs(CarSpecs):
   tireStiffnessFactor: float = 0.7  # not optimized yet
 
-
-class MazdaFlags(IntFlag):
-  # Static flags
-  # Gen 1 hardware: same CAN messages and same camera
-  GEN1 = 1
-  GEN2 = 2
-  TORQUE_INTERCEPTOR = 4
-  RADAR_INTERCEPTOR = 8
-  NO_FSC = 16
-  NO_MRCC = 32
-  MANUAL_TRANSMISSION = 64
 
 @dataclass
 class MazdaPlatformConfig(PlatformConfig):
