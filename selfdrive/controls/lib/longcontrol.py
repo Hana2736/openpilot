@@ -92,9 +92,10 @@ class LongControl:
     self.CP = CP
     self.long_control_state = LongCtrlState.off
     self.experimental_mode = False
+    pos_p_limit = 0.0 # if params("NoPositivePResponse") else None # put parameter-based control here
     self.pid = PIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                              (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
-                             rate=1 / DT_CTRL)
+                             rate=1 / DT_CTRL, pos_p_limit=pos_p_limit)
     # Preserve legacy behaviour when no feedforward gain is provided (default of 0.0)
     kf = getattr(CP.longitudinalTuning, 'kfDEPRECATED', 0.0)
     self.feedforward_gain = kf if kf != 0.0 else 1.0
