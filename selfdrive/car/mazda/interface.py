@@ -15,8 +15,7 @@ FrogPilotButtonType = custom.FrogPilotCarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
 
 NON_LINEAR_TORQUE_PARAMS = {
-  #CAR.MAZDA_3_2019: (15.38616, 0.71899, 0.15015, 0.37999), # shit values
-  CAR.MAZDA_3_2019: (12.58616, 0.71899, 0.15015, 0.37999),
+  CAR.MAZDA_3_2019: (15.38616, 0.71899, 0.15015, 0.37999), # shit values
   CAR.MAZDA_CX_30: (4.68689, 0.79999, 0.18244, 0.38763),
   CAR.MAZDA_CX_50: (4.68689, 0.79999, 0.18244, 0.38763)
 }
