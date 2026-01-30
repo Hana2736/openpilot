@@ -12,6 +12,32 @@ Ecu = car.CarParams.Ecu
 
 # Steer torque limits
 
+
+@dataclass
+class Gen2LongitudinalParams:
+  coast_coeffs: list[float]
+  gas_coeffs: list[float]
+  brake_coeffs: list[float]
+  gas_intercept: float
+  brake_intercept: float
+  coast_intercept: float
+  handoff_deadzone: float
+
+# Tuning block
+GEN2_LONG_TUNING = {
+  MazdaFlags.GEN2: Gen2LongitudinalParams(
+    coast_coeffs = [-0.0087659528, -0.0029064183, 0.0001596883, -0.0595163906, 37.9625487076], # v, p, v^2, v*p, p^2
+    coast_intercept = 0.0696048792,
+    
+    gas_coeffs = [142.1814843925, -5.8005215117, 0.1134134503, 57.5380263708, 4.0998488099, -0.1010112338, -0.0517629808, 0.0019665724, -0.0000251578], # d, v, r, d^2, d*v, d*r, v^2, v*r, r^2
+    gas_intercept = 1995.0171180138,
+    
+    brake_coeffs = [12.3023878201, 5.8231395815, -43.5078379184, 2.9422864341, -0.0833893808], # d, v, d^2, d*v, v^2
+    brake_intercept = 1884.3062952953,
+    handoff_deadzone = 0.05
+  )
+}
+
 class CarControllerParams:
   def __init__(self, CP):
     self.STEER_STEP = 1 # 100 Hz
@@ -39,6 +65,9 @@ class CarControllerParams:
       self.STEER_DRIVER_MULTIPLIER = 5      # weight driver torque
       self.STEER_DRIVER_FACTOR = 1           # from dbc
       self.STEER_ERROR_MAX = 3500            # max delta between torque cmd and torque motor
+      
+      # Load longitudinal tuning
+      self.long_params = GEN2_LONG_TUNING.get(MazdaFlags.GEN2) # Default to generic Gen2
 
 class TI_STATE:
   DISCOVER = 0
