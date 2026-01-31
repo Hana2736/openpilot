@@ -1,13 +1,10 @@
 import math
 import numpy as np
-from collections import deque
 
 from cereal import log
-from openpilot.selfdrive.car.interfaces import FRICTION_THRESHOLD, get_friction_threshold
-from openpilot.selfdrive.controls.lib.drive_helpers import MIN_SPEED, get_friction
-from openpilot.common.filter_simple import FirstOrderFilter
-from openpilot.selfdrive.controls.lib.latcontrol import LatControl, MIN_LATERAL_CONTROL_SPEED
-from openpilot.selfdrive.car.gm.values import CAR as GM_CAR
+from openpilot.selfdrive.controls.lib.drive_helpers import get_friction
+from openpilot.selfdrive.car.interfaces import FRICTION_THRESHOLD
+from openpilot.selfdrive.controls.lib.latcontrol import LatControl
 from openpilot.selfdrive.controls.lib.pid import PIDController
 from openpilot.selfdrive.controls.lib.vehicle_model import ACCELERATION_DUE_TO_GRAVITY
 
@@ -17,33 +14,14 @@ from openpilot.selfdrive.controls.lib.vehicle_model import ACCELERATION_DUE_TO_G
 # wheel slip, or to speed.
 
 # This controller applies torque to achieve desired lateral
-# accelerations. To compensate for the low speed effects the
-# proportional gain is increased at low speeds by the PID controller.
-# Additionally, there is friction in the steering wheel that needs
-# to be overcome to move it at all, this is compensated for too.
-
-KP = 0.6
-KI = 0.3
-
-INTERP_SPEEDS = [1, 1.5, 2.0, 3.0, 5, 7.5, 10, 15, 30]
-KP_INTERP = [250, 120, 65, 30, 11.5, 5.5, 3.5, 2.0, KP]
+# accelerations. To compensate for the low speed effects we
+# use a LOW_SPEED_FACTOR in the error. Additionally, there is
+# friction in the steering wheel that needs to be overcome to
+# move it at all, this is compensated for too.
 
 LOW_SPEED_X = [0, 10, 20, 30]
-LOW_SPEED_Y = [12, 10.5, 8, 5]
-MAX_LAT_JERK_UP = 2.5            # m/s^3
+LOW_SPEED_Y = [15, 13, 10, 5]
 
-LP_FILTER_CUTOFF_HZ = 1.2
-JERK_LOOKAHEAD_SECONDS = 0.19
-JERK_GAIN = 0.22
-LAT_ACCEL_REQUEST_BUFFER_SECONDS = 1.0
-VERSION = 2
-DEBUG_TORQUE_TUNE = False
-FF_SCALE_BLEND_LAT_ACCEL = 0.05
-DEADZONE_BOOST_LAT_ACCEL = 0.08
-UNWIND_D_DES_THRESHOLD = -1.0
-UNWIND_LAT_ACCEL_NEAR_ZERO = 0.3
-
-BOLT_CARS = (GM_CAR.CHEVROLET_BOLT_EUV, GM_CAR.CHEVROLET_BOLT_CC)
 
 class LatControlTorque(LatControl):
   def __init__(self, CP, CI, dt):
@@ -51,31 +29,10 @@ class LatControlTorque(LatControl):
     self.torque_params = CP.lateralTuning.torque
     self.torque_from_lateral_accel = CI.torque_from_lateral_accel()
     self.lateral_accel_from_torque = CI.lateral_accel_from_torque()
-    self.pid = PIDController([INTERP_SPEEDS, KP_INTERP], KI, rate=1/self.dt)
+    self.pid = PIDController(self.torque_params.kp, self.torque_params.ki,
+                             k_f=self.torque_params.kf)
     self.update_limits()
     self.steering_angle_deadzone_deg = self.torque_params.steeringAngleDeadzoneDeg
-    self.lat_accel_request_buffer_len = int(LAT_ACCEL_REQUEST_BUFFER_SECONDS / self.dt)
-    self.lat_accel_request_buffer = deque([0.] * self.lat_accel_request_buffer_len , maxlen=self.lat_accel_request_buffer_len)
-    self.lookahead_frames = int(JERK_LOOKAHEAD_SECONDS / self.dt)
-    self.jerk_filter = FirstOrderFilter(0.0, 1 / (2 * np.pi * LP_FILTER_CUTOFF_HZ), self.dt)
-    self.previous_measurement = 0.0
-    self.measurement_rate_filter = FirstOrderFilter(0.0, 1 / (2 * np.pi * (MAX_LAT_JERK_UP - 0.5)), self.dt)
-    self.low_speed_reset_threshold = max(CP.minSteerSpeed, MIN_LATERAL_CONTROL_SPEED)
-    self.debug_counter = 0
-    self.prev_desired_lateral_accel = 0.0
-
-    self.is_bolt = CP.carFingerprint in BOLT_CARS
-    self.torque_ff_scale_pos = 1.0
-    self.torque_ff_scale_neg = 1.0
-    self.torque_deadzone_boost_neg = 0.0
-    self.torque_ki_mult = 1.0
-    if self.is_bolt:
-      self.torque_ff_scale_pos = float(self.torque_params.kp)
-      self.torque_ff_scale_neg = float(self.torque_params.ki)
-      self.torque_ki_mult = float(self.torque_params.kd)
-      self.torque_deadzone_boost_neg = float(getattr(self.torque_params, "kfDEPRECATED", 0.0))
-      if self.torque_ki_mult > 0.0 and self.torque_ki_mult != 1.0:
-        self.pid._k_i = [self.pid._k_i[0], [k * self.torque_ki_mult for k in self.pid._k_i[1]]]
 
   def update_live_torque_params(self, latAccelFactor, latAccelOffset, friction):
     self.torque_params.latAccelFactor = latAccelFactor
@@ -89,68 +46,46 @@ class LatControlTorque(LatControl):
 
   def update(self, active, CS, VM, params, steer_limited_by_safety, desired_curvature, curvature_limited, lat_delay, llk, model_data, frogpilot_toggles):
     pid_log = log.ControlsState.LateralTorqueState.new_message()
-    pid_log.version = VERSION
     if not active:
       output_torque = 0.0
       pid_log.active = False
       self.pid.reset()
-      self.previous_measurement = 0.0
-      self.measurement_rate_filter.x = 0.0
-      self.lat_accel_request_buffer = deque([0.] * self.lat_accel_request_buffer_len , maxlen=self.lat_accel_request_buffer_len)
-      self.prev_desired_lateral_accel = 0.0
     else:
-      measured_curvature = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - params.angleOffsetDeg), CS.vEgo, params.roll)
+      actual_curvature = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - params.angleOffsetDeg), CS.vEgo, params.roll)
       roll_compensation = params.roll * ACCELERATION_DUE_TO_GRAVITY
       curvature_deadzone = abs(VM.calc_curvature(math.radians(self.steering_angle_deadzone_deg), CS.vEgo, 0.0))
+
+      desired_lateral_accel = desired_curvature * CS.vEgo ** 2
+      actual_lateral_accel = actual_curvature * CS.vEgo ** 2
       lateral_accel_deadzone = curvature_deadzone * CS.vEgo ** 2
 
-      delay_frames = int(np.clip(lat_delay / self.dt, 1, self.lat_accel_request_buffer_len))
-      expected_lateral_accel = self.lat_accel_request_buffer[-delay_frames]
-      future_desired_lateral_accel = desired_curvature * CS.vEgo ** 2
-      self.lat_accel_request_buffer.append(future_desired_lateral_accel)
-      raw_lateral_jerk = (future_desired_lateral_accel - expected_lateral_accel) / max(lat_delay, self.dt)
-      raw_lateral_jerk = np.clip(raw_lateral_jerk, -MAX_LAT_JERK_UP, MAX_LAT_JERK_UP)
-      desired_lateral_jerk = np.clip(self.jerk_filter.update(raw_lateral_jerk), -MAX_LAT_JERK_UP, MAX_LAT_JERK_UP)
-      gravity_adjusted_future_lateral_accel = future_desired_lateral_accel - roll_compensation
-      setpoint = expected_lateral_accel + desired_lateral_jerk * lat_delay
-      desired_lateral_accel_rate = (setpoint - self.prev_desired_lateral_accel) / self.dt
-      unwind_detected = (desired_lateral_accel_rate < UNWIND_D_DES_THRESHOLD and
-                         abs(setpoint) < UNWIND_LAT_ACCEL_NEAR_ZERO)
-      self.prev_desired_lateral_accel = setpoint
+      low_speed_factor = np.interp(CS.vEgo, LOW_SPEED_X, LOW_SPEED_Y)**2
+      setpoint = desired_lateral_accel + low_speed_factor * desired_curvature
+      measurement = actual_lateral_accel + low_speed_factor * actual_curvature
+      gravity_adjusted_lateral_accel = desired_lateral_accel - roll_compensation
 
-      measurement = measured_curvature * CS.vEgo ** 2
-      measurement_rate = self.measurement_rate_filter.update((measurement - self.previous_measurement) / self.dt)
-      measurement_rate = np.clip(measurement_rate, -MAX_LAT_JERK_UP, MAX_LAT_JERK_UP)
-      self.previous_measurement = measurement
+      # Backport more aggressive centering from upstream OP
+      accel_error = desired_lateral_accel - actual_lateral_accel
 
-      low_speed_factor = (np.interp(CS.vEgo, LOW_SPEED_X, LOW_SPEED_Y) / max(CS.vEgo, MIN_SPEED)) ** 2
-      current_kp = np.interp(CS.vEgo, self.pid._k_p[0], self.pid._k_p[1])
-      error = setpoint - measurement
-      error_with_lsf = error * (1 + low_speed_factor / max(current_kp, 1e-3))
+      CENTERING_GAIN_BP = [0, 10, 20, 30]  # m/s breakpoints
+      CENTERING_GAIN_V = [0.15, 0.12, 0.08, 0.05]  # correction gains
+      centering_gain = np.interp(CS.vEgo, CENTERING_GAIN_BP, CENTERING_GAIN_V)
+      lane_centering_correction = centering_gain * accel_error
 
       # do error correction in lateral acceleration space, convert at end to handle non-linear torque responses correctly
-      pid_log.error = float(error_with_lsf)
-      ff = gravity_adjusted_future_lateral_accel
+      # Apply centering correction to standard error
+      pid_log.error = float(setpoint - measurement + lane_centering_correction)
+
+      ff = gravity_adjusted_lateral_accel
       # latAccelOffset corrects roll compensation bias from device roll misalignment relative to car roll
       ff -= self.torque_params.latAccelOffset
-      ff_scale = 1.0
-      if self.is_bolt:
-        ff_scale = np.interp(ff, [-FF_SCALE_BLEND_LAT_ACCEL, 0.0, FF_SCALE_BLEND_LAT_ACCEL],
-                             [self.torque_ff_scale_neg, 1.0, self.torque_ff_scale_pos])
-        ff *= ff_scale
-      ff += get_friction(error_with_lsf + JERK_GAIN * desired_lateral_jerk, lateral_accel_deadzone, get_friction_threshold(CS.vEgo), self.torque_params)
-      deadzone_boost_active = False
-      if self.is_bolt and self.torque_deadzone_boost_neg > 0.0 and gravity_adjusted_future_lateral_accel < 0.0:
-        if abs(gravity_adjusted_future_lateral_accel) < DEADZONE_BOOST_LAT_ACCEL:
-          boost_scale = np.interp(abs(gravity_adjusted_future_lateral_accel), [0.0, DEADZONE_BOOST_LAT_ACCEL], [1.0, 0.0])
-          ff -= self.torque_deadzone_boost_neg * boost_scale
-          deadzone_boost_active = True
+      ff += get_friction(desired_lateral_accel - actual_lateral_accel, lateral_accel_deadzone, FRICTION_THRESHOLD, self.torque_params)
 
-      if CS.vEgo < self.low_speed_reset_threshold:
-        self.pid.reset()
-      freeze_integrator = (steer_limited_by_safety or CS.steeringPressed or
-                           CS.vEgo < self.low_speed_reset_threshold or unwind_detected)
-      output_lataccel = self.pid.update(pid_log.error, error_rate=-measurement_rate, speed=CS.vEgo, feedforward=ff, freeze_integrator=freeze_integrator)
+      freeze_integrator = steer_limited_by_safety or CS.steeringPressed or CS.vEgo < 5
+      output_lataccel = self.pid.update(pid_log.error,
+                                      feedforward=ff,
+                                      speed=CS.vEgo,
+                                      freeze_integrator=freeze_integrator)
       output_torque = self.torque_from_lateral_accel(output_lataccel, self.torque_params)
 
       pid_log.active = True
@@ -159,16 +94,9 @@ class LatControlTorque(LatControl):
       pid_log.d = float(self.pid.d)
       pid_log.f = float(self.pid.f)
       pid_log.output = float(-output_torque)  # TODO: log lat accel?
-      pid_log.actualLateralAccel = float(measurement)
-      pid_log.desiredLateralAccel = float(setpoint)
-      pid_log.desiredLateralJerk = float(desired_lateral_jerk)
+      pid_log.actualLateralAccel = float(actual_lateral_accel)
+      pid_log.desiredLateralAccel = float(desired_lateral_accel)
       pid_log.saturated = bool(self._check_saturation(self.steer_max - abs(output_torque) < 1e-3, CS, steer_limited_by_safety, curvature_limited))
-
-      if DEBUG_TORQUE_TUNE and self.is_bolt:
-        self.debug_counter += 1
-        if self.debug_counter % 50 == 0:
-          print(f"bolt_torque ff_scale={ff_scale:.3f} pos={self.torque_ff_scale_pos:.3f} "
-                f"neg={self.torque_ff_scale_neg:.3f} deadzone_boost_active={deadzone_boost_active}")
 
     # TODO left is positive in this convention
     return -output_torque, 0.0, pid_log
