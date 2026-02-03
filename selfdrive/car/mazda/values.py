@@ -67,10 +67,9 @@ GEN2_LONG_TUNING = {
 # CX-30:   A=4.68689,  B=0.79999, C=0.18244
 GEN2_LATERAL_TUNING = {
   MazdaFlags.GEN2: Gen2LateralParams(
-    # Baseline: Mazda 3 constant values (no speed variation yet)
-    a_coeffs = [15.38616, 0.0, 0.0],  # sigmoid steepness: A(v) = 15.38616
-    b_coeffs = [0.71899, 0.0, 0.0],   # sigmoid scale: B(v) = 0.71899
-    c_coeffs = [0.15015, 0.0, 0.0],   # linear gain: C(v) = 0.15015
+    a_coeffs = [18.46222141, -1.72212371, 0.03896959],  # sigmoid steepness
+    b_coeffs = [0.92858174, 0.01045407, 0.00035895],    # sigmoid scale
+    c_coeffs = [-0.04830432, 0.01281163, -0.00037414], # linear gain
   )
 }
 
