@@ -841,11 +841,11 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(
         }
         if (param == "TrafficFollow") {
           longitudinalToggle = new FrogPilotParamValueControl(
-              param, title, desc, icon, 0.5, 3, QString(), followTimeLabels,
+              param, title, desc, icon, 0, 3, QString(), followTimeLabels,
               0.01, true);
         } else {
           longitudinalToggle = new FrogPilotParamValueControl(
-              param, title, desc, icon, 1, 3, QString(), followTimeLabels, 0.01,
+              param, title, desc, icon, 0, 3, QString(), followTimeLabels, 0.01,
               true);
         }
       } else {
