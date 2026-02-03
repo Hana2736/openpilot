@@ -69,10 +69,10 @@ GEN2_LONG_TUNING = {
 GEN2_LATERAL_TUNING = {
   MazdaFlags.GEN2: Gen2LateralParams(
     # From 220-log regression (bin centers)
-    speed_bp = [5.0, 9.5, 15.0, 21.5, 30.0],
-    a_vals = [13.21, 1.10, 2.71, 1.02, 1.12],  # sigmoid steepness
-    b_vals = [0.90, 1.37, 0.75, 1.55, 1.52],   # sigmoid scale
-    c_vals = [0.05, 0.05, 0.12, 0.05, 0.05],   # linear gain (clamped min 0.05)
+    speed_bp = [5.0, 9.5, 21.5, 30.0],
+    a_vals = [13.21, 1.10, 1.02, 1.12],  # sigmoid steepness
+    b_vals = [0.90, 1.37, 1.55, 1.52],   # sigmoid scale
+    c_vals = [0.05, 0.05, 0.05, 0.05],   # linear gain (clamped min 0.05)
   )
 }
 
