@@ -27,13 +27,9 @@ class CarInterface(CarInterfaceBase):
     p = GEN2_LATERAL_TUNING.get(MazdaFlags.GEN2)
     if p is None:
       return 5.0, 0.8, 0.15  # defaults
-    a = p.a_coeffs[0] + p.a_coeffs[1]*v_ego + p.a_coeffs[2]*v_ego**2
-    b = p.b_coeffs[0] + p.b_coeffs[1]*v_ego + p.b_coeffs[2]*v_ego**2
-    c = p.c_coeffs[0] + p.c_coeffs[1]*v_ego + p.c_coeffs[2]*v_ego**2
-    # Clamp to reasonable ranges
-    a = float(np.clip(a, 1.0, 35.0))
-    b = float(np.clip(b, 0.3, 3.0))
-    c = float(np.clip(c, 0.05, 1.0))
+    a = float(np.interp(v_ego, p.speed_bp, p.a_vals))
+    b = float(np.interp(v_ego, p.speed_bp, p.b_vals))
+    c = float(np.interp(v_ego, p.speed_bp, p.c_vals))
     return a, b, c
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:

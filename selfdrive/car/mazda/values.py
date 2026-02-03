@@ -26,11 +26,12 @@ class Gen2LongitudinalParams:
 
 @dataclass
 class Gen2LateralParams:
-  # Polynomial coefficients for speed-varying sigmoid+linear torque model
-  # f(v) = c0 + c1*v + c2*v^2
-  a_coeffs: list[float]  # sigmoid steepness
-  b_coeffs: list[float]  # sigmoid scale
-  c_coeffs: list[float]  # linear gain
+  # Interpolation tables for speed-varying sigmoid+linear torque model
+  # torque = sigmoid(A * lat_accel) * B + lat_accel * C
+  speed_bp: list[float]  # speed breakpoints (m/s)
+  a_vals: list[float]    # sigmoid steepness at each BP
+  b_vals: list[float]    # sigmoid scale at each BP
+  c_vals: list[float]    # linear gain at each BP
 
 class MazdaFlags(IntFlag):
   # Static flags
@@ -67,9 +68,11 @@ GEN2_LONG_TUNING = {
 # CX-30:   A=4.68689,  B=0.79999, C=0.18244
 GEN2_LATERAL_TUNING = {
   MazdaFlags.GEN2: Gen2LateralParams(
-    a_coeffs = [18.46222141, -1.72212371, 0.03896959],  # sigmoid steepness
-    b_coeffs = [0.92858174, 0.01045407, 0.00035895],    # sigmoid scale
-    c_coeffs = [-0.04830432, 0.01281163, -0.00037414], # linear gain
+    # From 220-log regression (bin centers)
+    speed_bp = [5.0, 9.5, 15.0, 21.5, 30.0],
+    a_vals = [13.21, 1.10, 2.71, 1.02, 1.12],  # sigmoid steepness
+    b_vals = [0.90, 1.37, 0.75, 1.55, 1.52],   # sigmoid scale
+    c_vals = [0.05, 0.05, 0.12, 0.05, 0.05],   # linear gain (clamped min 0.05)
   )
 }
 
