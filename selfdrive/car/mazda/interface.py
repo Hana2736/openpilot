@@ -31,9 +31,9 @@ class CarInterface(CarInterfaceBase):
     b = p.b_coeffs[0] + p.b_coeffs[1]*v_ego + p.b_coeffs[2]*v_ego**2
     c = p.c_coeffs[0] + p.c_coeffs[1]*v_ego + p.c_coeffs[2]*v_ego**2
     # Clamp to reasonable ranges
-    a = float(np.clip(a, 1.0, 30.0))
-    b = float(np.clip(b, 0.3, 1.5))
-    c = float(np.clip(c, 0.05, 0.5))
+    a = float(np.clip(a, 1.0, 35.0))
+    b = float(np.clip(b, 0.3, 3.0))
+    c = float(np.clip(c, 0.05, 1.0))
     return a, b, c
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
