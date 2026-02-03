@@ -23,6 +23,15 @@ class Gen2LongitudinalParams:
   coast_intercept: float
   handoff_deadzone: float
 
+
+@dataclass
+class Gen2LateralParams:
+  # Polynomial coefficients for speed-varying sigmoid+linear torque model
+  # f(v) = c0 + c1*v + c2*v^2
+  a_coeffs: list[float]  # sigmoid steepness
+  b_coeffs: list[float]  # sigmoid scale
+  c_coeffs: list[float]  # linear gain
+
 class MazdaFlags(IntFlag):
   # Static flags
   # Gen 1 hardware: same CAN messages and same camera
@@ -46,6 +55,22 @@ GEN2_LONG_TUNING = {
     brake_coeffs = [76.1231051987, 8.1618335229, -22.5864472514, 1.6621808333, -0.1382510802],
     brake_intercept = 1866.3749987792,
     handoff_deadzone = 0.05
+  )
+}
+
+# Lateral tuning: speed-varying sigmoid+linear torque model
+# torque = sigmoid(A(v) * lat_accel) * B(v) + lat_accel * C(v)
+# where A(v) = a0 + a1*v + a2*v^2, etc.
+# Run perform_lateral_regression.py to generate speed-varying coefficients from rlogs
+#
+# MAZDA_3: A=15.38616, B=0.71899, C=0.15015
+# CX-30:   A=4.68689,  B=0.79999, C=0.18244
+GEN2_LATERAL_TUNING = {
+  MazdaFlags.GEN2: Gen2LateralParams(
+    # Baseline: Mazda 3 constant values (no speed variation yet)
+    a_coeffs = [15.38616, 0.0, 0.0],  # sigmoid steepness: A(v) = 15.38616
+    b_coeffs = [0.71899, 0.0, 0.0],   # sigmoid scale: B(v) = 0.71899
+    c_coeffs = [0.15015, 0.0, 0.0],   # linear gain: C(v) = 0.15015
   )
 }
 
@@ -76,9 +101,11 @@ class CarControllerParams:
       self.STEER_DRIVER_MULTIPLIER = 5      # weight driver torque
       self.STEER_DRIVER_FACTOR = 1           # from dbc
       self.STEER_ERROR_MAX = 3500            # max delta between torque cmd and torque motor
-      
+
       # Load longitudinal tuning
-      self.long_params = GEN2_LONG_TUNING.get(MazdaFlags.GEN2) # Default to generic Gen2
+      self.long_params = GEN2_LONG_TUNING.get(MazdaFlags.GEN2)
+      # Load lateral tuning (speed-varying ABC coeffs)
+      self.lateral_params = GEN2_LATERAL_TUNING.get(MazdaFlags.GEN2)
 
 class TI_STATE:
   DISCOVER = 0

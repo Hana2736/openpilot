@@ -5,7 +5,7 @@ import numpy as np
 from cereal import car, custom
 from panda import Panda
 from openpilot.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.mazda.values import CAR, LKAS_LIMITS, MazdaFlags, GEN1, GEN2
+from openpilot.selfdrive.car.mazda.values import CAR, LKAS_LIMITS, MazdaFlags, GEN1, GEN2, GEN2_LATERAL_TUNING
 from openpilot.selfdrive.car import create_button_events, get_safety_config
 from openpilot.selfdrive.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, LateralAccelFromTorqueCallbackType
 from openpilot.common.params import Params
@@ -14,49 +14,54 @@ ButtonType = car.CarState.ButtonEvent.Type
 FrogPilotButtonType = custom.FrogPilotCarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
 
-NON_LINEAR_TORQUE_PARAMS = {
-  CAR.MAZDA_3_2019: (15.38616, 0.71899, 0.15015, 0.37999), # shit values
-  CAR.MAZDA_CX_30: (4.68689, 0.79999, 0.18244, 0.38763),
-  CAR.MAZDA_CX_50: (4.68689, 0.79999, 0.18244, 0.38763)
-}
+# Set to True to use speed-varying sigmoid+linear torque model
+USE_SPEED_VARYING_LATERAL = True
+
 
 class CarInterface(CarInterfaceBase):
+  # Mutable container for current speed - updated in _update(), read by torque callback
+  _v_ego = [0.0]
 
-  def get_lataccel_torque_siglin(self) -> float:
-
-    def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
-      # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
-      # An important thing to consider is that the slope at 0 should be > 0 (ideally >1)
-      # This has big effect on the stability about 0 (noise when going straight)
-      non_linear_torque_params = NON_LINEAR_TORQUE_PARAMS.get(self.CP.carFingerprint)
-      assert non_linear_torque_params, "The params are not defined"
-      a, b, c, _ = non_linear_torque_params
-      sig_input = a * lateral_acceleration
-      sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
-      steer_torque = (sig * b) + (lateral_acceleration * c)
-      return float(steer_torque)
-
-    lataccel_values = np.arange(-8.0, 8.0, 0.01)
-    torque_values = [torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
-    assert min(torque_values) < -1 and max(torque_values) > 1, "The torque values should cover the range [-1, 1]"
-    return torque_values, lataccel_values
+  def get_abc_for_speed(self, v_ego: float) -> tuple[float, float, float]:
+    """Get speed-varying A, B, C params for sigmoid+linear torque model."""
+    p = GEN2_LATERAL_TUNING.get(MazdaFlags.GEN2)
+    if p is None:
+      return 5.0, 0.8, 0.15  # defaults
+    a = p.a_coeffs[0] + p.a_coeffs[1]*v_ego + p.a_coeffs[2]*v_ego**2
+    b = p.b_coeffs[0] + p.b_coeffs[1]*v_ego + p.b_coeffs[2]*v_ego**2
+    c = p.c_coeffs[0] + p.c_coeffs[1]*v_ego + p.c_coeffs[2]*v_ego**2
+    # Clamp to reasonable ranges
+    a = float(np.clip(a, 1.0, 30.0))
+    b = float(np.clip(b, 0.3, 1.5))
+    c = float(np.clip(c, 0.05, 0.5))
+    return a, b, c
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
-    if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
-      torque_values, lataccel_values = self.get_lataccel_torque_siglin()
-
+    if USE_SPEED_VARYING_LATERAL and self.CP.carFingerprint in GEN2:
       def torque_from_lateral_accel_siglin(lateral_acceleration: float, torque_params: car.CarParams.LateralTorqueTuning):
-        return np.interp(lateral_acceleration, lataccel_values, torque_values)
+        v_ego = CarInterface._v_ego[0]
+        a, b, c = self.get_abc_for_speed(v_ego)
+        sig_input = a * lateral_acceleration
+        sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
+        steer_torque = (sig * b) + (lateral_acceleration * c)
+        return float(steer_torque)
       return torque_from_lateral_accel_siglin
     else:
       return self.torque_from_lateral_accel_linear
 
   def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
-    if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
-      torque_values, lataccel_values = self.get_lataccel_torque_siglin()
-
+    if USE_SPEED_VARYING_LATERAL and self.CP.carFingerprint in GEN2:
       def lateral_accel_from_torque_siglin(torque: float, torque_params: car.CarParams.LateralTorqueTuning):
-        return np.interp(torque, torque_values, lataccel_values)
+        v_ego = CarInterface._v_ego[0]
+        a, b, c = self.get_abc_for_speed(v_ego)
+        # Numerical inverse - build lookup for current speed
+        lataccel_values = np.arange(-8.0, 8.0, 0.01)
+        torque_values = []
+        for la in lataccel_values:
+          sig_input = a * la
+          sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
+          torque_values.append((sig * b) + (la * c))
+        return float(np.interp(torque, torque_values, lataccel_values))
       return lateral_accel_from_torque_siglin
     else:
       return self.lateral_accel_from_torque_linear
@@ -118,7 +123,6 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.8
 
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-    ret.lateralTuning.torque.kp = 1.0  # Match hanapilot tuning
 
     if candidate not in (CAR.MAZDA_CX5_2022, CAR.MAZDA_3_2019, CAR.MAZDA_CX_30, CAR.MAZDA_CX_50) and not ret.flags & MazdaFlags.TORQUE_INTERCEPTOR:
       ret.minSteerSpeed = LKAS_LIMITS.DISABLE_SPEED * CV.KPH_TO_MS
@@ -130,6 +134,10 @@ class CarInterface(CarInterfaceBase):
   # returns a car.CarState
   def _update(self, c, frogpilot_toggles):
     ret, fp_ret = self.CS.update(self.cp, self.cp_cam, self.cp_body, frogpilot_toggles)
+
+    # Update speed for lateral torque callback
+    CarInterface._v_ego[0] = ret.vEgo
+
      # TODO: add button types for inc and dec
     ret.buttonEvents = [
       *create_button_events(self.CS.distance_button, self.CS.prev_distance_button, {1: ButtonType.gapAdjustCruise}),
