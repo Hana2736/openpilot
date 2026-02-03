@@ -52,11 +52,9 @@ class CarInterface(CarInterfaceBase):
         a, b, c = self.get_abc_for_speed(v_ego)
         # Numerical inverse - build lookup for current speed
         lataccel_values = np.arange(-8.0, 8.0, 0.01)
-        torque_values = []
-        for la in lataccel_values:
-          sig_input = a * la
-          sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
-          torque_values.append((sig * b) + (la * c))
+        sig_input = a * lataccel_values
+        sig = np.sign(sig_input) * (1 / (1 + np.exp(-np.abs(sig_input))) - 0.5)
+        torque_values = (sig * b) + (lataccel_values * c)
         return float(np.interp(torque, torque_values, lataccel_values))
       return lateral_accel_from_torque_siglin
     else:
