@@ -5,7 +5,7 @@ import numpy as np
 from cereal import car, custom
 from panda import Panda
 from openpilot.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.mazda.values import CAR, LKAS_LIMITS, MazdaFlags, GEN1, GEN2, GEN2_LATERAL_TUNING
+from openpilot.selfdrive.car.mazda.values import CAR, LKAS_LIMITS, MazdaFlags, GEN1, GEN2
 from openpilot.selfdrive.car import create_button_events, get_safety_config
 from openpilot.selfdrive.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, LateralAccelFromTorqueCallbackType
 from openpilot.common.params import Params
@@ -14,47 +14,47 @@ ButtonType = car.CarState.ButtonEvent.Type
 FrogPilotButtonType = custom.FrogPilotCarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
 
-# Set to True to use speed-varying sigmoid+linear torque model
-USE_SPEED_VARYING_LATERAL = True
+# Fixed sigmoid+linear torque params (A, B, C, D) from jwong tuning
+# These are car-specific and do NOT vary with speed
+NON_LINEAR_TORQUE_PARAMS = {
+  CAR.MAZDA_3_2019: (15.38616, 0.71899, 0.15015, 0.37999),
+  CAR.MAZDA_CX_30: (4.68689, 0.79999, 0.18244, 0.38763),
+  CAR.MAZDA_CX_50: (4.68689, 0.79999, 0.18244, 0.38763),
+}
 
 
 class CarInterface(CarInterfaceBase):
-  # Mutable container for current speed - updated in _update(), read by torque callback
-  _v_ego = [0.0]
 
-  def get_abc_for_speed(self, v_ego: float) -> tuple[float, float, float]:
-    """Get speed-varying A, B, C params for sigmoid+linear torque model."""
-    p = GEN2_LATERAL_TUNING.get(MazdaFlags.GEN2)
-    if p is None:
-      return 5.0, 0.8, 0.15  # defaults
-    a = float(np.interp(v_ego, p.speed_bp, p.a_vals))
-    b = float(np.interp(v_ego, p.speed_bp, p.b_vals))
-    c = float(np.interp(v_ego, p.speed_bp, p.c_vals))
-    return a, b, c
+  def _get_lataccel_torque_siglin(self):
+    """Precompute sigmoid+linear lookup table for this car's ABCD params."""
+    def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
+      non_linear_torque_params = NON_LINEAR_TORQUE_PARAMS.get(self.CP.carFingerprint)
+      assert non_linear_torque_params, "Torque params not defined for this car"
+      a, b, c, _ = non_linear_torque_params
+      sig_input = a * lateral_acceleration
+      sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
+      steer_torque = (sig * b) + (lateral_acceleration * c)
+      return float(steer_torque)
+
+    lataccel_values = np.arange(-8.0, 8.0, 0.01)
+    torque_values = [torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
+    return torque_values, lataccel_values
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
-    if USE_SPEED_VARYING_LATERAL and self.CP.carFingerprint in GEN2:
+    if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
+      torque_values, lataccel_values = self._get_lataccel_torque_siglin()
+
       def torque_from_lateral_accel_siglin(lateral_acceleration: float, torque_params: car.CarParams.LateralTorqueTuning):
-        v_ego = CarInterface._v_ego[0]
-        a, b, c = self.get_abc_for_speed(v_ego)
-        sig_input = a * lateral_acceleration
-        sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
-        steer_torque = (sig * b) + (lateral_acceleration * c)
-        return float(steer_torque)
+        return float(np.interp(lateral_acceleration, lataccel_values, torque_values))
       return torque_from_lateral_accel_siglin
     else:
       return self.torque_from_lateral_accel_linear
 
   def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
-    if USE_SPEED_VARYING_LATERAL and self.CP.carFingerprint in GEN2:
+    if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
+      torque_values, lataccel_values = self._get_lataccel_torque_siglin()
+
       def lateral_accel_from_torque_siglin(torque: float, torque_params: car.CarParams.LateralTorqueTuning):
-        v_ego = CarInterface._v_ego[0]
-        a, b, c = self.get_abc_for_speed(v_ego)
-        # Numerical inverse - build lookup for current speed
-        lataccel_values = np.arange(-8.0, 8.0, 0.01)
-        sig_input = a * lataccel_values
-        sig = np.sign(sig_input) * (1 / (1 + np.exp(-np.abs(sig_input))) - 0.5)
-        torque_values = (sig * b) + (lataccel_values * c)
         return float(np.interp(torque, torque_values, lataccel_values))
       return lateral_accel_from_torque_siglin
     else:
@@ -128,9 +128,6 @@ class CarInterface(CarInterfaceBase):
   # returns a car.CarState
   def _update(self, c, frogpilot_toggles):
     ret, fp_ret = self.CS.update(self.cp, self.cp_cam, self.cp_body, frogpilot_toggles)
-
-    # Update speed for lateral torque callback
-    CarInterface._v_ego[0] = ret.vEgo
 
      # TODO: add button types for inc and dec
     ret.buttonEvents = [
