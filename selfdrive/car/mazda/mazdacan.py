@@ -228,7 +228,7 @@ def create_radar_command(packer, frame, active, CS, hold):
   return ret
 
 # GEN2 new mazdas
-def create_acc_cmd(self, packer, values, hold, resume):
+def create_acc_cmd(packer, values, hold, resume):
   msg_name = "ACC"
   bus = 2
 

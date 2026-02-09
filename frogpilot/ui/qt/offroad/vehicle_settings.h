@@ -27,6 +27,7 @@ private:
   bool isGM;
   bool isHKG;
   bool isHKGCanFd;
+  bool isMazda;
   bool isToyota;
   bool isVolt;
   bool openpilotLongitudinalControlDisabled;
@@ -39,6 +40,7 @@ private:
   QSet<QString> gmKeys = {"ExperimentalGMTune", "LongPitch", "VoltSNG"};
   QSet<QString> hkgKeys = {"NewLongAPI", "TacoTuneHacks"};
   QSet<QString> longitudinalKeys = {"ExperimentalGMTune", "FrogsGoMoosTweak", "LongPitch", "NewLongAPI", "SNGHack", "VoltSNG"};
+  QSet<QString> mazdaKeys = {"BlendedACC", "TorqueInterceptorEnabled", "RadarInterceptorEnabled", "NoMRCC", "NoFSC", "ManualTransmission"};
   QSet<QString> toyotaKeys = {"ClusterOffset", "FrogsGoMoosTweak", "LockDoorsTimer", "SNGHack", "ToyotaDoors"};
   QSet<QString> vehicleInfoKeys = {"BlindSpotSupport", "HardwareDetected", "OpenpilotLongitudinal", "PedalSupport", "RadarSupport", "SDSUSupport", "SNGSupport"};
 

@@ -42,42 +42,6 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "../assets/img_experimental_white.svg",
     },
     {
-      "BlendedACC",
-      tr("Blended Acc (Experimental)"),
-      tr("Blend stock MRCC and Experimental Mode longitudinal control."),
-      "../assets/offroad/icon_openpilot.png",
-    },
-    {
-      "TorqueInterceptorEnabled",
-      tr("Torque Interceptor Installed"),
-      tr("Enable the torque interceptor to control the steering wheel."),
-      "../assets/offroad/icon_openpilot.png",
-    },
-    {
-      "RadarInterceptorEnabled",
-      tr("Radar Interceptor Installed"),
-      tr("Enable if you have installed the radar Iterceptor."),
-      "../assets/offroad/icon_openpilot.png",
-    },
-    {
-      "NoMRCC",
-      tr("Car Does not have stock MRCC"),
-      tr("Enable if your car does not have stock MRCC."),
-      "../assets/offroad/icon_openpilot.png",
-    },
-    {
-      "NoFSC",
-      tr("Car Does not have stock FSC"),
-      tr("Enable if your car does not have stock FSC."),
-      "../assets/offroad/icon_openpilot.png",
-    },
-    {
-      "ManualTransmission",
-      tr("Manual Transmission"),
-      tr("Enable if your is a manual."),
-      "../assets/offroad/icon_openpilot.png",
-    },
-    {
       "DisengageOnAccelerator",
       tr("Disengage on Accelerator Pedal"),
       tr("When enabled, pressing the accelerator pedal will disengage openpilot."),

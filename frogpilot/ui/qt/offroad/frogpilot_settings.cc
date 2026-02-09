@@ -276,6 +276,7 @@ void FrogPilotSettingsWindow::updateVariables() {
     isGM = carMake == "gm";
     isHKG = carMake == "hyundai";
     isHKGCanFd = isHKG && safetyModel == cereal::CarParams::SafetyModel::HYUNDAI_CANFD;
+    isMazda = carMake == "mazda";
     isSubaru = carMake == "subaru";
     isToyota = carMake == "toyota";
     isTSK = CP.getSecOcRequired();
