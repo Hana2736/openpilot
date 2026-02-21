@@ -91,7 +91,9 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
     {"CustomPersonalities", tr("Driving Personalities"), tr("<b>Customize the \"Driving Personalities\"</b> to better match your driving style."), "../../frogpilot/assets/toggle_icons/icon_personality.png"},
 
     {"TrafficPersonalityProfile", tr("Traffic Mode"), tr("<b>Customize the \"Traffic Mode\" personality profile.</b> Designed for stop-and-go driving."), "../../frogpilot/assets/stock_theme/distance_icons/traffic.png"},
-    {"TrafficFollow", tr("Following Distance"), tr("<b>The minimum following distance to the lead vehicle in \"Traffic Mode\".</b> openpilot blends between this value and the \"Aggressive\" profile as speed increases. Increase for more space; decrease for tighter gaps."), ""},
+    {"TrafficFollowLow", tr("Following Distance (< 30 mph)"), tr("<b>The minimum following distance to the lead vehicle in \"Traffic Mode\" when driving below 30 mph.</b> Increase for more space; decrease for tighter gaps."), ""},
+    {"TrafficFollowMid", tr("Following Distance (30-60 mph)"), tr("<b>The minimum following distance to the lead vehicle in \"Traffic Mode\" when driving between 30 and 60 mph.</b> Increase for more space; decrease for tighter gaps."), ""},
+    {"TrafficFollowHigh", tr("Following Distance (60+ mph)"), tr("<b>The minimum following distance to the lead vehicle in \"Traffic Mode\" when driving above 60 mph.</b> Increase for more space; decrease for tighter gaps."), ""},
     {"TrafficJerkAcceleration", tr("Acceleration Smoothness"), tr("<b>How smoothly openpilot accelerates in \"Traffic Mode\".</b> Increase for gentler starts; decrease for faster but more abrupt takeoffs."), ""},
     {"TrafficJerkDeceleration", tr("Braking Smoothness"), tr("<b>How smoothly openpilot brakes in \"Traffic Mode\".</b> Increase for gentler stops; decrease for quicker but sharper braking."), ""},
     {"TrafficJerkDanger", tr("Safety Gap Bias"), tr("<b>How much extra space openpilot keeps from the vehicle ahead in \"Traffic Mode\".</b> Increase for larger gaps and more cautious following; decrease for tighter gaps and closer following."), ""},
@@ -100,7 +102,9 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
     {"ResetTrafficPersonality", tr("Reset to Defaults"), tr("<b>Reset \"Traffic Mode\" settings to defaults.</b>"), ""},
 
     {"AggressivePersonalityProfile", tr("Aggressive"), tr("<b>Customize the \"Aggressive\" personality profile.</b> Designed for assertive driving with tighter gaps."), "../../frogpilot/assets/stock_theme/distance_icons/aggressive.png"},
-    {"AggressiveFollow", tr("Following Distance"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Aggressive\" profile.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.25 seconds."), ""},
+    {"AggressiveFollowLow", tr("Following Distance (< 30 mph)"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Aggressive\" profile when driving below 30 mph.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.25 seconds."), ""},
+    {"AggressiveFollowMid", tr("Following Distance (30-60 mph)"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Aggressive\" profile when driving between 30 and 60 mph.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.25 seconds."), ""},
+    {"AggressiveFollowHigh", tr("Following Distance (60+ mph)"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Aggressive\" profile when driving above 60 mph.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.25 seconds."), ""},
     {"AggressiveJerkAcceleration", tr("Acceleration Smoothness"), tr("<b>How smoothly openpilot accelerates with the \"Aggressive\" profile.</b> Increase for gentler starts; decrease for faster but more abrupt takeoffs."), ""},
     {"AggressiveJerkDeceleration", tr("Braking Smoothness"), tr("<b>How smoothly openpilot brakes with the \"Aggressive\" profile.</b> Increase for gentler stops; decrease for quicker but sharper braking."), ""},
     {"AggressiveJerkDanger", tr("Safety Gap Bias"), tr("<b>How much extra space openpilot keeps from the vehicle ahead with the \"Aggressive\" profile.</b> Increase for larger gaps and more cautious following; decrease for tighter gaps and closer following."), ""},
@@ -109,7 +113,9 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
     {"ResetAggressivePersonality", tr("Reset to Defaults"), tr("<b>Reset the \"Aggressive\" profile to defaults.</b>"), ""},
 
     {"StandardPersonalityProfile", tr("Standard"), tr("<b>Customize the \"Standard\" personality profile.</b> Designed for balanced driving with moderate gaps."), "../../frogpilot/assets/stock_theme/distance_icons/standard.png"},
-    {"StandardFollow", tr("Following Distance"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Standard\" profile.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.45 seconds."), ""},
+    {"StandardFollowLow", tr("Following Distance (< 30 mph)"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Standard\" profile when driving below 30 mph.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.45 seconds."), ""},
+    {"StandardFollowMid", tr("Following Distance (30-60 mph)"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Standard\" profile when driving between 30 and 60 mph.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.45 seconds."), ""},
+    {"StandardFollowHigh", tr("Following Distance (60+ mph)"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Standard\" profile when driving above 60 mph.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.45 seconds."), ""},
     {"StandardJerkAcceleration", tr("Acceleration Smoothness"), tr("<b>How smoothly openpilot accelerates with the \"Standard\" profile.</b> Increase for gentler starts; decrease for faster but more abrupt takeoffs."), ""},
     {"StandardJerkDeceleration", tr("Braking Smoothness"), tr("<b>How smoothly openpilot brakes with the \"Standard\" profile.</b> Increase for gentler stops; decrease for quicker but sharper braking."), ""},
     {"StandardJerkDanger", tr("Safety Gap Bias"), tr("<b>How much extra space openpilot keeps from the vehicle ahead with the \"Standard\" profile.</b> Increase for larger gaps and more cautious following; decrease for tighter gaps and closer following."), ""},
@@ -118,7 +124,9 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
     {"ResetStandardPersonality", tr("Reset to Defaults"), tr("<b>Reset the \"Standard\" profile to defaults.</b>"), ""},
 
     {"RelaxedPersonalityProfile", tr("Relaxed"), tr("<b>Customize the \"Relaxed\" personality profile.</b> Designed for smoother, more comfortable driving with larger gaps."), "../../frogpilot/assets/stock_theme/distance_icons/relaxed.png"},
-    {"RelaxedFollow", tr("Following Distance"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Relaxed\" profile.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.75 seconds."), ""},
+    {"RelaxedFollowLow", tr("Following Distance (< 30 mph)"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Relaxed\" profile when driving below 30 mph.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.75 seconds."), ""},
+    {"RelaxedFollowMid", tr("Following Distance (30-60 mph)"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Relaxed\" profile when driving between 30 and 60 mph.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.75 seconds."), ""},
+    {"RelaxedFollowHigh", tr("Following Distance (60+ mph)"), tr("<b>How many seconds openpilot follows behind lead vehicles when using the \"Relaxed\" profile when driving above 60 mph.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.75 seconds."), ""},
     {"RelaxedJerkAcceleration", tr("Acceleration Smoothness"), tr("<b>How smoothly openpilot accelerates with the \"Relaxed\" profile.</b> Increase for gentler starts; decrease for faster but more abrupt takeoffs."), ""},
     {"RelaxedJerkDeceleration", tr("Braking Smoothness"), tr("<b>How smoothly openpilot brakes with the \"Relaxed\" profile.</b> Increase for gentler stops; decrease for quicker but sharper braking."), ""},
     {"RelaxedJerkDanger", tr("Safety Gap Bias"), tr("<b>How much extra space openpilot keeps from the vehicle ahead with the \"Relaxed\" profile.</b> Increase for larger gaps and more cautious following; decrease for tighter gaps and closer following."), ""},
@@ -316,7 +324,10 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
       });
       longitudinalToggle = relaxedPersonalityToggle;
     } else if (aggressivePersonalityKeys.contains(param) || standardPersonalityKeys.contains(param) || relaxedPersonalityKeys.contains(param) || trafficPersonalityKeys.contains(param)) {
-      if (param == "TrafficFollow" || param == "AggressiveFollow" || param == "StandardFollow" || param == "RelaxedFollow") {
+      if (param == "TrafficFollow" || param == "TrafficFollowLow" || param == "TrafficFollowMid" || param == "TrafficFollowHigh" ||
+          param == "AggressiveFollow" || param == "AggressiveFollowLow" || param == "AggressiveFollowMid" || param == "AggressiveFollowHigh" ||
+          param == "StandardFollow" || param == "StandardFollowLow" || param == "StandardFollowMid" || param == "StandardFollowHigh" ||
+          param == "RelaxedFollow" || param == "RelaxedFollowLow" || param == "RelaxedFollowMid" || param == "RelaxedFollowHigh") {
         std::map<float, QString> followTimeLabels;
         for (float i = 0; i <= 3; i += 0.01) {
           followTimeLabels[i] = std::lround(i / 0.01) == 1 / 0.01 ? QString::number(i, 'f', 2) + tr(" second") : QString::number(i, 'f', 2) + tr(" seconds");
@@ -533,7 +544,9 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
     QObject::connect(static_cast<ToggleControl*>(toggles[key]), &ToggleControl::toggleFlipped, this, &FrogPilotLongitudinalPanel::updateToggles);
   }
 
-  FrogPilotParamValueControl *trafficFollowToggle = static_cast<FrogPilotParamValueControl*>(toggles["TrafficFollow"]);
+  FrogPilotParamValueControl *trafficFollowLowToggle = static_cast<FrogPilotParamValueControl*>(toggles["TrafficFollowLow"]);
+  FrogPilotParamValueControl *trafficFollowMidToggle = static_cast<FrogPilotParamValueControl*>(toggles["TrafficFollowMid"]);
+  FrogPilotParamValueControl *trafficFollowHighToggle = static_cast<FrogPilotParamValueControl*>(toggles["TrafficFollowHigh"]);
   FrogPilotParamValueControl *trafficAccelerationToggle = static_cast<FrogPilotParamValueControl*>(toggles["TrafficJerkAcceleration"]);
   FrogPilotParamValueControl *trafficDecelerationToggle = static_cast<FrogPilotParamValueControl*>(toggles["TrafficJerkDeceleration"]);
   FrogPilotParamValueControl *trafficDangerToggle = static_cast<FrogPilotParamValueControl*>(toggles["TrafficJerkDanger"]);
@@ -542,14 +555,18 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
   FrogPilotButtonsControl *trafficResetButton = static_cast<FrogPilotButtonsControl*>(toggles["ResetTrafficPersonality"]);
   QObject::connect(trafficResetButton, &FrogPilotButtonsControl::buttonClicked, [=]() {
     if (FrogPilotConfirmationDialog::yesorno(tr("Are you sure you want to completely reset your settings for <b>Traffic Mode</b>?"), this)) {
-      params.putFloat("TrafficFollow", params_default.getFloat("TrafficFollow"));
+      params.putFloat("TrafficFollowLow", params_default.getFloat("TrafficFollowLow"));
+      params.putFloat("TrafficFollowMid", params_default.getFloat("TrafficFollowMid"));
+      params.putFloat("TrafficFollowHigh", params_default.getFloat("TrafficFollowHigh"));
       params.putFloat("TrafficJerkAcceleration", params_default.getFloat("TrafficJerkAcceleration"));
       params.putFloat("TrafficJerkDeceleration", params_default.getFloat("TrafficJerkDeceleration"));
       params.putFloat("TrafficJerkDanger", params_default.getFloat("TrafficJerkDanger"));
       params.putFloat("TrafficJerkSpeed", params_default.getFloat("TrafficJerkSpeed"));
       params.putFloat("TrafficJerkSpeedDecrease", params_default.getFloat("TrafficJerkSpeedDecrease"));
 
-      trafficFollowToggle->refresh();
+      trafficFollowLowToggle->refresh();
+      trafficFollowMidToggle->refresh();
+      trafficFollowHighToggle->refresh();
       trafficAccelerationToggle->refresh();
       trafficDecelerationToggle->refresh();
       trafficDangerToggle->refresh();
@@ -558,7 +575,9 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
     }
   });
 
-  FrogPilotParamValueControl *aggressiveFollowToggle = static_cast<FrogPilotParamValueControl*>(toggles["AggressiveFollow"]);
+  FrogPilotParamValueControl *aggressiveFollowLowToggle = static_cast<FrogPilotParamValueControl*>(toggles["AggressiveFollowLow"]);
+  FrogPilotParamValueControl *aggressiveFollowMidToggle = static_cast<FrogPilotParamValueControl*>(toggles["AggressiveFollowMid"]);
+  FrogPilotParamValueControl *aggressiveFollowHighToggle = static_cast<FrogPilotParamValueControl*>(toggles["AggressiveFollowHigh"]);
   FrogPilotParamValueControl *aggressiveAccelerationToggle = static_cast<FrogPilotParamValueControl*>(toggles["AggressiveJerkAcceleration"]);
   FrogPilotParamValueControl *aggressiveDecelerationToggle = static_cast<FrogPilotParamValueControl*>(toggles["AggressiveJerkDeceleration"]);
   FrogPilotParamValueControl *aggressiveDangerToggle = static_cast<FrogPilotParamValueControl*>(toggles["AggressiveJerkDanger"]);
@@ -567,14 +586,18 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
   FrogPilotButtonsControl *aggressiveResetButton = static_cast<FrogPilotButtonsControl*>(toggles["ResetAggressivePersonality"]);
   QObject::connect(aggressiveResetButton, &FrogPilotButtonsControl::buttonClicked, [=]() {
     if (FrogPilotConfirmationDialog::yesorno(tr("Are you sure you want to completely reset your settings for the <b>Aggressive</b> personality?"), this)) {
-      params.putFloat("AggressiveFollow", params_default.getFloat("AggressiveFollow"));
+      params.putFloat("AggressiveFollowLow", params_default.getFloat("AggressiveFollowLow"));
+      params.putFloat("AggressiveFollowMid", params_default.getFloat("AggressiveFollowMid"));
+      params.putFloat("AggressiveFollowHigh", params_default.getFloat("AggressiveFollowHigh"));
       params.putFloat("AggressiveJerkAcceleration", params_default.getFloat("AggressiveJerkAcceleration"));
       params.putFloat("AggressiveJerkDeceleration", params_default.getFloat("AggressiveJerkDeceleration"));
       params.putFloat("AggressiveJerkDanger", params_default.getFloat("AggressiveJerkDanger"));
       params.putFloat("AggressiveJerkSpeed", params_default.getFloat("AggressiveJerkSpeed"));
       params.putFloat("AggressiveJerkSpeedDecrease", params_default.getFloat("AggressiveJerkSpeedDecrease"));
 
-      aggressiveFollowToggle->refresh();
+      aggressiveFollowLowToggle->refresh();
+      aggressiveFollowMidToggle->refresh();
+      aggressiveFollowHighToggle->refresh();
       aggressiveAccelerationToggle->refresh();
       aggressiveDecelerationToggle->refresh();
       aggressiveDangerToggle->refresh();
@@ -583,7 +606,9 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
     }
   });
 
-  FrogPilotParamValueControl *standardFollowToggle = static_cast<FrogPilotParamValueControl*>(toggles["StandardFollow"]);
+  FrogPilotParamValueControl *standardFollowLowToggle = static_cast<FrogPilotParamValueControl*>(toggles["StandardFollowLow"]);
+  FrogPilotParamValueControl *standardFollowMidToggle = static_cast<FrogPilotParamValueControl*>(toggles["StandardFollowMid"]);
+  FrogPilotParamValueControl *standardFollowHighToggle = static_cast<FrogPilotParamValueControl*>(toggles["StandardFollowHigh"]);
   FrogPilotParamValueControl *standardAccelerationToggle = static_cast<FrogPilotParamValueControl*>(toggles["StandardJerkAcceleration"]);
   FrogPilotParamValueControl *standardDecelerationToggle = static_cast<FrogPilotParamValueControl*>(toggles["StandardJerkDeceleration"]);
   FrogPilotParamValueControl *standardDangerToggle = static_cast<FrogPilotParamValueControl*>(toggles["StandardJerkDanger"]);
@@ -592,14 +617,18 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
   FrogPilotButtonsControl *standardResetButton = static_cast<FrogPilotButtonsControl*>(toggles["ResetStandardPersonality"]);
   QObject::connect(standardResetButton, &FrogPilotButtonsControl::buttonClicked, [=]() {
     if (FrogPilotConfirmationDialog::yesorno(tr("Are you sure you want to completely reset your settings for the <b>Standard</b> personality?"), this)) {
-      params.putFloat("StandardFollow", params_default.getFloat("StandardFollow"));
+      params.putFloat("StandardFollowLow", params_default.getFloat("StandardFollowLow"));
+      params.putFloat("StandardFollowMid", params_default.getFloat("StandardFollowMid"));
+      params.putFloat("StandardFollowHigh", params_default.getFloat("StandardFollowHigh"));
       params.putFloat("StandardJerkAcceleration", params_default.getFloat("StandardJerkAcceleration"));
       params.putFloat("StandardJerkDeceleration", params_default.getFloat("StandardJerkDeceleration"));
       params.putFloat("StandardJerkDanger", params_default.getFloat("StandardJerkDanger"));
       params.putFloat("StandardJerkSpeed", params_default.getFloat("StandardJerkSpeed"));
       params.putFloat("StandardJerkSpeedDecrease", params_default.getFloat("StandardJerkSpeedDecrease"));
 
-      standardFollowToggle->refresh();
+      standardFollowLowToggle->refresh();
+      standardFollowMidToggle->refresh();
+      standardFollowHighToggle->refresh();
       standardAccelerationToggle->refresh();
       standardDecelerationToggle->refresh();
       standardDangerToggle->refresh();
@@ -608,7 +637,9 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
     }
   });
 
-  FrogPilotParamValueControl *relaxedFollowToggle = static_cast<FrogPilotParamValueControl*>(toggles["RelaxedFollow"]);
+  FrogPilotParamValueControl *relaxedFollowLowToggle = static_cast<FrogPilotParamValueControl*>(toggles["RelaxedFollowLow"]);
+  FrogPilotParamValueControl *relaxedFollowMidToggle = static_cast<FrogPilotParamValueControl*>(toggles["RelaxedFollowMid"]);
+  FrogPilotParamValueControl *relaxedFollowHighToggle = static_cast<FrogPilotParamValueControl*>(toggles["RelaxedFollowHigh"]);
   FrogPilotParamValueControl *relaxedAccelerationToggle = static_cast<FrogPilotParamValueControl*>(toggles["RelaxedJerkAcceleration"]);
   FrogPilotParamValueControl *relaxedDecelerationToggle = static_cast<FrogPilotParamValueControl*>(toggles["RelaxedJerkDeceleration"]);
   FrogPilotParamValueControl *relaxedDangerToggle = static_cast<FrogPilotParamValueControl*>(toggles["RelaxedJerkDanger"]);
@@ -617,14 +648,18 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
   FrogPilotButtonsControl *relaxedResetButton = static_cast<FrogPilotButtonsControl*>(toggles["ResetRelaxedPersonality"]);
   QObject::connect(relaxedResetButton, &FrogPilotButtonsControl::buttonClicked, [=]() {
     if (FrogPilotConfirmationDialog::yesorno(tr("Are you sure you want to completely reset your settings for the <b>Relaxed</b> personality?"), this)) {
-      params.putFloat("RelaxedFollow", params_default.getFloat("RelaxedFollow"));
+      params.putFloat("RelaxedFollowLow", params_default.getFloat("RelaxedFollowLow"));
+      params.putFloat("RelaxedFollowMid", params_default.getFloat("RelaxedFollowMid"));
+      params.putFloat("RelaxedFollowHigh", params_default.getFloat("RelaxedFollowHigh"));
       params.putFloat("RelaxedJerkAcceleration", params_default.getFloat("RelaxedJerkAcceleration"));
       params.putFloat("RelaxedJerkDeceleration", params_default.getFloat("RelaxedJerkDeceleration"));
       params.putFloat("RelaxedJerkDanger", params_default.getFloat("RelaxedJerkDanger"));
       params.putFloat("RelaxedJerkSpeed", params_default.getFloat("RelaxedJerkSpeed"));
       params.putFloat("RelaxedJerkSpeedDecrease", params_default.getFloat("RelaxedJerkSpeedDecrease"));
 
-      relaxedFollowToggle->refresh();
+      relaxedFollowLowToggle->refresh();
+      relaxedFollowMidToggle->refresh();
+      relaxedFollowHighToggle->refresh();
       relaxedAccelerationToggle->refresh();
       relaxedDecelerationToggle->refresh();
       relaxedDangerToggle->refresh();
