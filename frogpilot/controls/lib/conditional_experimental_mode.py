@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import math
+from openpilot.common.conversions import Conversions as CV
 from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.car.interfaces import ACCEL_MIN
@@ -35,10 +36,10 @@ class ConditionalExperimentalMode:
       self.stop_light_filter.x = 0
 
   def check_conditions(self, v_ego, sm, frogpilot_toggles):
-    below_speed = not self.frogpilot_planner.frogpilot_following.following_lead and v_ego < frogpilot_toggles.conditional_limit
-    below_speed_with_lead = self.frogpilot_planner.frogpilot_following.following_lead and v_ego < frogpilot_toggles.conditional_limit_lead
+    below_speed = not self.frogpilot_planner.tracking_lead and v_ego < frogpilot_toggles.conditional_limit
+    below_speed_with_lead = self.frogpilot_planner.tracking_lead and v_ego < frogpilot_toggles.conditional_limit_lead
     if below_speed or below_speed_with_lead:
-      self.status_value = 3 if self.frogpilot_planner.frogpilot_following.following_lead else 4
+      self.status_value = 3 if self.frogpilot_planner.tracking_lead else 4
       return True
 
     desired_lane = self.frogpilot_planner.lane_width_left if sm["carState"].leftBlinker else self.frogpilot_planner.lane_width_right
@@ -48,11 +49,11 @@ class ConditionalExperimentalMode:
       return True
 
     approaching_maneuver = sm["frogpilotNavigation"].approachingIntersection or sm["frogpilotNavigation"].approachingTurn
-    if approaching_maneuver and (not self.frogpilot_planner.frogpilot_following.following_lead or frogpilot_toggles.conditional_navigation_lead) and frogpilot_toggles.conditional_navigation:
+    if approaching_maneuver and (not self.frogpilot_planner.tracking_lead or frogpilot_toggles.conditional_navigation_lead) and frogpilot_toggles.conditional_navigation:
       self.status_value = 6 if sm["frogpilotNavigation"].approachingIntersection else 7
       return True
 
-    if self.curve_detected and (not self.frogpilot_planner.frogpilot_following.following_lead or frogpilot_toggles.conditional_curves_lead) and frogpilot_toggles.conditional_curves:
+    if self.curve_detected and (not self.frogpilot_planner.tracking_lead or frogpilot_toggles.conditional_curves_lead) and frogpilot_toggles.conditional_curves:
       self.status_value = 8
       return True
 
@@ -89,7 +90,11 @@ class ConditionalExperimentalMode:
       wanted_stop_time = self.get_safe_stop_time(frogpilot_toggles.conditional_model_stop_time)
       safe_approach_dist = self.get_safe_distance(relative_speed, wanted_stop_time * (2.0/3.0))
 
-      closing_quickly = relative_speed > (CRUISING_SPEED * 0.75) # are we ~8.5ishmph faster than them?
+      if v_ego < 40 * CV.MPH_TO_MS:
+        closing_quickly = relative_speed > 0
+      else:
+        closing_quickly = relative_speed > (CRUISING_SPEED * 0.75) # are we ~8.5ishmph faster than them?
+
       close_proximity = lead_distance < safe_approach_dist
 
       slower_lead = closing_quickly and close_proximity and frogpilot_toggles.conditional_slower_lead
