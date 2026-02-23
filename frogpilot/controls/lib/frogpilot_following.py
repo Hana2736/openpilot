@@ -2,6 +2,8 @@
 import numpy as np
 
 from cereal import log
+from openpilot.common.filter_simple import FirstOrderFilter
+from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import COMFORT_BRAKE, STOP_DISTANCE, desired_follow_distance, get_jerk_factor, get_T_FOLLOW
 
 from openpilot.frogpilot.common.frogpilot_variables import CITY_SPEED_LIMIT
@@ -13,6 +15,8 @@ class FrogPilotFollowing:
   def __init__(self, FrogPilotPlanner):
     self.frogpilot_planner = FrogPilotPlanner
 
+    self.v_lead_filter = FirstOrderFilter(0, 0.33, DT_MDL)
+
     self.following_lead = False
     self.slower_lead = False
 
@@ -23,16 +27,22 @@ class FrogPilotFollowing:
     self.t_follow = 0
 
   def update(self, v_ego, sm, frogpilot_toggles):
+    if self.frogpilot_planner.tracking_lead:
+      self.v_lead_filter.update(self.frogpilot_planner.lead_one.vLead)
+    else:
+      self.v_lead_filter.x = v_ego
+    v_lookup = self.v_lead_filter.x
+
     if sm["controlsState"].enabled and sm["frogpilotCarState"].trafficModeEnabled:
       if sm["carState"].aEgo >= 0:
-        self.base_acceleration_jerk = float(np.interp(v_ego, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_acceleration))
-        self.base_speed_jerk = float(np.interp(v_ego, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_speed))
+        self.base_acceleration_jerk = float(np.interp(v_lookup, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_acceleration))
+        self.base_speed_jerk = float(np.interp(v_lookup, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_speed))
       else:
-        self.base_acceleration_jerk = float(np.interp(v_ego, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_deceleration))
-        self.base_speed_jerk = float(np.interp(v_ego, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_speed_decrease))
+        self.base_acceleration_jerk = float(np.interp(v_lookup, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_deceleration))
+        self.base_speed_jerk = float(np.interp(v_lookup, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_speed_decrease))
 
-      self.base_danger_jerk = float(np.interp(v_ego, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_danger))
-      self.t_follow = float(np.interp(v_ego, FOLLOW_BP, [frogpilot_toggles.traffic_follow_low, frogpilot_toggles.traffic_follow_mid, frogpilot_toggles.traffic_follow_high]))
+      self.base_danger_jerk = float(np.interp(v_lookup, TRAFFIC_MODE_BP, frogpilot_toggles.traffic_mode_jerk_danger))
+      self.t_follow = float(np.interp(v_lookup, FOLLOW_BP, [frogpilot_toggles.traffic_follow_low, frogpilot_toggles.traffic_follow_mid, frogpilot_toggles.traffic_follow_high]))
     elif sm["controlsState"].enabled:
       if sm["carState"].aEgo >= 0:
         self.base_acceleration_jerk, self.base_danger_jerk, self.base_speed_jerk = get_jerk_factor(
@@ -51,11 +61,11 @@ class FrogPilotFollowing:
 
       if frogpilot_toggles.custom_personalities:
         if sm["controlsState"].personality == log.LongitudinalPersonality.relaxed:
-          self.t_follow = float(np.interp(v_ego, FOLLOW_BP, [frogpilot_toggles.relaxed_follow_low, frogpilot_toggles.relaxed_follow_mid, frogpilot_toggles.relaxed_follow_high]))
+          self.t_follow = float(np.interp(v_lookup, FOLLOW_BP, [frogpilot_toggles.relaxed_follow_low, frogpilot_toggles.relaxed_follow_mid, frogpilot_toggles.relaxed_follow_high]))
         elif sm["controlsState"].personality == log.LongitudinalPersonality.standard:
-          self.t_follow = float(np.interp(v_ego, FOLLOW_BP, [frogpilot_toggles.standard_follow_low, frogpilot_toggles.standard_follow_mid, frogpilot_toggles.standard_follow_high]))
+          self.t_follow = float(np.interp(v_lookup, FOLLOW_BP, [frogpilot_toggles.standard_follow_low, frogpilot_toggles.standard_follow_mid, frogpilot_toggles.standard_follow_high]))
         elif sm["controlsState"].personality == log.LongitudinalPersonality.aggressive:
-          self.t_follow = float(np.interp(v_ego, FOLLOW_BP, [frogpilot_toggles.aggressive_follow_low, frogpilot_toggles.aggressive_follow_mid, frogpilot_toggles.aggressive_follow_high]))
+          self.t_follow = float(np.interp(v_lookup, FOLLOW_BP, [frogpilot_toggles.aggressive_follow_low, frogpilot_toggles.aggressive_follow_mid, frogpilot_toggles.aggressive_follow_high]))
         else:
           raise NotImplementedError("Longitudinal personality not supported")
       else:

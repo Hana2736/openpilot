@@ -128,6 +128,7 @@ class CarInterface(CarInterfaceBase):
       ret.startingState = True
       ret.steerActuatorDelay = 0.335
 
+    ret.wheelSpeedFactor = 2069 / 2033
     ret.steerLimitTimer = 0.8
 
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
