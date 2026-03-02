@@ -15,13 +15,11 @@ Ecu = car.CarParams.Ecu
 
 @dataclass
 class Gen2LongitudinalParams:
-  coast_coeffs: list[float]
-  gas_coeffs: list[float]
-  brake_coeffs: list[float]
-  gas_intercept: float
-  brake_intercept: float
-  coast_intercept: float
-  handoff_deadzone: float
+  accel_scale: float
+  accel_offset: float
+  brake_overboost_threshold: float
+  brake_overboost_multiplier: float
+  accel_min: float
 
 
 class MazdaFlags(IntFlag):
@@ -38,15 +36,11 @@ class MazdaFlags(IntFlag):
 # Tuning block
 GEN2_LONG_TUNING = {
   MazdaFlags.GEN2: Gen2LongitudinalParams(
-    coast_coeffs = [0.0010230200, -0.6081098361, -0.0000108194, -0.0057517193, 15.3719009087],
-    coast_intercept = -0.0283031701,
-    
-    gas_coeffs = [161.9342542385, -0.6811196823, 0.0375554305, 47.7124785205, 1.6211939772, -0.0532702940, -0.0140590202, -0.0003217089, 0.0000019094],
-    gas_intercept = 1987.6601401661,
-    
-    brake_coeffs = [74.7655197354, 6.6978746057, -25.1884682887, 1.9677352218, -0.1106949959],
-    brake_intercept = 1887.6242082149,
-    handoff_deadzone = 0.05
+    accel_scale = 200.0,
+    accel_offset = 2000.0,
+    brake_overboost_threshold = 6.0,
+    brake_overboost_multiplier = 2.0,
+    accel_min = -3.0
   )
 }
 

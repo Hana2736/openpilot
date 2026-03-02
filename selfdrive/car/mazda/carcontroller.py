@@ -35,7 +35,7 @@ class CarController(CarControllerBase):
     self.blend_coeff = 0 #factor for blending OP and stock long. 0 is fully stock, 1 is fully OP
     self.transition_time = 2.5 #After this number of seconds, the smooth blending from stock to OP (or vice versa) is complete
     self.distance_last = None
-    self.sm = messaging.SubMaster(['longitudinalPlan', 'radarState', 'liveLocationKalman'])
+    self.sm = messaging.SubMaster(['longitudinalPlan', 'radarState'])
 
 
   def update(self, CC, CS, now_nanos, frogpilot_toggles):
@@ -110,25 +110,16 @@ class CarController(CarControllerBase):
             raw_acc_output = max(-1000, min(raw_acc_output, 1000))
 
             if self.params.get_bool("BlendedACC"):
-              CEStatus = self.params_memory.get_int("CEStatus")
-
-              # Conditional Experimental Mode is active when status >= 2.
-              # 1 is force disabled, 0 is default/inactive.
-              if CEStatus >= 2:
-                if self.blend_coeff < 1.0:
-                  self.blend_coeff += (DT_CTRL / self.transition_time)
-                  self.blend_coeff = min(1.0, self.blend_coeff)
+              if self.params_memory.get_int("CEStatus"):
+                self.acc_filter.update_alpha(abs(raw_acc_output-self.filtered_acc_last)/1000)
+                filtered_acc_output = int(self.acc_filter.update(raw_acc_output))
               else:
-                if self.blend_coeff > 0.0:
-                  self.blend_coeff -= (DT_CTRL / self.transition_time)
-                  self.blend_coeff = max(0.0, self.blend_coeff)
+                # we want to use the stock value in this case but we need a smooth transition.
+                self.acc_filter.update_alpha(abs(CS.crz_info["ACCEL_CMD"]-self.filtered_acc_last)/1000)
+                filtered_acc_output = int(self.acc_filter.update(CS.crz_info["ACCEL_CMD"]))
 
-              if self.blend_coeff > 0:
-                blended_acc_output = (self.blend_coeff * raw_acc_output) + ((1 - self.blend_coeff) * CS.crz_info["ACCEL_CMD"])
-                CS.crz_info["ACCEL_CMD"] = int(blended_acc_output)
-
-              self.transition_time = (0.045455 * CS.out.vEgo) + 0.5 # Ramp transition time: ~0.5s at 0mph, ~1.6s at 55mph
-
+              CS.crz_info["ACCEL_CMD"] = int(filtered_acc_output)
+              self.filtered_acc_last = filtered_acc_output
             else:
               CS.crz_info["ACCEL_CMD"] = int(raw_acc_output)
 
@@ -137,51 +128,17 @@ class CarController(CarControllerBase):
     # GEN2
     else:
       target_accel = CC.actuators.accel
-
-      target_accel = max(-3.0, target_accel)
-
-      # NEW LOGIC: Piecewise Polynomial Regression
-      pitch = self.sm['liveLocationKalman'].calibratedOrientationNED.value[1] if self.sm.alive['liveLocationKalman'] else 0.0
-
-      # Piecewise Polynomial Regression
       p = self.ccp.long_params
-      v = CS.out.vEgo
-      r = CS.out.engineRpm
 
-      # Coast Baseline: v, p, v^2, v*p, p^2
-      a_coast = (p.coast_coeffs[0] * v) + (p.coast_coeffs[1] * pitch) + (p.coast_coeffs[2] * v**2) + (p.coast_coeffs[3] * v * pitch) + (p.coast_coeffs[4] * pitch**2) + p.coast_intercept
+      # Step on brakes some more below ~15 mph
+      if CS.out.vEgo < p.brake_overboost_threshold and target_accel < 0:
+        # At 0 m/s = 2x multiplier
+        # At 6 m/s = 1x multiplier
+        brake_mult = p.brake_overboost_multiplier - (CS.out.vEgo / p.brake_overboost_threshold)
+        target_accel *= brake_mult
 
-      a_delta = target_accel - a_coast
-
-      # Models
-      def get_gas(delta, v, r, p):
-          c = p.gas_coeffs
-          return (c[0] * delta) + (c[1] * v) + (c[2] * r) + \
-                 (c[3] * delta**2) + (c[4] * delta * v) + (c[5] * delta * r) + \
-                 (c[6] * v**2) + (c[7] * v * r) + (c[8] * r**2) + p.gas_intercept
-
-      def get_brake(delta, v, p):
-          c = p.brake_coeffs
-          return (c[0] * delta) + (c[1] * v) + \
-                 (c[2] * delta**2) + (c[3] * delta * v) + (c[4] * v**2) + p.brake_intercept
-
-      dz = p.handoff_deadzone
-
-      if a_delta > dz:
-          raw_acc_output = get_gas(a_delta, v, r, p)
-      elif a_delta < -dz:
-          raw_acc_output = get_brake(a_delta, v, p)
-      else:
-          # Linear Handoff
-          # Blend between BrakeModel(-dz) and GasModel(dz)
-          brake_limit = get_brake(-dz, v, p)
-          gas_limit = get_gas(dz, v, r, p)
-
-          # Ratio 0 at -dz (Full Brake Limit), Ratio 1 at +dz (Full Gas Limit)
-          ratio = (a_delta - (-dz)) / (2 * dz)
-          raw_acc_output = brake_limit + ratio * (gas_limit - brake_limit)
-
-      raw_acc_output = int(raw_acc_output)
+      target_accel = max(p.accel_min, target_accel)
+      raw_acc_output = int((target_accel * p.accel_scale) + p.accel_offset)
       OPlong = (self.params.get_bool("ExperimentalLongitudinalEnabled") and CC.longActive)
 
       if OPlong:
