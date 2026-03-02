@@ -375,9 +375,7 @@ void FrogPilotModelPanel::showEvent(QShowEvent *event) {
   modelDownloading &= !updatingTinygrad;
 
   QStringList availableModels = QString::fromStdString(params.get("AvailableModels")).split(",");
-  availableModels.sort();
   availableModelNames = QString::fromStdString(params.get("AvailableModelNames")).split(",");
-  availableModelNames.sort();
 
   modelFileToNameMap.clear();
   modelFileToNameMapProcessed.clear();
