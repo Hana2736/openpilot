@@ -137,10 +137,10 @@ class Controls:
     self.LaC: LatControl
     if self.CP.steerControlType == car.CarParams.SteerControlType.angle:
       self.LaC = LatControlAngle(self.CP, self.CI)
-    elif self.FPCP.lateralTuning.which() == 'pid':
+    elif self.CP.lateralTuning.which() == 'torque':
+      self.LaC = LatControlTorque(self.CP, self.CI, DT_CTRL)
+    elif self.CP.lateralTuning.which() == 'pid':
       self.LaC = LatControlPID(self.CP, self.CI)
-    elif self.FPCP.lateralTuning.which() == 'torque':
-      self.LaC = LatControlTorque(self.CP, self.FPCP, self.CI)
 
     self.initialized = False
     self.state = State.disabled
@@ -618,7 +618,7 @@ class Controls:
     self.curvature = -self.VM.calc_curvature(steer_angle_without_offset, CS.vEgo, lp.roll)
 
     # Update Torque Params
-    if self.FPCP.lateralTuning.which() == 'torque':
+    if self.CP.lateralTuning.which() == 'torque':
       torque_params = self.sm['liveTorqueParameters']
       if self.sm.all_checks(['liveTorqueParameters']) and (torque_params.useParams or self.frogpilot_toggles.force_auto_tune):
         self.LaC.update_live_torque_params(torque_params.latAccelFactorFiltered, torque_params.latAccelOffsetFiltered,
@@ -899,7 +899,7 @@ class Controls:
     controlsState.experimentalMode = self.experimental_mode
     controlsState.personality = self.personality
 
-    lat_tuning = self.FPCP.lateralTuning.which()
+    lat_tuning = self.CP.lateralTuning.which()
     if self.joystick_mode:
       controlsState.lateralControlState.debugState = lac_log
     elif self.CP.steerControlType == car.CarParams.SteerControlType.angle:
