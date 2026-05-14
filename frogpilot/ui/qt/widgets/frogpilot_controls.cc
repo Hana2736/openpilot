@@ -1,3 +1,5 @@
+#include <QMovie>
+
 #include "selfdrive/ui/ui.h"
 
 #include "frogpilot/ui/frogpilot_ui.h"
