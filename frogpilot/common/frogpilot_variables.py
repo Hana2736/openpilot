@@ -325,6 +325,20 @@ frogpilot_default_params: list[tuple[str, str | bytes, int, str]] = [
   ("MapsSelected", "", 0, ""),
   ("MapStyle", "1", 2, "0"),
   ("MaxDesiredAcceleration", "4.0", 2, "2.0"),
+  ("Mazda3TuneA", "15.38616", 3, "15.38616"),
+  ("Mazda3TuneB", "0.71899", 3, "0.71899"),
+  ("Mazda3TuneC", "0.15015", 3, "0.15015"),
+  ("Mazda3TuneD", "0.37999", 3, "0.37999"),
+  ("MazdaAutoTuneDeadzone", "0.0775", 3, "0.0775"),
+  ("MazdaCX30TuneA", "4.68689", 3, "4.68689"),
+  ("MazdaCX30TuneB", "0.79999", 3, "0.79999"),
+  ("MazdaCX30TuneC", "0.18244", 3, "0.18244"),
+  ("MazdaCX30TuneD", "0.38763", 3, "0.38763"),
+  ("MazdaCX50TuneA", "4.68689", 3, "4.68689"),
+  ("MazdaCX50TuneB", "0.79999", 3, "0.79999"),
+  ("MazdaCX50TuneC", "0.18244", 3, "0.18244"),
+  ("MazdaCX50TuneD", "0.38763", 3, "0.38763"),
+  ("MazdaTuneReset", "0", 3, "0"),
   ("MinimumLaneChangeSpeed", str(LANE_CHANGE_SPEED_MIN / CV.MPH_TO_MS), 2, str(LANE_CHANGE_SPEED_MIN / CV.MPH_TO_MS)),
   ("Model", DEFAULT_MODEL + "_default", 1, DEFAULT_MODEL + "_default"),
   ("ModelDrivesAndScores", "", 2, ""),
@@ -500,6 +514,7 @@ frogpilot_default_params: list[tuple[str, str | bytes, int, str]] = [
 ]
 
 misc_tuning_levels: list[tuple[str, str | bytes, int, str]] = [
+  ("MazdaAutoTune", "0", 3, "0"),
   ("SidebarMetrics", "1", 3, "0"),
   ("SLCPriority", "", 2, ""),
   ("WheelControls", "", 2, "")

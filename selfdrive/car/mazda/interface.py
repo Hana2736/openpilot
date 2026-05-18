@@ -14,11 +14,35 @@ ButtonType = car.CarState.ButtonEvent.Type
 FrogPilotButtonType = custom.FrogPilotCarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
 
-NON_LINEAR_TORQUE_PARAMS = {
+# Cars whose "lat_accel vs torque" relationship is fit with a "sigmoid + linear" curve.
+# The (a, b, c, d) coefficients are no longer hardcoded here; they live in Params so they
+# can be tuned from the Mazda settings panel (and, later, auto-tuned). The values below are
+# only used as a fallback if the corresponding params are unset (e.g. very early boot).
+SIGLIN_TORQUE_PARAM_PREFIX = {
+  CAR.MAZDA_3_2019: "Mazda3",
+  CAR.MAZDA_CX_30: "MazdaCX30",
+  CAR.MAZDA_CX_50: "MazdaCX50",
+}
+
+NON_LINEAR_TORQUE_DEFAULTS = {
   CAR.MAZDA_3_2019: (15.38616, 0.71899, 0.15015, 0.37999),
   CAR.MAZDA_CX_30: (4.68689, 0.79999, 0.18244, 0.38763),
   CAR.MAZDA_CX_50: (4.68689, 0.79999, 0.18244, 0.38763)
 }
+
+
+def get_non_linear_torque_params(fingerprint):
+  prefix = SIGLIN_TORQUE_PARAM_PREFIX.get(fingerprint)
+  if prefix is None:
+    return None
+
+  p = Params()
+  defaults = NON_LINEAR_TORQUE_DEFAULTS[fingerprint]
+  params = []
+  for suffix, default in zip(("A", "B", "C", "D"), defaults):
+    value = p.get_float(f"{prefix}Tune{suffix}")
+    params.append(value if value else default)
+  return tuple(params)
 
 class CarInterface(CarInterfaceBase):
 
@@ -28,7 +52,7 @@ class CarInterface(CarInterfaceBase):
       # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
       # An important thing to consider is that the slope at 0 should be > 0 (ideally >1)
       # This has big effect on the stability about 0 (noise when going straight)
-      non_linear_torque_params = NON_LINEAR_TORQUE_PARAMS.get(self.CP.carFingerprint)
+      non_linear_torque_params = get_non_linear_torque_params(self.CP.carFingerprint)
       assert non_linear_torque_params, "The params are not defined"
       a, b, c, _ = non_linear_torque_params
       sig_input = a * lateral_acceleration
@@ -42,7 +66,7 @@ class CarInterface(CarInterfaceBase):
     return torque_values, lataccel_values
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
-    if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
+    if self.CP.carFingerprint in SIGLIN_TORQUE_PARAM_PREFIX:
       torque_values, lataccel_values = self.get_lataccel_torque_siglin()
 
       def torque_from_lateral_accel_siglin(lateral_acceleration: float, torque_params: car.CarParams.LateralTorqueTuning):
@@ -52,7 +76,7 @@ class CarInterface(CarInterfaceBase):
       return self.torque_from_lateral_accel_linear
 
   def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
-    if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
+    if self.CP.carFingerprint in SIGLIN_TORQUE_PARAM_PREFIX:
       torque_values, lataccel_values = self.get_lataccel_torque_siglin()
 
       def lateral_accel_from_torque_siglin(torque: float, torque_params: car.CarParams.LateralTorqueTuning):

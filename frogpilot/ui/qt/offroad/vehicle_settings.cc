@@ -151,6 +151,7 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
   FrogPilotListWidget *gmList = new FrogPilotListWidget(this);
   FrogPilotListWidget *hkgList = new FrogPilotListWidget(this);
   FrogPilotListWidget *hondaList = new FrogPilotListWidget(this);
+  FrogPilotListWidget *mazdaList = new FrogPilotListWidget(this);
   FrogPilotListWidget *subaruList = new FrogPilotListWidget(this);
   FrogPilotListWidget *toyotaList = new FrogPilotListWidget(this);
   FrogPilotListWidget *vehicleInfoList = new FrogPilotListWidget(this);
@@ -158,6 +159,7 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
   ScrollView *gmPanel = new ScrollView(gmList, this);
   ScrollView *hkgPanel = new ScrollView(hkgList, this);
   ScrollView *hondaPanel = new ScrollView(hondaList, this);
+  ScrollView *mazdaPanel = new ScrollView(mazdaList, this);
   ScrollView *subaruPanel = new ScrollView(subaruList, this);
   ScrollView *toyotaPanel = new ScrollView(toyotaList, this);
   ScrollView *vehicleInfoPanel = new ScrollView(vehicleInfoList, this);
@@ -165,6 +167,7 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
   vehiclesLayout->addWidget(gmPanel);
   vehiclesLayout->addWidget(hkgPanel);
   vehiclesLayout->addWidget(hondaPanel);
+  vehiclesLayout->addWidget(mazdaPanel);
   vehiclesLayout->addWidget(subaruPanel);
   vehiclesLayout->addWidget(toyotaPanel);
   vehiclesLayout->addWidget(vehicleInfoPanel);
@@ -183,6 +186,23 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"HondaAltTune", tr("Gentle Following"), tr("<b>Reduces jerky acceleration and braking when following a lead vehicle.</b> Ideal for stop-and-go traffic."), ""},
     {"HondaMaxBrake", tr("Increased Braking Force"), tr("<b>Increases the maximum braking force for improved stopping performance.</b>"), ""},
     {"HondaLowSpeedPedal", tr("Responsive Pedal at Low Speeds"), tr("<b>Improves acceleration from a standstill for a more responsive throttle feel in city driving.</b>"), ""},
+
+    {"MazdaToggles", tr("Mazda Settings"), tr("<b>FrogPilot features for Mazda vehicles.</b>"), ""},
+    {"Mazda3TuneA", tr("Mazda 3 — Sigmoid Slope (a)"), tr("<b>The 'a' coefficient of the \"sigmoid + linear\" lateral-acceleration-to-torque fit for the Mazda 3 2019-24.</b> Controls how sharply torque ramps up near zero lateral acceleration."), ""},
+    {"Mazda3TuneB", tr("Mazda 3 — Sigmoid Gain (b)"), tr("<b>The 'b' coefficient of the \"sigmoid + linear\" fit for the Mazda 3 2019-24.</b> Scales the sigmoid (non-linear) portion of the torque curve."), ""},
+    {"Mazda3TuneC", tr("Mazda 3 — Linear Gain (c)"), tr("<b>The 'c' coefficient of the \"sigmoid + linear\" fit for the Mazda 3 2019-24.</b> Scales the linear portion of the torque curve."), ""},
+    {"Mazda3TuneD", tr("Mazda 3 — Coefficient (d)"), tr("<b>The 'd' coefficient of the \"sigmoid + linear\" fit for the Mazda 3 2019-24.</b> Reserved for future use; not currently applied to the torque curve."), ""},
+    {"MazdaCX30TuneA", tr("Mazda CX-30 — Sigmoid Slope (a)"), tr("<b>The 'a' coefficient of the \"sigmoid + linear\" lateral-acceleration-to-torque fit for the Mazda CX-30 2019-24.</b> Controls how sharply torque ramps up near zero lateral acceleration."), ""},
+    {"MazdaCX30TuneB", tr("Mazda CX-30 — Sigmoid Gain (b)"), tr("<b>The 'b' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-30 2019-24.</b> Scales the sigmoid (non-linear) portion of the torque curve."), ""},
+    {"MazdaCX30TuneC", tr("Mazda CX-30 — Linear Gain (c)"), tr("<b>The 'c' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-30 2019-24.</b> Scales the linear portion of the torque curve."), ""},
+    {"MazdaCX30TuneD", tr("Mazda CX-30 — Coefficient (d)"), tr("<b>The 'd' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-30 2019-24.</b> Reserved for future use; not currently applied to the torque curve."), ""},
+    {"MazdaCX50TuneA", tr("Mazda CX-50 — Sigmoid Slope (a)"), tr("<b>The 'a' coefficient of the \"sigmoid + linear\" lateral-acceleration-to-torque fit for the Mazda CX-50 2022-24.</b> Controls how sharply torque ramps up near zero lateral acceleration."), ""},
+    {"MazdaCX50TuneB", tr("Mazda CX-50 — Sigmoid Gain (b)"), tr("<b>The 'b' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-50 2022-24.</b> Scales the sigmoid (non-linear) portion of the torque curve."), ""},
+    {"MazdaCX50TuneC", tr("Mazda CX-50 — Linear Gain (c)"), tr("<b>The 'c' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-50 2022-24.</b> Scales the linear portion of the torque curve."), ""},
+    {"MazdaCX50TuneD", tr("Mazda CX-50 — Coefficient (d)"), tr("<b>The 'd' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-50 2022-24.</b> Reserved for future use; not currently applied to the torque curve."), ""},
+    {"MazdaAutoTune", tr("Auto-Tune Now"), tr("<b>Learn the Mazda lateral tune from your own driving logs.</b> Recursively scans your saved drives, keeps the clean lateral samples (steering untouched) in a rolling data set, refits the \"sigmoid + linear\" curve, and writes the result for your car. Runs while parked and can take a while the first time."), ""},
+    {"MazdaAutoTuneDeadzone", tr("Auto-Tune Lateral Deadzone"), tr("<b>Lateral acceleration deadzone used by Auto-Tune.</b> Samples with |lateral acceleration| below this are ignored when fitting, so straight-line driving doesn't bias the curve. Applied at fit time, so changing it takes effect on the next Auto-Tune without reprocessing logs."), ""},
+    {"MazdaTuneReset", tr("Reset Mazda Tune"), tr("<b>Reset all Mazda lateral tune coefficients back to their defaults.</b>"), ""},
 
     {"SubaruToggles", tr("Subaru Settings"), tr("<b>FrogPilot features for Subaru vehicles.</b>"), ""},
     {"SubaruSNG", tr("Stop and Go"), tr("Stop and go for supported Subaru vehicles."), ""},
@@ -239,6 +259,56 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
       });
       vehicleToggle = subaruButton;
 
+    } else if (param == "MazdaToggles") {
+      ButtonControl *mazdaButton = new ButtonControl(title, tr("MANAGE"), desc);
+      QObject::connect(mazdaButton, &ButtonControl::clicked, [vehiclesLayout, mazdaPanel, this]() {
+        openDescriptions(forceOpenDescriptions, toggles);
+        vehiclesLayout->setCurrentWidget(mazdaPanel);
+      });
+      vehicleToggle = mazdaButton;
+
+    } else if (param == "MazdaAutoTune") {
+      ButtonControl *autoTuneButton = new ButtonControl(title, tr("RUN"), desc);
+      QObject::connect(autoTuneButton, &ButtonControl::clicked, [autoTuneButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Auto-Tune can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Process your driving logs and re-learn the Mazda lateral tune? This runs in the background while parked and may take a while."), this)) {
+          return;
+        }
+        autoTuneRebootPrompted = false;
+        params_memory.put("AutoTuneStatus", "Queued...");
+        params_memory.putBool("MazdaAutoTune", true);
+        autoTuneButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = autoTuneButton;
+
+    } else if (param == "MazdaTuneReset") {
+      ButtonControl *mazdaResetButton = new ButtonControl(title, tr("RESET"), desc);
+      QObject::connect(mazdaResetButton, &ButtonControl::clicked, [this]() {
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Are you sure you want to reset the Mazda lateral tune to its defaults?"), this)) {
+          return;
+        }
+        QSet<QString> tuneKeys = mazda3Keys;
+        tuneKeys.unite(mazdaCX30Keys);
+        tuneKeys.unite(mazdaCX50Keys);
+        for (const QString &tuneKey : tuneKeys) {
+          params.putFloat(tuneKey.toStdString(), params_default.getFloat(tuneKey.toStdString()));
+          if (FrogPilotParamValueControl *valueToggle = qobject_cast<FrogPilotParamValueControl*>(toggles[tuneKey])) {
+            valueToggle->refresh();
+          }
+        }
+      });
+      vehicleToggle = mazdaResetButton;
+
+    } else if (param == "MazdaAutoTuneDeadzone") {
+      vehicleToggle = new FrogPilotParamValueControl(param, title, desc, icon, 0.0f, 1.0f, tr(" m/s²"), std::map<float, QString>(), 0.0025f, true);
+
+    } else if (mazdaKeys.contains(param)) {
+      float mazdaMaxValue = param.endsWith("A") ? 30.0f : 3.0f;
+      vehicleToggle = new FrogPilotParamValueControl(param, title, desc, icon, 0.0f, mazdaMaxValue, QString(), std::map<float, QString>(), 0.0001f, true);
+
     } else if (param == "ToyotaToggles") {
       ButtonControl *toyotaButton = new ButtonControl(title, tr("MANAGE"), desc);
       QObject::connect(toyotaButton, &ButtonControl::clicked, [vehiclesLayout, toyotaPanel, this]() {
@@ -287,6 +357,8 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
       hkgList->addItem(vehicleToggle);
     } else if (hondaKeys.contains(param)) {
       hondaList->addItem(vehicleToggle);
+    } else if (mazdaKeys.contains(param)) {
+      mazdaList->addItem(vehicleToggle);
     } else if (subaruKeys.contains(param)) {
       subaruList->addItem(vehicleToggle);
     } else if (toyotaKeys.contains(param)) {
@@ -381,6 +453,22 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
   }
 
   started = s.scene.started;
+
+  if (ButtonControl *autoTuneButton = qobject_cast<ButtonControl*>(toggles["MazdaAutoTune"])) {
+    QString status = QString::fromStdString(params_memory.get("AutoTuneStatus"));
+    if (status.startsWith("Done|")) {
+      QString summary = status.mid(5);
+      autoTuneButton->setValue(summary);
+      if (!autoTuneRebootPrompted) {
+        autoTuneRebootPrompted = true;
+        if (FrogPilotConfirmationDialog::toggleReboot(this)) {
+          Hardware::reboot();
+        }
+      }
+    } else {
+      autoTuneButton->setValue(status);
+    }
+  }
 }
 
 void FrogPilotVehiclesPanel::updateToggles() {
@@ -403,6 +491,8 @@ void FrogPilotVehiclesPanel::updateToggles() {
       setVisible &= parent->isHKG;
     } else if (hondaKeys.contains(key)) {
       setVisible &= parent->isHonda;
+    } else if (mazdaKeys.contains(key)) {
+      setVisible &= parent->isMazda;
     } else if (subaruKeys.contains(key)) {
       setVisible &= parent->isSubaru;
     } else if (toyotaKeys.contains(key)) {
@@ -425,6 +515,18 @@ void FrogPilotVehiclesPanel::updateToggles() {
 
     else if (key == "HondaMaxBrake") {
       setVisible &= parent->isHondaNidec;
+    }
+
+    else if (mazda3Keys.contains(key)) {
+      setVisible &= parent->isMazda3;
+    }
+
+    else if (mazdaCX30Keys.contains(key)) {
+      setVisible &= parent->isMazdaCX30;
+    }
+
+    else if (mazdaCX50Keys.contains(key)) {
+      setVisible &= parent->isMazdaCX50;
     }
 
     else if (key == "SNGHack") {
@@ -452,6 +554,8 @@ void FrogPilotVehiclesPanel::updateToggles() {
         toggles["HKGToggles"]->setVisible(true);
       } else if (hondaKeys.contains(key)) {
         toggles["HondaToggles"]->setVisible(true);
+      } else if (mazdaKeys.contains(key)) {
+        toggles["MazdaToggles"]->setVisible(true);
       } else if (subaruKeys.contains(key)) {
         toggles["SubaruToggles"]->setVisible(true);
       } else if (toyotaKeys.contains(key)) {

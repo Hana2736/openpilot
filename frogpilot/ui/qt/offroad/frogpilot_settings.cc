@@ -315,6 +315,10 @@ void FrogPilotSettingsWindow::updateVariables() {
     isHKGCanFd = isHKG && safetyModel == cereal::CarParams::SafetyModel::HYUNDAI_CANFD;
     isHonda = carMake == "honda";
     isHondaNidec = isHonda && safetyModel == cereal::CarParams::SafetyModel::HONDA_NIDEC;
+    isMazda = carMake == "mazda";
+    isMazda3 = carFingerprint == "MAZDA_3_2019";
+    isMazdaCX30 = carFingerprint == "MAZDA_CX_30";
+    isMazdaCX50 = carFingerprint == "MAZDA_CX_50";
     isSubaru = carMake == "subaru";
     isTorqueCar = CP.getLateralTuning().which() == cereal::CarParams::LateralTuning::TORQUE;
     isToyota = carMake == "toyota";

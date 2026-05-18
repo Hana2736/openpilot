@@ -12,6 +12,7 @@ from openpilot.frogpilot.assets.theme_manager import THEME_COMPONENT_PARAMS, The
 from openpilot.frogpilot.common.frogpilot_functions import backup_toggles
 from openpilot.frogpilot.common.frogpilot_utilities import capture_report, flash_panda, is_url_pingable, lock_doors, run_thread_with_lock, update_maps, update_openpilot
 from openpilot.frogpilot.common.frogpilot_variables import ERROR_LOGS_PATH, FrogPilotVariables, get_frogpilot_toggles, params, params_cache, params_memory
+from openpilot.frogpilot.common.torque_autotune import run_autotune
 from openpilot.frogpilot.controls.frogpilot_planner import FrogPilotPlanner
 from openpilot.frogpilot.system.frogpilot_stats import send_stats
 from openpilot.frogpilot.system.frogpilot_tracking import FrogPilotTracking
@@ -40,6 +41,15 @@ def assets_checks(model_manager, theme_manager, frogpilot_toggles):
     asset_to_download = params_memory.get(asset_param, encoding="utf-8")
     if asset_to_download:
       run_thread_with_lock("download_theme", theme_manager.download_theme, (asset_type, asset_to_download, asset_param, frogpilot_toggles))
+
+def autotune_check(started):
+  # Auto-Tune is heavy (reads many rlogs) so it only runs while parked.
+  if started or not params_memory.get_bool("MazdaAutoTune"):
+    return
+  params_memory.remove("MazdaAutoTune")
+  params_memory.put("AutoTuneStatus", "Queued...")
+  run_thread_with_lock("mazda_autotune", run_autotune)
+
 
 def update_checks(model_manager, now, theme_manager, frogpilot_toggles, boot_run=False):
   while not (is_url_pingable("https://github.com") or is_url_pingable("https://gitlab.com")):
@@ -128,6 +138,7 @@ def frogpilot_thread():
 
     if rate_keeper.frame % ASSET_CHECK_RATE == 0:
       assets_checks(model_manager, theme_manager, frogpilot_toggles)
+      autotune_check(started)
 
     if params_memory.get_bool("FrogPilotTogglesUpdated") or theme_manager.theme_updated:
       previous_holiday_themes = frogpilot_toggles.holiday_themes

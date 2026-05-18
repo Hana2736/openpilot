@@ -26,6 +26,13 @@ private:
   QSet<QString> gmKeys = {"ExperimentalGMTune", "LongPitch", "VoltSNG"};
   QSet<QString> hkgKeys = {"NewLongAPI", "TacoTuneHacks"};
   QSet<QString> hondaKeys = {"HondaAltTune", "HondaLowSpeedPedal", "HondaMaxBrake"};
+  QSet<QString> mazda3Keys = {"Mazda3TuneA", "Mazda3TuneB", "Mazda3TuneC", "Mazda3TuneD"};
+  QSet<QString> mazdaCX30Keys = {"MazdaCX30TuneA", "MazdaCX30TuneB", "MazdaCX30TuneC", "MazdaCX30TuneD"};
+  QSet<QString> mazdaCX50Keys = {"MazdaCX50TuneA", "MazdaCX50TuneB", "MazdaCX50TuneC", "MazdaCX50TuneD"};
+  QSet<QString> mazdaKeys = {"Mazda3TuneA", "Mazda3TuneB", "Mazda3TuneC", "Mazda3TuneD",
+                             "MazdaCX30TuneA", "MazdaCX30TuneB", "MazdaCX30TuneC", "MazdaCX30TuneD",
+                             "MazdaCX50TuneA", "MazdaCX50TuneB", "MazdaCX50TuneC", "MazdaCX50TuneD",
+                             "MazdaTuneReset", "MazdaAutoTune", "MazdaAutoTuneDeadzone"};
   QSet<QString> longitudinalKeys = {"ExperimentalGMTune", "FrogsGoMoosTweak", "HondaAltTune", "HondaMaxBrake", "HondaLowSpeedPedal", "LongPitch", "NewLongAPI", "SNGHack", "SubaruSNG", "VoltSNG"};
   QSet<QString> subaruKeys = {"SubaruSNG"};
   QSet<QString> toyotaKeys = {"ClusterOffset", "FrogsGoMoosTweak", "LockDoorsTimer", "SNGHack", "ToyotaDoors"};
@@ -40,6 +47,9 @@ private:
 
   Params params;
   Params params_default{"/dev/shm/params_default"};
+  Params params_memory{"/dev/shm/params"};
+
+  bool autoTuneRebootPrompted = false;
 
   QJsonObject frogpilotToggleLevels;
 
