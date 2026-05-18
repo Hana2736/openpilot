@@ -38,6 +38,7 @@ locks = {
   "download_theme": threading.Lock(),
   "flash_panda": threading.Lock(),
   "lock_doors": threading.Lock(),
+  "mazda_autotune": threading.Lock(),
   "update_checks": threading.Lock(),
   "update_maps": threading.Lock(),
   "update_openpilot": threading.Lock(),
