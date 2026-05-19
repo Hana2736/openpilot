@@ -162,7 +162,15 @@ def _extract_one(path: Path):
 
   if not np.isfinite(t_evt).any():
     return None
-  t0, t1 = t_evt[0], t_evt[-1]
+  # Early-boot events (e.g. initData) have logMonoTimes from before the
+  # actual drive started - one such outlier blows the grid up to ~26min
+  # when the real drive is 60s. Bound the grid to the carState timespan,
+  # which is what we actually fit against.
+  cs_idx = np.where(np.isfinite(cols["v_ego"]))[0]
+  if cs_idx.size == 0:
+    return None
+  t0 = float(t_evt[cs_idx[0]])
+  t1 = float(t_evt[cs_idx[-1]])
   if t1 - t0 < 2.0:
     return None  # rlog too short to contain a steady window
 
@@ -219,6 +227,15 @@ def _rolling_std(x: np.ndarray, w: int):
   out = np.full(n, np.nan)
   if n < w:
     return out
+  # np.cumsum propagates NaN, so any leading NaN poisons the whole result.
+  # ffill, then patch any remaining prefix NaN with the first finite value;
+  # callers exclude those rows via their own validity mask anyway.
+  x = np.asarray(x, dtype=float)
+  if np.isnan(x).any():
+    x = _ffill(x)
+    if x.size and np.isnan(x[0]):
+      finite = x[~np.isnan(x)]
+      x = np.where(np.isnan(x), finite[0] if finite.size else 0.0, x)
   c1 = np.concatenate(([0.0], np.cumsum(x)))
   c2 = np.concatenate(([0.0], np.cumsum(x * x)))
   s = c1[w:] - c1[:-w]
