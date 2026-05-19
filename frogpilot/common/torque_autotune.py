@@ -32,6 +32,7 @@ STORE_DIR = Path("/data/media/0/lateral_autotune")
 SAMPLES_PATH = STORE_DIR / "samples.f32"          # raw float32, 3 cols: output, lat_accel, pitch
 PROCESSED_PATH = STORE_DIR / "processed.json"     # rlogs already ingested
 STATUS_PARAM = "AutoTuneStatus"
+PENDING_PARAM = "AutoTunePending"   # previewed but not-yet-applied fit (JSON)
 
 SAMPLE_COLS = 3
 SAMPLE_BYTES = SAMPLE_COLS * 4                    # float32
@@ -434,16 +435,34 @@ def run_autotune() -> None:
     _set_status("Not enough usable data yet. Drive more, then retry.")
     return
 
-  a, b, c, d = result
-  default = NON_LINEAR_TORQUE_DEFAULTS[next(k for k, v in SIGLIN_TORQUE_PARAM_PREFIX.items() if v == prefix)]
-  # sanity: a fit that fell back to a bound edge or is wildly off -> keep, but flag
-  for suffix, value in zip(("A", "B", "C", "D"), (a, b, c, d)):
-    params.put_float(f"{prefix}Tune{suffix}", float(value))
+  a, b, c, d = (float(v) for v in result)
+  # Preview only: stash the candidate, do NOT touch the live params. The user
+  # reviews the numbers and taps "Apply Auto-Tune" to commit (apply_pending).
+  params.put(PENDING_PARAM, json.dumps({"prefix": prefix, "a": a, "b": b, "c": c, "d": d,
+                                        "n": int(new_samples)}))
+  _set_status(f"Preview|{prefix} a={a:.5f} b={b:.5f} c={c:.5f} d={d:.5f} "
+              f"({new_samples} new). Tap Apply to use.")
 
-  _set_status(
-    f"Done|{prefix} a={a:.5f} b={b:.5f} c={c:.5f} d={d:.5f} "
-    f"({new_samples} new samples). Reboot to apply. (was {default[0]:.5f},{default[1]:.5f},{default[2]:.5f})"
-  )
+
+def apply_pending() -> None:
+  raw = params.get(PENDING_PARAM)
+  if not raw:
+    _set_status("No previewed tune to apply. Run Auto-Tune first.")
+    return
+  try:
+    p = json.loads(raw)
+    prefix = p["prefix"]
+    vals = (p["a"], p["b"], p["c"], p["d"])
+  except Exception:
+    params.remove(PENDING_PARAM)
+    _set_status("Previewed tune was invalid. Re-run Auto-Tune.")
+    return
+
+  for suffix, value in zip(("A", "B", "C", "D"), vals):
+    params.put_float(f"{prefix}Tune{suffix}", float(value))
+  params.remove(PENDING_PARAM)
+  _set_status(f"Done|{prefix} applied a={vals[0]:.5f} b={vals[1]:.5f} "
+              f"c={vals[2]:.5f} d={vals[3]:.5f}. Reboot to apply.")
 
 
 if __name__ == "__main__":

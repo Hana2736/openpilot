@@ -187,22 +187,23 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"HondaMaxBrake", tr("Increased Braking Force"), tr("<b>Increases the maximum braking force for improved stopping performance.</b>"), ""},
     {"HondaLowSpeedPedal", tr("Responsive Pedal at Low Speeds"), tr("<b>Improves acceleration from a standstill for a more responsive throttle feel in city driving.</b>"), ""},
 
-    {"MazdaToggles", tr("Mazda Settings"), tr("<b>FrogPilot features for Mazda vehicles.</b>"), ""},
-    {"Mazda3TuneA", tr("Mazda 3 — Sigmoid Slope (a)"), tr("<b>The 'a' coefficient of the \"sigmoid + linear\" lateral-acceleration-to-torque fit for the Mazda 3 2019-24.</b> Controls how sharply torque ramps up near zero lateral acceleration."), ""},
-    {"Mazda3TuneB", tr("Mazda 3 — Sigmoid Gain (b)"), tr("<b>The 'b' coefficient of the \"sigmoid + linear\" fit for the Mazda 3 2019-24.</b> Scales the sigmoid (non-linear) portion of the torque curve."), ""},
-    {"Mazda3TuneC", tr("Mazda 3 — Linear Gain (c)"), tr("<b>The 'c' coefficient of the \"sigmoid + linear\" fit for the Mazda 3 2019-24.</b> Scales the linear portion of the torque curve."), ""},
-    {"Mazda3TuneD", tr("Mazda 3 — Torque Offset (d)"), tr("<b>The 'd' constant torque offset of the \"sigmoid + linear + offset\" fit for the Mazda 3 2019-24.</b> Additive steering/torque bias; may be negative. 0 = no bias."), ""},
-    {"MazdaCX30TuneA", tr("Mazda CX-30 — Sigmoid Slope (a)"), tr("<b>The 'a' coefficient of the \"sigmoid + linear\" lateral-acceleration-to-torque fit for the Mazda CX-30 2019-24.</b> Controls how sharply torque ramps up near zero lateral acceleration."), ""},
-    {"MazdaCX30TuneB", tr("Mazda CX-30 — Sigmoid Gain (b)"), tr("<b>The 'b' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-30 2019-24.</b> Scales the sigmoid (non-linear) portion of the torque curve."), ""},
-    {"MazdaCX30TuneC", tr("Mazda CX-30 — Linear Gain (c)"), tr("<b>The 'c' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-30 2019-24.</b> Scales the linear portion of the torque curve."), ""},
-    {"MazdaCX30TuneD", tr("Mazda CX-30 — Torque Offset (d)"), tr("<b>The 'd' constant torque offset of the \"sigmoid + linear + offset\" fit for the Mazda CX-30 2019-24.</b> Additive steering/torque bias; may be negative. 0 = no bias."), ""},
-    {"MazdaCX50TuneA", tr("Mazda CX-50 — Sigmoid Slope (a)"), tr("<b>The 'a' coefficient of the \"sigmoid + linear\" lateral-acceleration-to-torque fit for the Mazda CX-50 2022-24.</b> Controls how sharply torque ramps up near zero lateral acceleration."), ""},
-    {"MazdaCX50TuneB", tr("Mazda CX-50 — Sigmoid Gain (b)"), tr("<b>The 'b' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-50 2022-24.</b> Scales the sigmoid (non-linear) portion of the torque curve."), ""},
-    {"MazdaCX50TuneC", tr("Mazda CX-50 — Linear Gain (c)"), tr("<b>The 'c' coefficient of the \"sigmoid + linear\" fit for the Mazda CX-50 2022-24.</b> Scales the linear portion of the torque curve."), ""},
-    {"MazdaCX50TuneD", tr("Mazda CX-50 — Torque Offset (d)"), tr("<b>The 'd' constant torque offset of the \"sigmoid + linear + offset\" fit for the Mazda CX-50 2022-24.</b> Additive steering/torque bias; may be negative. 0 = no bias."), ""},
-    {"MazdaAutoTune", tr("Auto-Tune Now"), tr("<b>Learn the Mazda lateral tune from your own driving logs.</b> Recursively scans your saved drives, keeps the clean lateral samples (steering untouched) in a rolling data set, refits the \"sigmoid + linear\" curve, and writes the result for your car. Runs while parked and can take a while the first time."), ""},
-    {"MazdaAutoTuneDeadzone", tr("Auto-Tune Lateral Deadzone"), tr("<b>Lateral acceleration deadzone used by Auto-Tune.</b> Samples with |lateral acceleration| below this are ignored when fitting, so straight-line driving doesn't bias the curve. Applied at fit time, so changing it takes effect on the next Auto-Tune without reprocessing logs."), ""},
-    {"MazdaTuneReset", tr("Reset Mazda Tune"), tr("<b>Reset all Mazda lateral tune coefficients back to their defaults.</b>"), ""},
+    {"MazdaToggles", tr("Mazda Settings"), tr("Mazda lateral tune."), ""},
+    {"Mazda3TuneA", tr("Mazda 3 — a"), tr("Sigmoid slope."), ""},
+    {"Mazda3TuneB", tr("Mazda 3 — b"), tr("Sigmoid gain."), ""},
+    {"Mazda3TuneC", tr("Mazda 3 — c"), tr("Linear gain (≥0)."), ""},
+    {"Mazda3TuneD", tr("Mazda 3 — d"), tr("Torque offset; ± OK, 0 = none."), ""},
+    {"MazdaCX30TuneA", tr("CX-30 — a"), tr("Sigmoid slope."), ""},
+    {"MazdaCX30TuneB", tr("CX-30 — b"), tr("Sigmoid gain."), ""},
+    {"MazdaCX30TuneC", tr("CX-30 — c"), tr("Linear gain (≥0)."), ""},
+    {"MazdaCX30TuneD", tr("CX-30 — d"), tr("Torque offset; ± OK, 0 = none."), ""},
+    {"MazdaCX50TuneA", tr("CX-50 — a"), tr("Sigmoid slope."), ""},
+    {"MazdaCX50TuneB", tr("CX-50 — b"), tr("Sigmoid gain."), ""},
+    {"MazdaCX50TuneC", tr("CX-50 — c"), tr("Linear gain (≥0)."), ""},
+    {"MazdaCX50TuneD", tr("CX-50 — d"), tr("Torque offset; ± OK, 0 = none."), ""},
+    {"MazdaAutoTune", tr("Auto-Tune Now"), tr("Fit the tune from drive logs. Parked only; previews first."), ""},
+    {"MazdaAutoTuneApply", tr("Apply Auto-Tune"), tr("Write the previewed tune, then reboot."), ""},
+    {"MazdaAutoTuneDeadzone", tr("Auto-Tune Deadzone"), tr("Ignore |lat accel| below this when fitting."), ""},
+    {"MazdaTuneReset", tr("Reset Mazda Tune"), tr("Restore default coefficients."), ""},
 
     {"SubaruToggles", tr("Subaru Settings"), tr("<b>FrogPilot features for Subaru vehicles.</b>"), ""},
     {"SubaruSNG", tr("Stop and Go"), tr("Stop and go for supported Subaru vehicles."), ""},
@@ -283,6 +284,17 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
         autoTuneButton->setValue(tr("Queued..."));
       });
       vehicleToggle = autoTuneButton;
+
+    } else if (param == "MazdaAutoTuneApply") {
+      ButtonControl *applyButton = new ButtonControl(title, tr("APPLY"), desc);
+      QObject::connect(applyButton, &ButtonControl::clicked, [this]() {
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Write the previewed Auto-Tune result to your car's lateral tune?"), this)) {
+          return;
+        }
+        autoTuneRebootPrompted = false;
+        params_memory.putBool("MazdaAutoTuneApply", true);
+      });
+      vehicleToggle = applyButton;
 
     } else if (param == "MazdaTuneReset") {
       ButtonControl *mazdaResetButton = new ButtonControl(title, tr("RESET"), desc);
@@ -458,9 +470,10 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
 
   if (ButtonControl *autoTuneButton = qobject_cast<ButtonControl*>(toggles["MazdaAutoTune"])) {
     QString status = QString::fromStdString(params_memory.get("AutoTuneStatus"));
-    if (status.startsWith("Done|")) {
-      QString summary = status.mid(5);
-      autoTuneButton->setValue(summary);
+    if (status.startsWith("Preview|")) {
+      autoTuneButton->setValue(status.mid(8));
+    } else if (status.startsWith("Done|")) {
+      autoTuneButton->setValue(status.mid(5));
       if (!autoTuneRebootPrompted) {
         autoTuneRebootPrompted = true;
         if (FrogPilotConfirmationDialog::toggleReboot(this)) {

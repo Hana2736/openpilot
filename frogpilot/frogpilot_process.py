@@ -12,7 +12,7 @@ from openpilot.frogpilot.assets.theme_manager import THEME_COMPONENT_PARAMS, The
 from openpilot.frogpilot.common.frogpilot_functions import backup_toggles
 from openpilot.frogpilot.common.frogpilot_utilities import capture_report, flash_panda, is_url_pingable, lock_doors, run_thread_with_lock, update_maps, update_openpilot
 from openpilot.frogpilot.common.frogpilot_variables import ERROR_LOGS_PATH, FrogPilotVariables, get_frogpilot_toggles, params, params_cache, params_memory
-from openpilot.frogpilot.common.torque_autotune import run_autotune
+from openpilot.frogpilot.common.torque_autotune import apply_pending, run_autotune
 from openpilot.frogpilot.controls.frogpilot_planner import FrogPilotPlanner
 from openpilot.frogpilot.system.frogpilot_stats import send_stats
 from openpilot.frogpilot.system.frogpilot_tracking import FrogPilotTracking
@@ -44,11 +44,15 @@ def assets_checks(model_manager, theme_manager, frogpilot_toggles):
 
 def autotune_check(started):
   # Auto-Tune is heavy (reads many rlogs) so it only runs while parked.
-  if started or not params_memory.get_bool("MazdaAutoTune"):
+  if started:
     return
-  params_memory.remove("MazdaAutoTune")
-  params_memory.put("AutoTuneStatus", "Queued...")
-  run_thread_with_lock("mazda_autotune", run_autotune)
+  if params_memory.get_bool("MazdaAutoTuneApply"):
+    params_memory.remove("MazdaAutoTuneApply")
+    apply_pending()
+  if params_memory.get_bool("MazdaAutoTune"):
+    params_memory.remove("MazdaAutoTune")
+    params_memory.put("AutoTuneStatus", "Queued...")
+    run_thread_with_lock("mazda_autotune", run_autotune)
 
 
 def update_checks(model_manager, now, theme_manager, frogpilot_toggles, boot_run=False):

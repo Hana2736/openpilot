@@ -514,6 +514,7 @@ frogpilot_default_params: list[tuple[str, str | bytes, int, str]] = [
 
 misc_tuning_levels: list[tuple[str, str | bytes, int, str]] = [
   ("MazdaAutoTune", "0", 3, "0"),
+  ("MazdaAutoTuneApply", "0", 3, "0"),
   ("MazdaTuneReset", "0", 3, "0"),
   ("SidebarMetrics", "1", 3, "0"),
   ("SLCPriority", "", 2, ""),
