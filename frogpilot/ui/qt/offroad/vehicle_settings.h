@@ -21,6 +21,8 @@ private:
   bool forceOpenDescriptions;
   bool started;
 
+  QString autoTuneStatusShown;
+
   std::map<QString, AbstractControl*> toggles;
 
   QSet<QString> gmKeys = {"ExperimentalGMTune", "LongPitch", "VoltSNG"};

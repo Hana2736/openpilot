@@ -288,7 +288,14 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     } else if (param == "MazdaAutoTuneApply") {
       ButtonControl *applyButton = new ButtonControl(title, tr("APPLY"), desc);
       QObject::connect(applyButton, &ButtonControl::clicked, [this]() {
-        if (!FrogPilotConfirmationDialog::yesorno(tr("Write the previewed Auto-Tune result to your car's lateral tune?"), this)) {
+        QString status = QString::fromStdString(params_memory.get("AutoTuneStatus"));
+        QStringList parts = status.split('|');
+        QString detail = (parts.value(0) == "Preview" && parts.size() >= 3) ? parts.value(2) : QString();
+        if (detail.isEmpty()) {
+          ConfirmationDialog::alert(tr("No previewed tune to apply. Run Auto-Tune first."), this);
+          return;
+        }
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Apply this tune to your car?\n\n") + detail, this)) {
           return;
         }
         autoTuneRebootPrompted = false;
@@ -469,18 +476,26 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
   started = s.scene.started;
 
   if (ButtonControl *autoTuneButton = qobject_cast<ButtonControl*>(toggles["MazdaAutoTune"])) {
+    // status protocol: "STATE|<short label>|<full wrapping detail>" for
+    // Preview/Done; plain text otherwise (progress/idle/errors).
     QString status = QString::fromStdString(params_memory.get("AutoTuneStatus"));
-    if (status.startsWith("Preview|")) {
-      autoTuneButton->setValue(status.mid(8));
-    } else if (status.startsWith("Done|")) {
-      autoTuneButton->setValue(status.mid(5));
-      if (!autoTuneRebootPrompted) {
+    if (status == autoTuneStatusShown) {
+      return;
+    }
+    autoTuneStatusShown = status;
+    QStringList parts = status.split('|');
+    QString state = parts.value(0);
+    if ((state == "Preview" || state == "Done") && parts.size() >= 3) {
+      autoTuneButton->setValue(parts.value(1));
+      autoTuneButton->setDescription(parts.value(2));   // full a/b/c/d, wraps - no truncation
+      autoTuneButton->showDescription();
+      if (state == "Done" && !autoTuneRebootPrompted) {
         autoTuneRebootPrompted = true;
         if (FrogPilotConfirmationDialog::toggleReboot(this)) {
           Hardware::reboot();
         }
       }
-    } else {
+    } else if (!status.isEmpty()) {
       autoTuneButton->setValue(status);
     }
   }

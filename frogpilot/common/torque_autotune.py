@@ -440,8 +440,9 @@ def run_autotune() -> None:
   # reviews the numbers and taps "Apply Auto-Tune" to commit (apply_pending).
   params.put(PENDING_PARAM, json.dumps({"prefix": prefix, "a": a, "b": b, "c": c, "d": d,
                                         "n": int(new_samples)}))
-  _set_status(f"Preview|{prefix} a={a:.5f} b={b:.5f} c={c:.5f} d={d:.5f} "
-              f"({new_samples} new). Tap Apply to use.")
+  # status protocol: STATE|<short button label>|<full wrapping detail>
+  _set_status(f"Preview|Preview ready — tap Apply|{prefix}  "
+              f"a={a:.5f}  b={b:.5f}  c={c:.5f}  d={d:.5f}  ·  {new_samples} samples")
 
 
 def apply_pending() -> None:
@@ -461,8 +462,8 @@ def apply_pending() -> None:
   for suffix, value in zip(("A", "B", "C", "D"), vals):
     params.put_float(f"{prefix}Tune{suffix}", float(value))
   params.remove(PENDING_PARAM)
-  _set_status(f"Done|{prefix} applied a={vals[0]:.5f} b={vals[1]:.5f} "
-              f"c={vals[2]:.5f} d={vals[3]:.5f}. Reboot to apply.")
+  _set_status(f"Done|Applied — reboot to use|{prefix} applied  "
+              f"a={vals[0]:.5f}  b={vals[1]:.5f}  c={vals[2]:.5f}  d={vals[3]:.5f}")
 
 
 if __name__ == "__main__":
