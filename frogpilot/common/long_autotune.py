@@ -79,7 +79,8 @@ PITCH_THRESH = 0.04            # rad
 # Sanity gates for the per-bin fit (in CAN counts, not m/s^2).
 DZ_MAX_COUNTS = 100            # |dz_can - 2000| <= 100  (~±0.5 m/s²)
 SLOPE_LO, SLOPE_HI = 1.0 / 600.0, 1.0 / 60.0   # m/s² per count, ≈[0.00167, 0.0167]
-MIN_PER_SIDE = 30              # >=30 above-center and >=30 below-center per bin
+MIN_PER_SIDE = 8               # >=8 above-center and >=8 below-center per bin
+MIN_FOR_LINE = 8               # min total samples for the fallback no-deadband line
 
 # Sample grid.
 GRID_HZ = 50.0
@@ -341,17 +342,36 @@ def _fit_pwl_deadband(can_cmd: np.ndarray, ae: np.ndarray):
 
 # --- main ------------------------------------------------------------------
 
-def _print_row(label, n, fit):
-  if fit is None:
-    print(f"  {label:>10s}  n={n:5d}  -- insufficient samples or sanity gates failed --")
+def _fit_line(can_cmd: np.ndarray, ae: np.ndarray):
+  """Fallback when the deadband fit gates fail: regress aEgo against
+  (can_cmd - 2000) with no deadband, free intercept. Returns
+  (slope_per_100ct, intercept, r2). slope is m/s² per 100 CAN counts."""
+  if can_cmd.size < MIN_FOR_LINE:
+    return None
+  x = (can_cmd - ACC_CMD_CENTER)
+  X = np.column_stack([x, np.ones_like(x)])
+  beta, *_ = np.linalg.lstsq(X, ae, rcond=None)
+  pred = X @ beta
+  ss_res = float(((ae - pred) ** 2).sum())
+  ss_tot = max(1e-9, float(((ae - ae.mean()) ** 2).sum()))
+  return float(beta[0] * 100.0), float(beta[1]), 1.0 - ss_res / ss_tot
+
+
+def _print_row(label, n, fit, line):
+  if fit is not None:
+    s_pos_100 = fit['s_pos'] * 100.0
+    s_neg_100 = fit['s_neg'] * 100.0
+    print(f"  {label:>10s}  n={n:5d}  "
+          f"dz_can=[{fit['dz_lo']:.0f},{fit['dz_hi']:.0f}]  "
+          f"+slope={s_pos_100:.3f}/100ct (n={fit['n_pos']:4d}, R²={fit['r2_pos']:+.3f})  "
+          f"-slope={s_neg_100:.3f}/100ct (n={fit['n_neg']:4d}, R²={fit['r2_neg']:+.3f})")
     return
-  # Report slopes in m/s² per count AND in m/s² per 100 counts for readability.
-  s_pos_100 = fit['s_pos'] * 100.0
-  s_neg_100 = fit['s_neg'] * 100.0
-  print(f"  {label:>10s}  n={n:5d}  "
-        f"dz_can=[{fit['dz_lo']:.0f},{fit['dz_hi']:.0f}]  "
-        f"+slope={s_pos_100:.3f}/100ct (n={fit['n_pos']:4d}, R²={fit['r2_pos']:+.3f})  "
-        f"-slope={s_neg_100:.3f}/100ct (n={fit['n_neg']:4d}, R²={fit['r2_neg']:+.3f})")
+  if line is not None:
+    slope100, intercept, r2 = line
+    print(f"  {label:>10s}  n={n:5d}  [deadband fit gated; fallback line] "
+          f"slope={slope100:+.3f}/100ct  intercept={intercept:+.3f}m/s²  R²={r2:+.3f}")
+    return
+  print(f"  {label:>10s}  n={n:5d}  -- too few samples even for the line fallback --")
 
 
 def main():
@@ -422,7 +442,8 @@ def main():
       print(f"  {label:>10s}  n=    0  --")
       continue
     fit = _fit_pwl_deadband(cmd[mask], ae[mask])
-    _print_row(label, n_bin, fit)
+    line = _fit_line(cmd[mask], ae[mask]) if fit is None else None
+    _print_row(label, n_bin, fit, line)
 
   print(f"\n(Gates: per-side n >= {MIN_PER_SIDE}, |dz_can - {ACC_CMD_CENTER:.0f}| <= {DZ_MAX_COUNTS},")
   print(f" slope in [{SLOPE_LO*100:.3f}, {SLOPE_HI*100:.3f}] m/s² per 100 counts.")
