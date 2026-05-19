@@ -101,10 +101,20 @@ def _ffill(a: np.ndarray) -> np.ndarray:
 
 def _centered_rolling_std(x: np.ndarray, w: int = ROLLING_WINDOW) -> np.ndarray:
   """Centered rolling std (ddof=1), NaN where the window is incomplete (pandas-like)."""
+  x = np.asarray(x, dtype=float)
   n = x.shape[0]
   out = np.full(n, np.nan)
   if n < w:
     return out
+  # np.cumsum propagates NaN, so a single leading NaN (events before the first
+  # controlsState, which ffill can't fill) would poison the whole result and
+  # wipe out every sample. Forward- then back-fill before the cumsum; rows in
+  # that NaN region are excluded by the caller's validity mask anyway.
+  if np.isnan(x).any():
+    x = _ffill(x)
+    if x.size and np.isnan(x[0]):
+      finite = x[~np.isnan(x)]
+      x = np.where(np.isnan(x), finite[0] if finite.size else 0.0, x)
   c1 = np.concatenate(([0.0], np.cumsum(x)))
   c2 = np.concatenate(([0.0], np.cumsum(x * x)))
   s = c1[w:] - c1[:-w]
@@ -126,10 +136,34 @@ def _read_rlog_bytes(path: Path) -> bytes:
   return dat
 
 
+EMPTY_SAMPLES = np.empty((0, 3), dtype=np.float32)
+
+
 def extract_segment(path: Path) -> np.ndarray | None:
-  """Return survivors for one rlog as an (N, 3) float32 array: output, lat_accel, pitch."""
+  """Survivors for one rlog as an (N, 3) float32 array: output, lat_accel, pitch.
+
+  Returns an empty (0, 3) array if the log read fine but nothing passed the
+  filters (e.g. a parked segment) - the caller treats that as "done".
+  Returns None only if the log could not be read at all (so it can be retried).
+  rlogs are very commonly truncated at the tail (power-down mid-write), so we
+  iterate message-by-message and keep everything parsed before the break
+  instead of throwing the whole 30+ MB segment away on one bad message.
+  """
   try:
-    events = list(capnp_log.Event.read_multiple_bytes(_read_rlog_bytes(path)))
+    dat = _read_rlog_bytes(path)
+  except Exception:
+    return None
+
+  events = []
+  try:
+    reader = iter(capnp_log.Event.read_multiple_bytes(dat))
+    while True:
+      try:
+        events.append(next(reader))
+      except StopIteration:
+        break
+      except Exception:
+        break  # truncated/corrupt from here on - salvage what we have
   except Exception:
     return None
 
@@ -184,7 +218,7 @@ def extract_segment(path: Path) -> np.ndarray | None:
   # (see fit_store) so the slider stays adjustable without reprocessing.
 
   if not keep.any():
-    return None
+    return EMPTY_SAMPLES  # read OK, just nothing usable here (e.g. parked) -> don't retry
 
   return np.stack([cols["output"][keep], cols["lat_accel"][keep], cols["pitch"][keep]], axis=1).astype(np.float32)
 
@@ -380,10 +414,14 @@ def run_autotune() -> None:
   for i, path in enumerate(todo):
     _set_status(f"Processing logs... {i + 1}/{len(todo)}")
     rows = extract_segment(path)
-    if rows is not None and rows.shape[0]:
+    if rows is None:
+      # couldn't read the log at all - leave it OUT of processed so a future
+      # run can retry it instead of permanently burning the drive.
+      continue
+    if rows.shape[0]:
       _append_samples(rows)
       new_samples += rows.shape[0]
-    processed.add(str(path))
+    processed.add(str(path))            # read OK (even if 0 survivors) -> done
     if i % 20 == 0:
       _save_processed(processed)
 
