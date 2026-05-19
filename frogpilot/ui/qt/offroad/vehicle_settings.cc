@@ -497,7 +497,7 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
       autoTuneStatusShown = status;
       QStringList parts = status.split('|');
       QString state = parts.value(0);
-      if ((state == "Preview" || state == "Done") && parts.size() >= 3) {
+      if ((state == "Preview" || state == "Done" || state == "Refused") && parts.size() >= 3) {
         autoTuneButton->setValue(parts.value(1));
         autoTuneButton->setDescription(parts.value(2));   // full a/b/c/d, wraps - no truncation
         autoTuneButton->showDescription();

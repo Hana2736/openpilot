@@ -436,6 +436,24 @@ def run_autotune() -> None:
     return
 
   a, b, c, d = (float(v) for v in result)
+
+  # Same range gate the live interface enforces (mazda/interface.py:68):
+  # the siglin model evaluated over lat_accel ∈ [-8, 8) must cover [-1, 1],
+  # else np.interp silently clips and controlsd would crash on engage.
+  # The sigmoid term saturates at ±0.5·b so this is just 0.5·b + 8·c + d > 1
+  # on each side (plus a tiny margin so apply doesn't land right on the gate).
+  max_torque = 0.5 * b + 8.0 * c + d
+  min_torque = -0.5 * b - 8.0 * c + d
+  if max_torque <= 1.02 or min_torque >= -1.02:
+    _set_status(
+      f"Refused|Fit can't reach ±1 torque (try c≥{(1.02 - 0.5 * b - abs(d)) / 8.0:.3f})|"
+      f"Fit refused: max={max_torque:.3f} min={min_torque:.3f} from a={a:.3f} b={b:.3f} "
+      f"c={c:.4f} d={d:.3f}. Linear gain c collapsed — likely too few hard-cornering "
+      f"samples (>3 m/s² lat accel). Either bump c manually in the slider, or drive "
+      f"more curvy roads and re-run. Not applied; live tune unchanged."
+    )
+    return
+
   # Preview only: stash the candidate, do NOT touch the live params. The user
   # reviews the numbers and taps "Apply Auto-Tune" to commit (apply_pending).
   params.put(PENDING_PARAM, json.dumps({"prefix": prefix, "a": a, "b": b, "c": c, "d": d,
