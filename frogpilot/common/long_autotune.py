@@ -47,7 +47,14 @@ DEFAULT_BINS_MS = (0.0, 4.0, 8.0, 14.0, 20.0, 28.0, 40.0)
 # SG_ ACCEL_CMD : 16|12@0+). Layout is non-byte-aligned - see
 # _decode_accel_cmd for the actual bit math (resolved against opendbc's
 # be_bits lookup). Stock-coast / openpilot-zero both center on 2000.
+#
+# Msg 544 appears on multiple buses in the rlog: bus 0 (camera side,
+# IDLE pattern - bytes 2,3 latched at 01 F4 with no real ACCEL_CMD
+# changes) and "bus 2 echo" with src=130 (panda's own TX echo to the
+# powertrain bus, mazdacan.py:create_acc_cmd). Only src=130 carries the
+# ACCEL_CMD that actually drives the car.
 ACC_MSG_ADDR = 544
+ACC_MSG_SRC = 130                   # bus 2 TX echo
 ACC_CMD_CENTER = 2000.0
 # Tolerance on CAN integer for "constant" inside a window: ±10 counts
 # corresponds to ±0.05 m/s² under the current 200 counts/(m/s²) affine,
@@ -133,7 +140,7 @@ def _extract_one(path: Path):
         cols["pitch"][i] = ev.liveLocationKalman.orientationNED.value[1]
       elif which == "can":
         for frame in ev.can:
-          if frame.address == ACC_MSG_ADDR:
+          if frame.address == ACC_MSG_ADDR and frame.src == ACC_MSG_SRC:
             cmd = _decode_accel_cmd(bytes(frame.dat))
             if cmd is not None:
               cols["can_cmd"][i] = float(cmd)
@@ -310,6 +317,8 @@ def _print_row(label, n, fit):
 def main():
   ap = argparse.ArgumentParser(description="Mazda Gen2 long static-map diagnostic")
   ap.add_argument("--limit-logs", type=int, default=0, help="0 = all available")
+  ap.add_argument("--skip-tail", type=int, default=0,
+                  help="skip the last N rlogs (the konik dir tail is parked junk)")
   ap.add_argument("--max-samples", type=int, default=200000)
   ap.add_argument("--bins", type=str, default=",".join(f"{b:g}" for b in DEFAULT_BINS_MS))
   args = ap.parse_args()
@@ -319,6 +328,8 @@ def main():
     sys.exit("--bins needs at least two edges")
 
   rlogs = find_rlogs()
+  if args.skip_tail > 0:
+    rlogs = rlogs[:-args.skip_tail]
   if args.limit_logs > 0:
     rlogs = rlogs[-args.limit_logs:]
   if not rlogs:
