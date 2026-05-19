@@ -1,0 +1,383 @@
+#!/usr/bin/env python3
+# Mazda Gen2 longitudinal "static-map" diagnostic.
+#
+# The current Gen2 long path is one affine map:
+#
+#     raw_acc_output = int(target_accel * accel_scale + accel_offset)
+#
+# (selfdrive/car/mazda/values.py + carcontroller.py), with a low-speed brake
+# overboost on top. Openpilot does NOT own actuator dynamics here - Mazda's own
+# ACC closed loop interprets the CAN setpoint we send. So the right ID problem
+# is: what is the steady-state forward map "CAN ACCEL_CMD on the bus -> achieved
+# aEgo", parameterized by vEgo? Once we have that, the carcontroller can use the
+# inverse instead of the global affine that spends time inside Mazda's own
+# deadband.
+#
+# We read the ACTUAL integer that was on the bus (Mazda msg 544 "ACC",
+# signal ACCEL_CMD = bits 16|12@0+, big-endian unsigned), not
+# carControl.actuators.accel. The plant (Mazda's onboard controller + throttle/
+# brake response) doesn't care whether that integer came from Mazda's own ACC
+# algorithm, from openpilot's affine, or from a blend - so logs collected with
+# BlendedACC=ON or stock ACC are all fair game. That's a much wider data set
+# than waiting for a pure-OP commute would give us.
+#
+# v1 is read-only. SSH in, run:
+#   python3 -m openpilot.frogpilot.common.long_autotune
+# It prints a per-speed-bin table of (n, dz_can, s_pos, s_neg, R²) and writes
+# nothing live. If the table looks structurally clean we promote to v2
+# (carcontroller integration with preview/apply).
+
+import argparse
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+
+from cereal import log as capnp_log
+from openpilot.frogpilot.common.torque_autotune import _ffill, _read_rlog_bytes, find_rlogs
+
+# --- defaults --------------------------------------------------------------
+
+# Speed bins (m/s). The lowest one overlaps brake_overboost (vEgo<6) on the
+# brake side; we still report it but tag it so it's not used for the inverse.
+DEFAULT_BINS_MS = (0.0, 4.0, 8.0, 14.0, 20.0, 28.0, 40.0)
+
+# Mazda CAN ACCEL_CMD wire format (mazda_2019.dbc: BO_ 544 ACC,
+# SG_ ACCEL_CMD : 16|12@0+). Layout is non-byte-aligned - see
+# _decode_accel_cmd for the actual bit math (resolved against opendbc's
+# be_bits lookup). Stock-coast / openpilot-zero both center on 2000.
+ACC_MSG_ADDR = 544
+ACC_CMD_CENTER = 2000.0
+# Tolerance on CAN integer for "constant" inside a window: ±10 counts
+# corresponds to ±0.05 m/s² under the current 200 counts/(m/s²) affine,
+# which is the same swing budget we used before.
+CMD_COUNTS_TOLERANCE = 10
+
+# Steady-state window thresholds.
+WINDOW_SECONDS = 1.0           # min steady duration
+AEGO_STD_MAX = 0.15            # m/s^2 - rolling std of aEgo inside window
+PITCH_THRESH = 0.04            # rad
+
+# Sanity gates for the per-bin fit (in CAN counts, not m/s^2).
+DZ_MAX_COUNTS = 100            # |dz_can - 2000| <= 100  (~±0.5 m/s²)
+SLOPE_LO, SLOPE_HI = 1.0 / 600.0, 1.0 / 60.0   # m/s² per count, ≈[0.00167, 0.0167]
+MIN_PER_SIDE = 30              # >=30 above-center and >=30 below-center per bin
+
+# Sample grid.
+GRID_HZ = 50.0
+GRID_DT = 1.0 / GRID_HZ
+
+
+# --- rlog -> uniform 50 Hz arrays ------------------------------------------
+
+def _decode_accel_cmd(dat: bytes) -> int | None:
+  """Decode Mazda ACC msg 544 ACCEL_CMD (DBC: 16|12@0+, big-endian unsigned).
+
+  opendbc resolves this to lsb=37, msb=16 (see opendbc/can/dbc.cc be_bits
+  lookup). The 12-bit signal is scattered across 3 bytes:
+    - byte 2, bit 0:        signal bit 11 (MSB)
+    - byte 3, bits 7..0:    signal bits 10..3
+    - byte 4, bits 7..5:    signal bits 2..0 (LSB)
+  Sanity: 0 m/s² command should land at value 2000 (carcontroller affine).
+  """
+  if len(dat) < 5:
+    return None
+  return ((dat[2] & 1) << 11) | (dat[3] << 3) | ((dat[4] >> 5) & 7)
+
+
+def _extract_one(path: Path):
+  """Returns dict of uniform 50 Hz arrays for one rlog, or None on read failure.
+
+  Keys: t, can_cmd (bus int), v_ego, a_ego, gas, brake, standstill, pitch.
+  """
+  try:
+    dat = _read_rlog_bytes(path)
+  except Exception:
+    return None
+
+  events = []
+  try:
+    reader = iter(capnp_log.Event.read_multiple_bytes(dat))
+    while True:
+      try:
+        events.append(next(reader))
+      except StopIteration:
+        break
+      except Exception:
+        break  # truncated tail: salvage what we have
+  except Exception:
+    return None
+
+  if not events:
+    return None
+  events.sort(key=lambda e: e.logMonoTime)
+
+  n = len(events)
+  t_evt = np.empty(n, dtype=np.float64)
+  cols = {k: np.full(n, np.nan, dtype=np.float64) for k in
+          ("can_cmd", "v_ego", "a_ego", "gas", "brake", "standstill", "pitch")}
+
+  for i, ev in enumerate(events):
+    t_evt[i] = ev.logMonoTime / 1e9
+    try:
+      which = ev.which()
+      if which == "carState":
+        cs = ev.carState
+        cols["v_ego"][i] = cs.vEgo
+        cols["a_ego"][i] = cs.aEgo
+        cols["gas"][i] = 1.0 if cs.gasPressed else 0.0
+        cols["brake"][i] = 1.0 if cs.brakePressed else 0.0
+        cols["standstill"][i] = 1.0 if cs.standstill else 0.0
+      elif which == "liveLocationKalman":
+        cols["pitch"][i] = ev.liveLocationKalman.orientationNED.value[1]
+      elif which == "can":
+        for frame in ev.can:
+          if frame.address == ACC_MSG_ADDR:
+            cmd = _decode_accel_cmd(bytes(frame.dat))
+            if cmd is not None:
+              cols["can_cmd"][i] = float(cmd)
+            break
+    except Exception:
+      continue
+
+  if not np.isfinite(t_evt).any():
+    return None
+  t0, t1 = t_evt[0], t_evt[-1]
+  if t1 - t0 < 2.0:
+    return None  # rlog too short to contain a steady window
+
+  # ffill on event-indexed arrays, then sample onto a uniform 50 Hz grid using
+  # right-side searchsorted (latest event at or before each grid tick).
+  for k in cols:
+    cols[k] = _ffill(cols[k])
+
+  ng = int((t1 - t0) / GRID_DT) + 1
+  t_grid = t0 + np.arange(ng) * GRID_DT
+  idx = np.searchsorted(t_evt, t_grid, side="right") - 1
+  idx = np.clip(idx, 0, n - 1)
+
+  out = {"t": t_grid}
+  for k, v in cols.items():
+    out[k] = v[idx]
+  return out
+
+
+# --- steady-state window detection ----------------------------------------
+
+def _rolling_min_max(x: np.ndarray, w: int):
+  """Naive O(n*w) rolling min/max - w is small (50) so this is fine."""
+  n = x.shape[0]
+  if n < w:
+    return np.full(n, np.nan), np.full(n, np.nan)
+  # Stride trick would be cheaper; for w=50 and n~1e5 the loop is still cheap.
+  cmin = np.full(n, np.nan)
+  cmax = np.full(n, np.nan)
+  for off in range(w):
+    seg = x[off:n - w + 1 + off]
+    if off == 0:
+      cmin[w - 1:] = seg
+      cmax[w - 1:] = seg
+    else:
+      cmin[w - 1:] = np.minimum(cmin[w - 1:], seg)
+      cmax[w - 1:] = np.maximum(cmax[w - 1:], seg)
+  return cmin, cmax
+
+
+def _rolling_std(x: np.ndarray, w: int):
+  n = x.shape[0]
+  out = np.full(n, np.nan)
+  if n < w:
+    return out
+  c1 = np.concatenate(([0.0], np.cumsum(x)))
+  c2 = np.concatenate(([0.0], np.cumsum(x * x)))
+  s = c1[w:] - c1[:-w]
+  sq = c2[w:] - c2[:-w]
+  var = (sq - s * s / w) / max(1, w - 1)
+  out[w - 1:] = np.sqrt(np.clip(var, 0.0, None))
+  return out
+
+
+def _collect_steady_samples(rec):
+  """Returns (n,3) array of (v_ego_med, can_cmd_med, a_ego_med) per window."""
+  w = int(WINDOW_SECONDS * GRID_HZ)
+
+  cc = rec["can_cmd"]
+  ae = rec["a_ego"]
+  ve = rec["v_ego"]
+  if cc.shape[0] < w:
+    return np.empty((0, 3), dtype=np.float32)
+
+  base_valid = (np.isfinite(cc) & np.isfinite(ae) & np.isfinite(ve)
+                & np.isfinite(rec["pitch"]) & np.isfinite(rec["gas"])
+                & np.isfinite(rec["brake"]) & np.isfinite(rec["standstill"]))
+
+  # Stay off samples where the driver is fighting the controller, or where
+  # the car is held against the brake at standstill (aEgo≈0 regardless of cmd).
+  driver_clean = (rec["gas"] < 0.5) & (rec["brake"] < 0.5) & (rec["standstill"] < 0.5)
+  pitch_ok = np.abs(rec["pitch"]) <= PITCH_THRESH
+
+  # Steady-state filters: can_cmd swing within tolerance, aEgo settled.
+  cc_min, cc_max = _rolling_min_max(cc, w)
+  cc_swing = cc_max - cc_min
+  ae_std = _rolling_std(ae, w)
+
+  mask_all = base_valid & driver_clean & pitch_ok
+  mask_f = mask_all.astype(np.float64)
+  mask_min, _ = _rolling_min_max(mask_f, w)
+
+  ok = (np.isfinite(cc_swing) & (cc_swing <= CMD_COUNTS_TOLERANCE)
+        & np.isfinite(ae_std) & (ae_std <= AEGO_STD_MAX)
+        & (mask_min > 0.5))
+
+  if not ok.any():
+    return np.empty((0, 3), dtype=np.float32)
+
+  # One sample per non-overlapping window.
+  rows = []
+  i = w - 1
+  end = cc.shape[0]
+  while i < end:
+    if ok[i]:
+      lo = i - w + 1
+      rows.append((float(np.median(ve[lo:i + 1])),
+                   float(np.median(cc[lo:i + 1])),
+                   float(np.median(ae[lo:i + 1]))))
+      i += w
+    else:
+      i += 1
+  if not rows:
+    return np.empty((0, 3), dtype=np.float32)
+  return np.asarray(rows, dtype=np.float32)
+
+
+# --- piecewise-affine with deadband ---------------------------------------
+
+def _fit_pwl_deadband(can_cmd: np.ndarray, ae: np.ndarray):
+  """Fit aEgo = s_pos*(can - dz_hi) for can>dz_hi, 0 in [dz_lo, dz_hi],
+  s_neg*(can - dz_lo) for can<dz_lo. Inputs are raw 12-bit ints centered
+  on ~2000. Slopes are m/s² per CAN count. Grid search over (dz_lo, dz_hi)
+  inside ±DZ_MAX_COUNTS of 2000. Returns dict or None if gates fail.
+  """
+  if (can_cmd > ACC_CMD_CENTER).sum() < MIN_PER_SIDE or (can_cmd < ACC_CMD_CENTER).sum() < MIN_PER_SIDE:
+    return None
+
+  dz_grid = np.arange(-DZ_MAX_COUNTS, DZ_MAX_COUNTS + 1, 10) + ACC_CMD_CENTER
+  best = None
+  for dz_lo in dz_grid:
+    for dz_hi in dz_grid:
+      if dz_hi < dz_lo:
+        continue
+      mt = can_cmd > dz_hi
+      mb = can_cmd < dz_lo
+      if mt.sum() < MIN_PER_SIDE or mb.sum() < MIN_PER_SIDE:
+        continue
+      x_t = can_cmd[mt] - dz_hi
+      y_t = ae[mt]
+      x_b = can_cmd[mb] - dz_lo
+      y_b = ae[mb]
+      st = float(x_t @ y_t) / float(x_t @ x_t)
+      sb = float(x_b @ y_b) / float(x_b @ x_b)
+      if not (SLOPE_LO <= st <= SLOPE_HI) or not (SLOPE_LO <= sb <= SLOPE_HI):
+        continue
+      pred_t = st * x_t
+      pred_b = sb * x_b
+      sse = float(((y_t - pred_t) ** 2).sum() + ((y_b - pred_b) ** 2).sum())
+      if best is None or sse < best["sse"]:
+        r2_t = 1.0 - float(((y_t - pred_t) ** 2).sum()) / max(1e-9, float(((y_t - y_t.mean()) ** 2).sum()))
+        r2_b = 1.0 - float(((y_b - pred_b) ** 2).sum()) / max(1e-9, float(((y_b - y_b.mean()) ** 2).sum()))
+        best = {"dz_lo": float(dz_lo), "dz_hi": float(dz_hi),
+                "s_pos": st, "s_neg": sb, "r2_pos": r2_t, "r2_neg": r2_b,
+                "n_pos": int(mt.sum()), "n_neg": int(mb.sum()), "sse": sse}
+  return best
+
+
+# --- main ------------------------------------------------------------------
+
+def _print_row(label, n, fit):
+  if fit is None:
+    print(f"  {label:>10s}  n={n:5d}  -- insufficient samples or sanity gates failed --")
+    return
+  # Report slopes in m/s² per count AND in m/s² per 100 counts for readability.
+  s_pos_100 = fit['s_pos'] * 100.0
+  s_neg_100 = fit['s_neg'] * 100.0
+  print(f"  {label:>10s}  n={n:5d}  "
+        f"dz_can=[{fit['dz_lo']:.0f},{fit['dz_hi']:.0f}]  "
+        f"+slope={s_pos_100:.3f}/100ct (n={fit['n_pos']:4d}, R²={fit['r2_pos']:+.3f})  "
+        f"-slope={s_neg_100:.3f}/100ct (n={fit['n_neg']:4d}, R²={fit['r2_neg']:+.3f})")
+
+
+def main():
+  ap = argparse.ArgumentParser(description="Mazda Gen2 long static-map diagnostic")
+  ap.add_argument("--limit-logs", type=int, default=0, help="0 = all available")
+  ap.add_argument("--max-samples", type=int, default=200000)
+  ap.add_argument("--bins", type=str, default=",".join(f"{b:g}" for b in DEFAULT_BINS_MS))
+  args = ap.parse_args()
+
+  bins = np.asarray([float(x) for x in args.bins.split(",")], dtype=float)
+  if bins.size < 2:
+    sys.exit("--bins needs at least two edges")
+
+  rlogs = find_rlogs()
+  if args.limit_logs > 0:
+    rlogs = rlogs[-args.limit_logs:]
+  if not rlogs:
+    sys.exit("no rlogs under /data/media/0/realdata*")
+
+  print(f"Scanning {len(rlogs)} rlogs for steady-state long samples...")
+  print(f"(Reading bus ACCEL_CMD from msg {ACC_MSG_ADDR}; BlendedACC state irrelevant.)")
+  t_start = time.time()
+
+  all_rows = []
+  total_samples = 0
+  for i, path in enumerate(rlogs, 1):
+    rec = _extract_one(path)
+    if rec is None:
+      print(f"  [{i:3d}/{len(rlogs)}] {path.parent.name}: unreadable")
+      continue
+    rows = _collect_steady_samples(rec)
+    total_samples += rows.shape[0]
+    if rows.shape[0]:
+      all_rows.append(rows)
+    print(f"  [{i:3d}/{len(rlogs)}] {path.parent.name}: +{rows.shape[0]} steady windows  (running total {total_samples})")
+    if total_samples >= args.max_samples:
+      print(f"  -- hit --max-samples cap ({args.max_samples}); stopping ingest")
+      break
+
+  if not all_rows:
+    sys.exit("no steady-state windows found")
+
+  samples = np.concatenate(all_rows, axis=0)  # (N, 3): v_ego, can_cmd, a_ego
+  print(f"\nCollected {samples.shape[0]} steady windows in {time.time() - t_start:.1f}s")
+
+  v = samples[:, 0]
+  cmd = samples[:, 1]
+  ae = samples[:, 2]
+  med = float(np.median(cmd))
+  print(f"can_cmd range observed: [{cmd.min():.0f}, {cmd.max():.0f}]  median {med:.0f}")
+  if not (1700.0 <= med <= 2300.0):
+    print("WARNING: median can_cmd is not near 2000 - decode of ACC msg 544")
+    print("ACCEL_CMD may be wrong, or the dataset is heavily skewed. Bailing.")
+    sys.exit(3)
+
+  print("\nPer-bin piecewise-affine-with-deadband fit (input units: 12-bit CAN ints, output: m/s²):")
+  print("  bin (m/s)   n              deadband              +slope (above dz_hi)            -slope (below dz_lo)")
+  for i in range(bins.size - 1):
+    lo, hi = bins[i], bins[i + 1]
+    mask = (v >= lo) & (v < hi)
+    n_bin = int(mask.sum())
+    label = f"{lo:g}-{hi:g}"
+    if n_bin == 0:
+      print(f"  {label:>10s}  n=    0  --")
+      continue
+    fit = _fit_pwl_deadband(cmd[mask], ae[mask])
+    _print_row(label, n_bin, fit)
+
+  print(f"\n(Gates: per-side n >= {MIN_PER_SIDE}, |dz_can - {ACC_CMD_CENTER:.0f}| <= {DZ_MAX_COUNTS},")
+  print(f" slope in [{SLOPE_LO*100:.3f}, {SLOPE_HI*100:.3f}] m/s² per 100 counts.")
+  print(" Lowest bin overlaps Mazda's brake_overboost regime on the brake side -")
+  print(" its -slope reflects overboost-distorted samples, ignore for inverse design.)")
+
+
+if __name__ == "__main__":
+  main()
