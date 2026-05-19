@@ -437,20 +437,40 @@ def run_autotune() -> None:
 
   a, b, c, d = (float(v) for v in result)
 
-  # Same range gate the live interface enforces (mazda/interface.py:68):
-  # the siglin model evaluated over lat_accel ∈ [-8, 8) must cover [-1, 1],
-  # else np.interp silently clips and controlsd would crash on engage.
-  # The sigmoid term saturates at ±0.5·b so this is just 0.5·b + 8·c + d > 1
-  # on each side (plus a tiny margin so apply doesn't land right on the gate).
-  max_torque = 0.5 * b + 8.0 * c + d
-  min_torque = -0.5 * b - 8.0 * c + d
-  if max_torque <= 1.02 or min_torque >= -1.02:
+  # Same range gate the live interface enforces (mazda/interface.py:68): the
+  # siglin model evaluated over lat_accel ∈ [-8, 8) must cover [-1, 1], else
+  # np.interp silently clips and controlsd asserts on engage. The sigmoid
+  # term saturates at ±0.5·b, so this reduces to ±(0.5·b + 8·c) + d outside
+  # [-1, 1] on both sides. Sparse hard-cornering data routinely lets c
+  # collapse to ~0; when that happens, graft the baseline (NON_LINEAR_-
+  # TORQUE_DEFAULTS) c value onto the fitted (a, b, d) and re-test coverage.
+  # Rationale: c only matters at large |lat_accel|, which is the regime the
+  # data was thin in, so substituting the upstream-tuned prior there is more
+  # honest than shipping a curve that can't reach ±1.
+  c_baseline = float(NON_LINEAR_TORQUE_DEFAULTS[
+      next(k for k, v in SIGLIN_TORQUE_PARAM_PREFIX.items() if v == prefix)][2])
+
+  def _covers(_a, _b, _c, _d) -> bool:
+    return (0.5 * _b + 8.0 * _c + _d > 1.02) and (-0.5 * _b - 8.0 * _c + _d < -1.02)
+
+  if not _covers(a, b, c, d):
+    if _covers(a, b, c_baseline, d):
+      c = c_baseline
+      _set_status(
+        f"Preview|Preview ready (c→baseline)|"
+        f"{prefix}  a={a:.5f}  b={b:.5f}  c={c:.5f} (←baseline; fit's c collapsed)  "
+        f"d={d:.5f}  ·  {int(new_samples)} new samples"
+      )
+      params.put(PENDING_PARAM, json.dumps({"prefix": prefix, "a": a, "b": b,
+                                            "c": c, "d": d, "n": int(new_samples)}))
+      return
     _set_status(
       f"Refused|Fit can't reach ±1 torque (try c≥{(1.02 - 0.5 * b - abs(d)) / 8.0:.3f})|"
-      f"Fit refused: max={max_torque:.3f} min={min_torque:.3f} from a={a:.3f} b={b:.3f} "
-      f"c={c:.4f} d={d:.3f}. Linear gain c collapsed — likely too few hard-cornering "
-      f"samples (>3 m/s² lat accel). Either bump c manually in the slider, or drive "
-      f"more curvy roads and re-run. Not applied; live tune unchanged."
+      f"Fit refused: max={0.5 * b + 8.0 * c + d:.3f} min={-0.5 * b - 8.0 * c + d:.3f} "
+      f"from a={a:.3f} b={b:.3f} c={c:.4f} d={d:.3f}. Linear gain c collapsed AND "
+      f"baseline-c fallback (c={c_baseline:.3f}) still doesn't cover ±1 — fitted b "
+      f"is too low. Bump c (and/or b) manually in the sliders. Not applied; live "
+      f"tune unchanged."
     )
     return
 
