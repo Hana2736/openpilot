@@ -493,24 +493,23 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
     // status protocol: "STATE|<short label>|<full wrapping detail>" for
     // Preview/Done; plain text otherwise (progress/idle/errors).
     QString status = QString::fromStdString(params_memory.get("AutoTuneStatus"));
-    if (status == autoTuneStatusShown) {
-      return;
-    }
-    autoTuneStatusShown = status;
-    QStringList parts = status.split('|');
-    QString state = parts.value(0);
-    if ((state == "Preview" || state == "Done") && parts.size() >= 3) {
-      autoTuneButton->setValue(parts.value(1));
-      autoTuneButton->setDescription(parts.value(2));   // full a/b/c/d, wraps - no truncation
-      autoTuneButton->showDescription();
-      if (state == "Done" && !autoTuneRebootPrompted) {
-        autoTuneRebootPrompted = true;
-        if (FrogPilotConfirmationDialog::toggleReboot(this)) {
-          Hardware::reboot();
+    if (status != autoTuneStatusShown) {
+      autoTuneStatusShown = status;
+      QStringList parts = status.split('|');
+      QString state = parts.value(0);
+      if ((state == "Preview" || state == "Done") && parts.size() >= 3) {
+        autoTuneButton->setValue(parts.value(1));
+        autoTuneButton->setDescription(parts.value(2));   // full a/b/c/d, wraps - no truncation
+        autoTuneButton->showDescription();
+        if (state == "Done" && !autoTuneRebootPrompted) {
+          autoTuneRebootPrompted = true;
+          if (FrogPilotConfirmationDialog::toggleReboot(this)) {
+            Hardware::reboot();
+          }
         }
+      } else if (!status.isEmpty()) {
+        autoTuneButton->setValue(status);
       }
-    } else if (!status.isEmpty()) {
-      autoTuneButton->setValue(status);
     }
   }
 
@@ -518,18 +517,17 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
     // long collector status protocol: "STATE|<short>|<full detail>" for
     // Idle/Collect; plain text for queued/errors.
     QString status = QString::fromStdString(params_memory.get("LongAutoTuneStatus"));
-    if (status == longCollectStatusShown) {
-      return;
-    }
-    longCollectStatusShown = status;
-    QStringList parts = status.split('|');
-    QString state = parts.value(0);
-    if ((state == "Idle" || state == "Collect") && parts.size() >= 3) {
-      collectButton->setValue(parts.value(1));
-      collectButton->setDescription(parts.value(2));
-      collectButton->showDescription();
-    } else if (!status.isEmpty()) {
-      collectButton->setValue(status);
+    if (status != longCollectStatusShown) {
+      longCollectStatusShown = status;
+      QStringList parts = status.split('|');
+      QString state = parts.value(0);
+      if ((state == "Idle" || state == "Collect") && parts.size() >= 3) {
+        collectButton->setValue(parts.value(1));
+        collectButton->setDescription(parts.value(2));
+        collectButton->showDescription();
+      } else if (!status.isEmpty()) {
+        collectButton->setValue(status);
+      }
     }
   }
 }
