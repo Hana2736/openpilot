@@ -44,19 +44,19 @@ REALDATA_ROOT = Path("/data/media/0")
 SMIN = 15.0           # m/s
 SMAX = 40.0           # m/s
 ROLL_THRESH = 0.02    # rad
-ACCEL_THRESH = 0.5    # m/s^2
-PITCH_THRESH = 0.02   # rad
+ACCEL_THRESH = 0.2    # m/s^2
+PITCH_THRESH = 0.04   # rad
 ERROR_THRESH = 0.1
-LAT_DEADZONE_DEFAULT = 0.0775  # only the default; the live value is adjustable in the GUI
-ROLLING_WINDOW = 1000
+LAT_DEADZONE_DEFAULT = 0.05  # only the default; the live value is adjustable in the GUI
+ROLLING_WINDOW = 500
 ROLLING_STD_MAX = 1.0
 
-# siglin params (a, b, c) are only constrained to be positive - we intentionally
-# do NOT clamp them to a "sane" range here so a fit can land on extreme values.
-# The GUI sliders are responsible for clamping what actually gets applied.
-# ('d' is not part of the model; the reported 4th value is the median spread.)
-PARAM_LO = np.array([1e-6, 1e-6, 1e-6])
-PARAM_HI = np.array([np.inf, np.inf, np.inf])
+# siglin model is now (sig*b + la*c + d): a, b, c are gains and are only
+# constrained to be positive; d is an additive torque offset and may be
+# negative, so it is left fully unbounded. We intentionally do NOT clamp the
+# gains to a "sane" range - the GUI sliders clamp what actually gets applied.
+PARAM_LO = np.array([1e-6, 1e-6, 1e-6, -np.inf])
+PARAM_HI = np.array([np.inf, np.inf, np.inf, np.inf])
 
 params = Params()
 
@@ -242,17 +242,18 @@ def _load_store() -> np.ndarray:
 
 # --- curve fitting (numpy reimplementation of fitting.py) ------------------
 
-def siglin(x: np.ndarray, a: float, b: float, c: float) -> np.ndarray:
+def siglin(x: np.ndarray, a: float, b: float, c: float, d: float) -> np.ndarray:
   s = a * x
   sig = np.sign(s) * (1.0 / (1.0 + np.exp(-np.abs(s))) - 0.5)
-  return sig * b + x * c
+  return sig * b + x * c + d
 
 
 def _curve_fit(x: np.ndarray, y: np.ndarray, p0: np.ndarray) -> np.ndarray | None:
-  """Bounded Levenberg-Marquardt least squares for the 3-param siglin model."""
+  """Bounded Levenberg-Marquardt least squares for the 4-param siglin model."""
   p = np.clip(p0.astype(float), PARAM_LO, PARAM_HI)
   lam = 1e-3
   eps = 1e-6
+  n_params = p.shape[0]
 
   def resid(pp):
     return siglin(x, *pp) - y
@@ -262,9 +263,9 @@ def _curve_fit(x: np.ndarray, y: np.ndarray, p0: np.ndarray) -> np.ndarray | Non
 
   for _ in range(200):
     # numeric Jacobian
-    J = np.empty((x.shape[0], 3))
-    for k in range(3):
-      dp = np.zeros(3)
+    J = np.empty((x.shape[0], n_params))
+    for k in range(n_params):
+      dp = np.zeros(n_params)
       dp[k] = eps * max(1.0, abs(p[k]))
       J[:, k] = (siglin(x, *(p + dp)) - siglin(x, *(p - dp))) / (2.0 * dp[k])
 
@@ -313,9 +314,8 @@ def fit_store() -> tuple[float, float, float, float] | None:
   if output.shape[0] < 2 * ROLLING_WINDOW:
     return None
 
-  # reflect for left/right symmetry to remove steering bias
-  output = np.concatenate([output, -output])
-  lat_accel = np.concatenate([lat_accel, -lat_accel])
+  # NOTE: no left/right reflection - the model's 'd' offset term now captures
+  # steering/torque bias instead of it being averaged out.
 
   bin_bounds = np.std(output) * 2.5
   if not np.isfinite(bin_bounds) or bin_bounds <= 0:
@@ -327,26 +327,22 @@ def fit_store() -> tuple[float, float, float, float] | None:
 
   n_bins = len(bins) - 1
   y_mean = np.full(n_bins, np.nan)
-  y_std = np.full(n_bins, np.nan)
   for b in range(n_bins):
     sel = bin_idx == b
     if sel.sum() >= 2:
       y_mean[b] = y[sel].mean()
-      y_std[b] = y[sel].std(ddof=1)
 
-  good = (np.abs(bin_centers) > 0.2) & ~np.isnan(y_mean) & ~np.isnan(y_std)
+  good = (np.abs(bin_centers) > 0.2) & ~np.isnan(y_mean)
   bc = bin_centers[good]
   ym = y_mean[good]
-  ys = y_std[good]
   if bc.shape[0] < 4:
     return None
 
-  fit = _curve_fit(ym, bc, np.array([6.0, 0.8, 0.18]))
+  fit = _curve_fit(ym, bc, np.array([6.0, 0.8, 0.18, 0.0]))
   if fit is None:
     return None
 
-  a, b, c = (float(v) for v in fit)
-  d = float(np.median(ys))
+  a, b, c, d = (float(v) for v in fit)
   return a, b, c, d
 
 

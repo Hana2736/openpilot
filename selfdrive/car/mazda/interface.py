@@ -24,10 +24,12 @@ SIGLIN_TORQUE_PARAM_PREFIX = {
   CAR.MAZDA_CX_50: "MazdaCX50",
 }
 
+# a, b, c are the sigmoid+linear gains; d is an additive torque offset
+# (0.0 = no bias, matching the original offset-less hardcoded tunes).
 NON_LINEAR_TORQUE_DEFAULTS = {
-  CAR.MAZDA_3_2019: (15.38616, 0.71899, 0.15015, 0.37999),
-  CAR.MAZDA_CX_30: (4.68689, 0.79999, 0.18244, 0.38763),
-  CAR.MAZDA_CX_50: (4.68689, 0.79999, 0.18244, 0.38763)
+  CAR.MAZDA_3_2019: (15.38616, 0.71899, 0.15015, 0.0),
+  CAR.MAZDA_CX_30: (4.68689, 0.79999, 0.18244, 0.0),
+  CAR.MAZDA_CX_50: (4.68689, 0.79999, 0.18244, 0.0)
 }
 
 
@@ -49,15 +51,16 @@ class CarInterface(CarInterfaceBase):
   def get_lataccel_torque_siglin(self) -> float:
 
     def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
-      # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
+      # The "lat_accel vs torque" relationship is assumed to be a "sigmoid + linear"
+      # curve plus a constant offset 'd' (steering/torque bias).
       # An important thing to consider is that the slope at 0 should be > 0 (ideally >1)
       # This has big effect on the stability about 0 (noise when going straight)
       non_linear_torque_params = get_non_linear_torque_params(self.CP.carFingerprint)
       assert non_linear_torque_params, "The params are not defined"
-      a, b, c, _ = non_linear_torque_params
+      a, b, c, d = non_linear_torque_params
       sig_input = a * lateral_acceleration
       sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
-      steer_torque = (sig * b) + (lateral_acceleration * c)
+      steer_torque = (sig * b) + (lateral_acceleration * c) + d
       return float(steer_torque)
 
     lataccel_values = np.arange(-8.0, 8.0, 0.01)
