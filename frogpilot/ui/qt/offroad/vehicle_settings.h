@@ -22,6 +22,7 @@ private:
   bool started;
 
   QString autoTuneStatusShown;
+  QString longCollectStatusShown;
 
   std::map<QString, AbstractControl*> toggles;
 
@@ -35,7 +36,7 @@ private:
                              "MazdaCX30TuneA", "MazdaCX30TuneB", "MazdaCX30TuneC", "MazdaCX30TuneD",
                              "MazdaCX50TuneA", "MazdaCX50TuneB", "MazdaCX50TuneC", "MazdaCX50TuneD",
                              "MazdaTuneReset", "MazdaAutoTune", "MazdaAutoTuneApply",
-                             "MazdaAutoTuneDeadzone"};
+                             "MazdaAutoTuneDeadzone", "LongAutoTuneCollect"};
   QSet<QString> longitudinalKeys = {"ExperimentalGMTune", "FrogsGoMoosTweak", "HondaAltTune", "HondaMaxBrake", "HondaLowSpeedPedal", "LongPitch", "NewLongAPI", "SNGHack", "SubaruSNG", "VoltSNG"};
   QSet<QString> subaruKeys = {"SubaruSNG"};
   QSet<QString> toyotaKeys = {"ClusterOffset", "FrogsGoMoosTweak", "LockDoorsTimer", "SNGHack", "ToyotaDoors"};

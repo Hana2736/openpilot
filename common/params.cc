@@ -637,6 +637,8 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"MazdaAutoTuneDeadzone", PERSISTENT},
     {"AutoTuneStatus", CLEAR_ON_MANAGER_START},
     {"AutoTunePending", PERSISTENT},
+    {"LongAutoTuneCollect", CLEAR_ON_MANAGER_START},
+    {"LongAutoTuneStatus", CLEAR_ON_MANAGER_START},
     {"BlendedACC", PERSISTENT},
     {"ManualTransmission", PERSISTENT},
     {"RemoteAccess", PERSISTENT},

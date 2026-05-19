@@ -204,6 +204,7 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"MazdaAutoTuneApply", tr("Apply Auto-Tune"), tr("Write the previewed tune, then reboot."), ""},
     {"MazdaAutoTuneDeadzone", tr("Auto-Tune Deadzone"), tr("Ignore |lat accel| below this when fitting."), ""},
     {"MazdaTuneReset", tr("Reset Mazda Tune"), tr("Restore default coefficients."), ""},
+    {"LongAutoTuneCollect", tr("Collect Long Samples"), tr("Ingest any new rlogs into the long-tune rolling store. Parked only."), ""},
 
     {"SubaruToggles", tr("Subaru Settings"), tr("<b>FrogPilot features for Subaru vehicles.</b>"), ""},
     {"SubaruSNG", tr("Stop and Go"), tr("Stop and go for supported Subaru vehicles."), ""},
@@ -323,6 +324,19 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
 
     } else if (param == "MazdaAutoTuneDeadzone") {
       vehicleToggle = new FrogPilotParamValueControl(param, title, desc, icon, 0.0f, 1.0f, tr(" m/s²"), std::map<float, QString>(), 0.0025f, true);
+
+    } else if (param == "LongAutoTuneCollect") {
+      ButtonControl *collectButton = new ButtonControl(title, tr("COLLECT"), desc);
+      QObject::connect(collectButton, &ButtonControl::clicked, [collectButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Collection can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        params_memory.put("LongAutoTuneStatus", "Queued...");
+        params_memory.putBool("LongAutoTuneCollect", true);
+        collectButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = collectButton;
 
     } else if (mazdaKeys.contains(param)) {
       // a: gain 0-30, b/c: gains 0-3, d: signed torque offset -1..1
@@ -497,6 +511,25 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
       }
     } else if (!status.isEmpty()) {
       autoTuneButton->setValue(status);
+    }
+  }
+
+  if (ButtonControl *collectButton = qobject_cast<ButtonControl*>(toggles["LongAutoTuneCollect"])) {
+    // long collector status protocol: "STATE|<short>|<full detail>" for
+    // Idle/Collect; plain text for queued/errors.
+    QString status = QString::fromStdString(params_memory.get("LongAutoTuneStatus"));
+    if (status == longCollectStatusShown) {
+      return;
+    }
+    longCollectStatusShown = status;
+    QStringList parts = status.split('|');
+    QString state = parts.value(0);
+    if ((state == "Idle" || state == "Collect") && parts.size() >= 3) {
+      collectButton->setValue(parts.value(1));
+      collectButton->setDescription(parts.value(2));
+      collectButton->showDescription();
+    } else if (!status.isEmpty()) {
+      collectButton->setValue(status);
     }
   }
 }

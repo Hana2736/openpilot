@@ -381,45 +381,56 @@ def main():
                   help="skip the last N rlogs (the konik dir tail is parked junk)")
   ap.add_argument("--max-samples", type=int, default=200000)
   ap.add_argument("--bins", type=str, default=",".join(f"{b:g}" for b in DEFAULT_BINS_MS))
+  ap.add_argument("--use-store", action="store_true",
+                  help="read from /data/media/0/long_autotune/samples.f32 "
+                       "(populated by the GUI's Collect Long Samples button) "
+                       "instead of re-scanning rlogs.")
   args = ap.parse_args()
 
   bins = np.asarray([float(x) for x in args.bins.split(",")], dtype=float)
   if bins.size < 2:
     sys.exit("--bins needs at least two edges")
 
-  rlogs = find_rlogs()
-  if args.skip_tail > 0:
-    rlogs = rlogs[:-args.skip_tail]
-  if args.limit_logs > 0:
-    rlogs = rlogs[-args.limit_logs:]
-  if not rlogs:
-    sys.exit("no rlogs under /data/media/0/realdata*")
+  if args.use_store:
+    from openpilot.frogpilot.common.long_collect import load_store, SAMPLES_PATH
+    samples = load_store()
+    if samples.shape[0] == 0:
+      sys.exit(f"store at {SAMPLES_PATH} is empty; press 'Collect Long Samples' first")
+    print(f"Loaded {samples.shape[0]} samples from {SAMPLES_PATH}")
+  else:
+    rlogs = find_rlogs()
+    if args.skip_tail > 0:
+      rlogs = rlogs[:-args.skip_tail]
+    if args.limit_logs > 0:
+      rlogs = rlogs[-args.limit_logs:]
+    if not rlogs:
+      sys.exit("no rlogs under /data/media/0/realdata*")
 
-  print(f"Scanning {len(rlogs)} rlogs for steady-state long samples...")
-  print(f"(Reading bus ACCEL_CMD from msg {ACC_MSG_ADDR}; BlendedACC state irrelevant.)")
-  t_start = time.time()
+    print(f"Scanning {len(rlogs)} rlogs for steady-state long samples...")
+    print(f"(Reading bus ACCEL_CMD from msg {ACC_MSG_ADDR}; BlendedACC state irrelevant.)")
+    t_start = time.time()
 
-  all_rows = []
-  total_samples = 0
-  for i, path in enumerate(rlogs, 1):
-    rec = _extract_one(path)
-    if rec is None:
-      print(f"  [{i:3d}/{len(rlogs)}] {path.parent.name}: unreadable")
-      continue
-    rows = _collect_steady_samples(rec)
-    total_samples += rows.shape[0]
-    if rows.shape[0]:
-      all_rows.append(rows)
-    print(f"  [{i:3d}/{len(rlogs)}] {path.parent.name}: +{rows.shape[0]} steady windows  (running total {total_samples})")
-    if total_samples >= args.max_samples:
-      print(f"  -- hit --max-samples cap ({args.max_samples}); stopping ingest")
-      break
+    all_rows = []
+    total_samples = 0
+    for i, path in enumerate(rlogs, 1):
+      rec = _extract_one(path)
+      if rec is None:
+        print(f"  [{i:3d}/{len(rlogs)}] {path.parent.name}: unreadable")
+        continue
+      rows = _collect_steady_samples(rec)
+      total_samples += rows.shape[0]
+      if rows.shape[0]:
+        all_rows.append(rows)
+      print(f"  [{i:3d}/{len(rlogs)}] {path.parent.name}: +{rows.shape[0]} steady windows  (running total {total_samples})")
+      if total_samples >= args.max_samples:
+        print(f"  -- hit --max-samples cap ({args.max_samples}); stopping ingest")
+        break
 
-  if not all_rows:
-    sys.exit("no steady-state windows found")
+    if not all_rows:
+      sys.exit("no steady-state windows found")
 
-  samples = np.concatenate(all_rows, axis=0)  # (N, 3): v_ego, can_cmd, a_ego
-  print(f"\nCollected {samples.shape[0]} steady windows in {time.time() - t_start:.1f}s")
+    samples = np.concatenate(all_rows, axis=0)  # (N, 3): v_ego, can_cmd, a_ego
+    print(f"\nCollected {samples.shape[0]} steady windows in {time.time() - t_start:.1f}s")
 
   v = samples[:, 0]
   cmd = samples[:, 1]

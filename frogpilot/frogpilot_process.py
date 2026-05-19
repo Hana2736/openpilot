@@ -12,6 +12,7 @@ from openpilot.frogpilot.assets.theme_manager import THEME_COMPONENT_PARAMS, The
 from openpilot.frogpilot.common.frogpilot_functions import backup_toggles
 from openpilot.frogpilot.common.frogpilot_utilities import capture_report, flash_panda, is_url_pingable, lock_doors, run_thread_with_lock, update_maps, update_openpilot
 from openpilot.frogpilot.common.frogpilot_variables import ERROR_LOGS_PATH, FrogPilotVariables, get_frogpilot_toggles, params, params_cache, params_memory
+from openpilot.frogpilot.common.long_collect import restore_idle_status as restore_long_idle_status, run_collect as run_long_collect
 from openpilot.frogpilot.common.torque_autotune import apply_pending, restore_preview_status, run_autotune
 from openpilot.frogpilot.controls.frogpilot_planner import FrogPilotPlanner
 from openpilot.frogpilot.system.frogpilot_stats import send_stats
@@ -47,6 +48,7 @@ def autotune_check(started):
   if started:
     return
   restore_preview_status()
+  restore_long_idle_status()
   if params_memory.get_bool("MazdaAutoTuneApply"):
     params_memory.remove("MazdaAutoTuneApply")
     apply_pending()
@@ -54,6 +56,10 @@ def autotune_check(started):
     params_memory.remove("MazdaAutoTune")
     params_memory.put("AutoTuneStatus", "Queued...")
     run_thread_with_lock("mazda_autotune", run_autotune)
+  if params_memory.get_bool("LongAutoTuneCollect"):
+    params_memory.remove("LongAutoTuneCollect")
+    params_memory.put("LongAutoTuneStatus", "Queued...")
+    run_thread_with_lock("mazda_long_collect", run_long_collect)
 
 
 def update_checks(model_manager, now, theme_manager, frogpilot_toggles, boot_run=False):
