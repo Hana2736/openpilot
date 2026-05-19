@@ -60,6 +60,16 @@ ACC_CMD_CENTER = 2000.0
 # corresponds to ±0.05 m/s² under the current 200 counts/(m/s²) affine,
 # which is the same swing budget we used before.
 CMD_COUNTS_TOLERANCE = 10
+# Mazda's bus broadcasts 4000 (and similar high values) as an "ACC not
+# active" sentinel; in practice only [1500,2500] is real commanded accel.
+# Samples outside this window are dropped as invalid before any further
+# processing.
+CMD_VALID_LO = 1500
+CMD_VALID_HI = 2500
+# Max time (s) a ffilled can_cmd sample is considered "fresh". msg 544
+# broadcasts at ~50 Hz when ACC is active, so anything stale by >100 ms
+# is almost certainly an inactive gap we should not fit through.
+CMD_MAX_STALE_S = 0.1
 
 # Steady-state window thresholds.
 WINDOW_SECONDS = 1.0           # min steady duration
@@ -142,7 +152,9 @@ def _extract_one(path: Path):
         for frame in ev.can:
           if frame.address == ACC_MSG_ADDR and frame.src == ACC_MSG_SRC:
             cmd = _decode_accel_cmd(bytes(frame.dat))
-            if cmd is not None:
+            # Drop the "ACC not active" sentinel range so it doesn't
+            # blow out the ffill or get treated as a valid sample.
+            if cmd is not None and CMD_VALID_LO <= cmd <= CMD_VALID_HI:
               cols["can_cmd"][i] = float(cmd)
             break
     except Exception:
@@ -153,6 +165,12 @@ def _extract_one(path: Path):
   t0, t1 = t_evt[0], t_evt[-1]
   if t1 - t0 < 2.0:
     return None  # rlog too short to contain a steady window
+
+  # Track freshness of can_cmd separately so we can reject samples that
+  # were ffilled across an inactive-ACC gap (sentinel-filtered to NaN).
+  cmd_valid = np.isfinite(cols["can_cmd"])
+  cmd_last_t = np.where(cmd_valid, t_evt, np.nan)
+  cmd_last_t = _ffill(cmd_last_t)
 
   # ffill on event-indexed arrays, then sample onto a uniform 50 Hz grid using
   # right-side searchsorted (latest event at or before each grid tick).
@@ -167,6 +185,11 @@ def _extract_one(path: Path):
   out = {"t": t_grid}
   for k, v in cols.items():
     out[k] = v[idx]
+  # Stale-can_cmd mask: drop ffilled samples >CMD_MAX_STALE_S past the
+  # last actually-active frame. Reuses the same idx so it stays aligned.
+  cmd_age = t_grid - cmd_last_t[idx]
+  stale = ~np.isfinite(cmd_age) | (cmd_age > CMD_MAX_STALE_S)
+  out["can_cmd"] = np.where(stale, np.nan, out["can_cmd"])
   return out
 
 
