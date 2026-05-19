@@ -440,9 +440,32 @@ def run_autotune() -> None:
   # reviews the numbers and taps "Apply Auto-Tune" to commit (apply_pending).
   params.put(PENDING_PARAM, json.dumps({"prefix": prefix, "a": a, "b": b, "c": c, "d": d,
                                         "n": int(new_samples)}))
+  _set_status(_preview_status(prefix, a, b, c, d, int(new_samples)))
+
+
+def _preview_status(prefix, a, b, c, d, n) -> str:
   # status protocol: STATE|<short button label>|<full wrapping detail>
-  _set_status(f"Preview|Preview ready — tap Apply|{prefix}  "
-              f"a={a:.5f}  b={b:.5f}  c={c:.5f}  d={d:.5f}  ·  {new_samples} samples")
+  return (f"Preview|Preview ready — tap Apply|{prefix}  "
+          f"a={a:.5f}  b={b:.5f}  c={c:.5f}  d={d:.5f}  ·  {n} samples")
+
+
+def restore_preview_status() -> None:
+  """Re-emit the Preview status from the persisted pending fit.
+
+  AutoTuneStatus is volatile (CLEAR_ON_MANAGER_START) but AutoTunePending
+  persists, so after a reboot we rebuild the status string so the panel
+  still shows the pending preview instead of looking empty.
+  """
+  if Params("/dev/shm/params").get(STATUS_PARAM):
+    return  # a run/preview/progress status is already showing
+  raw = params.get(PENDING_PARAM)
+  if not raw:
+    return
+  try:
+    p = json.loads(raw)
+    _set_status(_preview_status(p["prefix"], p["a"], p["b"], p["c"], p["d"], p.get("n", 0)))
+  except Exception:
+    pass
 
 
 def apply_pending() -> None:

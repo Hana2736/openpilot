@@ -12,7 +12,7 @@ from openpilot.frogpilot.assets.theme_manager import THEME_COMPONENT_PARAMS, The
 from openpilot.frogpilot.common.frogpilot_functions import backup_toggles
 from openpilot.frogpilot.common.frogpilot_utilities import capture_report, flash_panda, is_url_pingable, lock_doors, run_thread_with_lock, update_maps, update_openpilot
 from openpilot.frogpilot.common.frogpilot_variables import ERROR_LOGS_PATH, FrogPilotVariables, get_frogpilot_toggles, params, params_cache, params_memory
-from openpilot.frogpilot.common.torque_autotune import apply_pending, run_autotune
+from openpilot.frogpilot.common.torque_autotune import apply_pending, restore_preview_status, run_autotune
 from openpilot.frogpilot.controls.frogpilot_planner import FrogPilotPlanner
 from openpilot.frogpilot.system.frogpilot_stats import send_stats
 from openpilot.frogpilot.system.frogpilot_tracking import FrogPilotTracking
@@ -46,6 +46,7 @@ def autotune_check(started):
   # Auto-Tune is heavy (reads many rlogs) so it only runs while parked.
   if started:
     return
+  restore_preview_status()
   if params_memory.get_bool("MazdaAutoTuneApply"):
     params_memory.remove("MazdaAutoTuneApply")
     apply_pending()
