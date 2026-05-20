@@ -205,6 +205,10 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"MazdaAutoTuneDeadzone", tr("Auto-Tune Deadzone"), tr("Ignore |lat accel| below this when fitting."), ""},
     {"MazdaTuneReset", tr("Reset Mazda Tune"), tr("Restore default coefficients."), ""},
     {"LongAutoTuneCollect", tr("Collect Long Samples"), tr("Ingest any new rlogs into the long-tune rolling store. Parked only."), ""},
+    {"LatDelayCollect", tr("Collect Lat Delay Samples"), tr("Ingest any new rlogs into the lateral-delay rolling store. Parked only."), ""},
+    {"LatDelayFit", tr("Fit Lat Delay Table"), tr("Build a per-speed delay breakpoint table from the store. Previews first."), ""},
+    {"LatDelayApply", tr("Apply Lat Delay Table"), tr("Write the previewed delay table; lagd will interpolate it at runtime. Reboot after."), ""},
+    {"LatDelayReset", tr("Reset Lat Delay Table"), tr("Clear the applied delay table; fall back to lagd's learned single value."), ""},
 
     {"SubaruToggles", tr("Subaru Settings"), tr("<b>FrogPilot features for Subaru vehicles.</b>"), ""},
     {"SubaruSNG", tr("Stop and Go"), tr("Stop and go for supported Subaru vehicles."), ""},
@@ -337,6 +341,59 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
         collectButton->setValue(tr("Queued..."));
       });
       vehicleToggle = collectButton;
+
+    } else if (param == "LatDelayCollect") {
+      ButtonControl *latDelayCollectButton = new ButtonControl(title, tr("COLLECT"), desc);
+      QObject::connect(latDelayCollectButton, &ButtonControl::clicked, [latDelayCollectButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Collection can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        params_memory.put("LatDelayStatus", "Queued...");
+        params_memory.putBool("LatDelayCollect", true);
+        latDelayCollectButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = latDelayCollectButton;
+
+    } else if (param == "LatDelayFit") {
+      ButtonControl *latDelayFitButton = new ButtonControl(title, tr("FIT"), desc);
+      QObject::connect(latDelayFitButton, &ButtonControl::clicked, [latDelayFitButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Fit can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        params_memory.put("LatDelayStatus", "Queued...");
+        params_memory.putBool("LatDelayFit", true);
+        latDelayFitButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = latDelayFitButton;
+
+    } else if (param == "LatDelayApply") {
+      ButtonControl *latDelayApplyButton = new ButtonControl(title, tr("APPLY"), desc);
+      QObject::connect(latDelayApplyButton, &ButtonControl::clicked, [this]() {
+        QString status = QString::fromStdString(params_memory.get("LatDelayStatus"));
+        QStringList parts = status.split('|');
+        QString detail = (parts.value(0) == "Preview" && parts.size() >= 3) ? parts.value(2) : QString();
+        if (detail.isEmpty()) {
+          ConfirmationDialog::alert(tr("No previewed delay table to apply. Run Fit first."), this);
+          return;
+        }
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Apply this lateral delay table?\n\n") + detail, this)) {
+          return;
+        }
+        params_memory.putBool("LatDelayApply", true);
+      });
+      vehicleToggle = latDelayApplyButton;
+
+    } else if (param == "LatDelayReset") {
+      ButtonControl *latDelayResetButton = new ButtonControl(title, tr("RESET"), desc);
+      QObject::connect(latDelayResetButton, &ButtonControl::clicked, [this]() {
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Clear the applied lateral delay table?"), this)) {
+          return;
+        }
+        params_memory.putBool("LatDelayReset", true);
+      });
+      vehicleToggle = latDelayResetButton;
 
     } else if (mazdaKeys.contains(param)) {
       // a: gain 0-30, b/c: gains 0-3, d: signed torque offset -1..1
@@ -527,6 +584,29 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
         collectButton->showDescription();
       } else if (!status.isEmpty()) {
         collectButton->setValue(status);
+      }
+    }
+  }
+
+  // Lateral-delay status is shared across Collect/Fit/Apply buttons; show
+  // the full detail on each so the user can see what's going on regardless
+  // of which button they're looking at.
+  QString latDelayStatus = QString::fromStdString(params_memory.get("LatDelayStatus"));
+  if (latDelayStatus != latDelayStatusShown) {
+    latDelayStatusShown = latDelayStatus;
+    QStringList parts = latDelayStatus.split('|');
+    QString state = parts.value(0);
+    const bool isStructured = (state == "Idle" || state == "Collect" || state == "Preview"
+                               || state == "Done" || state == "Refused") && parts.size() >= 3;
+    for (const QString &key : {"LatDelayCollect", "LatDelayFit", "LatDelayApply"}) {
+      if (ButtonControl *btn = qobject_cast<ButtonControl*>(toggles[key])) {
+        if (isStructured) {
+          btn->setValue(parts.value(1));
+          btn->setDescription(parts.value(2));
+          btn->showDescription();
+        } else if (!latDelayStatus.isEmpty()) {
+          btn->setValue(latDelayStatus);
+        }
       }
     }
   }

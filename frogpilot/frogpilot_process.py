@@ -12,6 +12,14 @@ from openpilot.frogpilot.assets.theme_manager import THEME_COMPONENT_PARAMS, The
 from openpilot.frogpilot.common.frogpilot_functions import backup_toggles
 from openpilot.frogpilot.common.frogpilot_utilities import capture_report, flash_panda, is_url_pingable, lock_doors, run_thread_with_lock, update_maps, update_openpilot
 from openpilot.frogpilot.common.frogpilot_variables import ERROR_LOGS_PATH, FrogPilotVariables, get_frogpilot_toggles, params, params_cache, params_memory
+from openpilot.frogpilot.common.lat_delay_collect import (
+  apply_pending as apply_lat_delay,
+  reset_table as reset_lat_delay,
+  restore_idle_status as restore_lat_delay_idle_status,
+  restore_preview_status as restore_lat_delay_preview_status,
+  run_collect as run_lat_delay_collect,
+  run_fit as run_lat_delay_fit,
+)
 from openpilot.frogpilot.common.long_collect import restore_idle_status as restore_long_idle_status, run_collect as run_long_collect
 from openpilot.frogpilot.common.torque_autotune import apply_pending, restore_preview_status, run_autotune
 from openpilot.frogpilot.controls.frogpilot_planner import FrogPilotPlanner
@@ -60,6 +68,22 @@ def autotune_check(started):
     params_memory.remove("LongAutoTuneCollect")
     params_memory.put("LongAutoTuneStatus", "Queued...")
     run_thread_with_lock("mazda_long_collect", run_long_collect)
+  restore_lat_delay_preview_status()
+  restore_lat_delay_idle_status()
+  if params_memory.get_bool("LatDelayReset"):
+    params_memory.remove("LatDelayReset")
+    reset_lat_delay()
+  if params_memory.get_bool("LatDelayApply"):
+    params_memory.remove("LatDelayApply")
+    apply_lat_delay()
+  if params_memory.get_bool("LatDelayFit"):
+    params_memory.remove("LatDelayFit")
+    params_memory.put("LatDelayStatus", "Fitting...")
+    run_thread_with_lock("mazda_lat_delay", run_lat_delay_fit)
+  if params_memory.get_bool("LatDelayCollect"):
+    params_memory.remove("LatDelayCollect")
+    params_memory.put("LatDelayStatus", "Queued...")
+    run_thread_with_lock("mazda_lat_delay", run_lat_delay_collect)
 
 
 def update_checks(model_manager, now, theme_manager, frogpilot_toggles, boot_run=False):

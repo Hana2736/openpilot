@@ -217,7 +217,15 @@ class LateralLagEstimator:
     else:
       liveDelay.status = log.LiveDelayData.Status.unestimated
 
-    if frogpilot_toggles.use_custom_steerActuatorDelay:
+    # Speed-scheduled lateral delay (applied via Mazda panel's Apply Delay
+    # Table). Takes precedence over both the slider override and the
+    # learner. The table is pre-validated (≥2 monotonic breakpoints, each
+    # clipped to [0.05, 1.0]); we still re-clip the interp output for safety.
+    if getattr(frogpilot_toggles, "use_steer_delay_table", False):
+      tbl = frogpilot_toggles.steer_delay_table
+      liveDelay.lateralDelay = float(np.clip(
+          np.interp(self.v_ego, tbl[:, 0], tbl[:, 1]), 0.05, 1.0))
+    elif frogpilot_toggles.use_custom_steerActuatorDelay:
       liveDelay.lateralDelay = frogpilot_toggles.steerActuatorDelay
     elif liveDelay.status == log.LiveDelayData.Status.estimated:
       liveDelay.lateralDelay = valid_mean_lag

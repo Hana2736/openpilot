@@ -517,6 +517,10 @@ misc_tuning_levels: list[tuple[str, str | bytes, int, str]] = [
   ("MazdaAutoTuneApply", "0", 3, "0"),
   ("MazdaTuneReset", "0", 3, "0"),
   ("LongAutoTuneCollect", "0", 3, "0"),
+  ("LatDelayCollect", "0", 3, "0"),
+  ("LatDelayFit", "0", 3, "0"),
+  ("LatDelayApply", "0", 3, "0"),
+  ("LatDelayReset", "0", 3, "0"),
   ("SidebarMetrics", "1", 3, "0"),
   ("SLCPriority", "", 2, ""),
   ("WheelControls", "", 2, "")
@@ -676,6 +680,24 @@ class FrogPilotVariables:
     toggle.force_auto_tune_off = advanced_lateral_tuning and has_auto_tune and is_torque_car and (params.get_bool("ForceAutoTuneOff") if toggle.tuning_level >= level["ForceAutoTuneOff"] else default.get_bool("ForceAutoTuneOff"))
     toggle.steerActuatorDelay = np.clip(params.get_float("SteerDelay"), 0.01, 1.0) if advanced_lateral_tuning and toggle.tuning_level >= level["SteerDelay"] else steerActuatorDelay
     toggle.use_custom_steerActuatorDelay = bool(round(toggle.steerActuatorDelay, 2) != round(steerActuatorDelay, 2))
+    # Optional per-speed lateral-delay breakpoint table (applied via the
+    # Mazda panel's "Apply Delay Table" button after auto-fit). If set,
+    # lagd interpolates liveDelay.lateralDelay from this table at runtime
+    # instead of publishing a single value. Bad/empty/un-parseable JSON
+    # falls back to the default behavior.
+    toggle.steer_delay_table = None
+    raw_table = params.get("LatDelayTable", encoding="utf-8") or ""
+    if raw_table:
+      try:
+        import json as _json
+        bps = _json.loads(raw_table).get("breakpoints", [])
+        arr = np.asarray([(float(v), float(d)) for v, d in bps], dtype=np.float64)
+        if arr.shape[0] >= 2 and (np.diff(arr[:, 0]) > 0).all():
+          arr[:, 1] = np.clip(arr[:, 1], 0.05, 1.0)
+          toggle.steer_delay_table = arr
+      except Exception:
+        toggle.steer_delay_table = None
+    toggle.use_steer_delay_table = toggle.steer_delay_table is not None
     toggle.friction = np.clip(params.get_float("SteerFriction"), 0, 0.5) if advanced_lateral_tuning and toggle.tuning_level >= level["SteerFriction"] else friction
     toggle.use_custom_friction = bool(round(toggle.friction, 2) != round(friction, 2)) and is_torque_car and not toggle.force_auto_tune or toggle.force_auto_tune_off
     toggle.steerKp = [[0], [np.clip(params.get_float("SteerKP"), steerKp * 0.5, steerKp * 1.5) if advanced_lateral_tuning and is_torque_car and toggle.tuning_level >= level["SteerKP"] else steerKp]]
