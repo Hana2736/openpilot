@@ -53,10 +53,10 @@ STATUS_PARAM = "LatDelayStatus"
 PENDING_PARAM = "LatDelayPending"              # JSON breakpoint table preview
 APPLIED_PARAM = "LatDelayTable"                # JSON breakpoint table live (consumed by lagd)
 
-# Per-bin sanity gates.
-MIN_BIN_N = 15                                 # >=15 filtered windows per bin
-MAX_IQR_S = 0.30                               # IQR width must be <= 300 ms (else too noisy)
-MIN_BIN_NCC = 0.85                             # median NCC per bin
+# Per-bin sanity gates. Medians are robust; n drives stability not IQR.
+MIN_BIN_N = 10                                 # >=10 filtered windows per bin
+MAX_IQR_S = 0.50                               # only reject genuinely broken bins
+MIN_BIN_NCC = 0.80                             # median NCC per bin
 
 # Whole-table sanity (every interpolated value falls in this range).
 MIN_DELAY_S = 0.10
