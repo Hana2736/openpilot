@@ -54,7 +54,10 @@ PENDING_PARAM = "LatDelayPending"              # JSON breakpoint table preview
 APPLIED_PARAM = "LatDelayTable"                # JSON breakpoint table live (consumed by lagd)
 
 # Per-bin sanity gates. Medians are robust; n drives stability not IQR.
-MIN_BIN_N = 10                                 # >=10 filtered windows per bin
+# Gate ONLY on data quality (sample count, NCC, IQR), never on the shape of
+# the result - other users' hardware (suspension, tires, EPS) may produce
+# legitimately flat or monotonic curves that ours wouldn't.
+MIN_BIN_N = 8                                  # >=8 filtered windows per bin
 MAX_IQR_S = 0.50                               # only reject genuinely broken bins
 MIN_BIN_NCC = 0.80                             # median NCC per bin
 
@@ -210,7 +213,9 @@ def fit_store() -> dict | None:
     per_bin.append(entry)
 
   # Build breakpoint table from bins that passed; refuse if fewer than 2
-  # bins are usable (can't interpolate with one point).
+  # bins are usable (can't interpolate with one point). Don't reject the
+  # fit based on its SHAPE - a flat or monotonic result might be real on
+  # another user's hardware even if it surprises us on ours.
   bps = []
   for entry, v_center in zip(per_bin, BIN_CENTERS_MS):
     if entry is None or not entry["ok"]:
