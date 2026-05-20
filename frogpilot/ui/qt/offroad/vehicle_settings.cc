@@ -152,6 +152,9 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
   FrogPilotListWidget *hkgList = new FrogPilotListWidget(this);
   FrogPilotListWidget *hondaList = new FrogPilotListWidget(this);
   FrogPilotListWidget *mazdaList = new FrogPilotListWidget(this);
+  FrogPilotListWidget *mazdaLatAbcdList = new FrogPilotListWidget(this);
+  FrogPilotListWidget *mazdaLatDelayList = new FrogPilotListWidget(this);
+  FrogPilotListWidget *mazdaLongList = new FrogPilotListWidget(this);
   FrogPilotListWidget *subaruList = new FrogPilotListWidget(this);
   FrogPilotListWidget *toyotaList = new FrogPilotListWidget(this);
   FrogPilotListWidget *vehicleInfoList = new FrogPilotListWidget(this);
@@ -160,6 +163,9 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
   ScrollView *hkgPanel = new ScrollView(hkgList, this);
   ScrollView *hondaPanel = new ScrollView(hondaList, this);
   ScrollView *mazdaPanel = new ScrollView(mazdaList, this);
+  ScrollView *mazdaLatAbcdPanel = new ScrollView(mazdaLatAbcdList, this);
+  ScrollView *mazdaLatDelayPanel = new ScrollView(mazdaLatDelayList, this);
+  ScrollView *mazdaLongPanel = new ScrollView(mazdaLongList, this);
   ScrollView *subaruPanel = new ScrollView(subaruList, this);
   ScrollView *toyotaPanel = new ScrollView(toyotaList, this);
   ScrollView *vehicleInfoPanel = new ScrollView(vehicleInfoList, this);
@@ -168,6 +174,9 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
   vehiclesLayout->addWidget(hkgPanel);
   vehiclesLayout->addWidget(hondaPanel);
   vehiclesLayout->addWidget(mazdaPanel);
+  vehiclesLayout->addWidget(mazdaLatAbcdPanel);
+  vehiclesLayout->addWidget(mazdaLatDelayPanel);
+  vehiclesLayout->addWidget(mazdaLongPanel);
   vehiclesLayout->addWidget(subaruPanel);
   vehiclesLayout->addWidget(toyotaPanel);
   vehiclesLayout->addWidget(vehicleInfoPanel);
@@ -187,7 +196,10 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"HondaMaxBrake", tr("Increased Braking Force"), tr("<b>Increases the maximum braking force for improved stopping performance.</b>"), ""},
     {"HondaLowSpeedPedal", tr("Responsive Pedal at Low Speeds"), tr("<b>Improves acceleration from a standstill for a more responsive throttle feel in city driving.</b>"), ""},
 
-    {"MazdaToggles", tr("Mazda Settings"), tr("Mazda lateral tune."), ""},
+    {"MazdaToggles", tr("Mazda Settings"), tr("Mazda lateral and longitudinal tuning."), ""},
+    {"MazdaLatAbcdToggles", tr("Lateral ABCD Tuning"), tr("Sigmoid+linear tune (a/b/c/d) and per-model sliders."), ""},
+    {"MazdaLatDelayToggles", tr("Lateral Delay Tuning"), tr("Per-speed steerActuatorDelay breakpoint table."), ""},
+    {"MazdaLongToggles", tr("Longitudinal Tuning"), tr("Gen2 long static-map sample collector."), ""},
     {"Mazda3TuneA", tr("Mazda 3 — a"), tr("Sigmoid slope."), ""},
     {"Mazda3TuneB", tr("Mazda 3 — b"), tr("Sigmoid gain."), ""},
     {"Mazda3TuneC", tr("Mazda 3 — c"), tr("Linear gain (≥0)."), ""},
@@ -272,6 +284,30 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
         vehiclesLayout->setCurrentWidget(mazdaPanel);
       });
       vehicleToggle = mazdaButton;
+
+    } else if (param == "MazdaLatAbcdToggles") {
+      ButtonControl *navButton = new ButtonControl(title, tr("MANAGE"), desc);
+      QObject::connect(navButton, &ButtonControl::clicked, [vehiclesLayout, mazdaLatAbcdPanel, this]() {
+        openDescriptions(forceOpenDescriptions, toggles);
+        vehiclesLayout->setCurrentWidget(mazdaLatAbcdPanel);
+      });
+      vehicleToggle = navButton;
+
+    } else if (param == "MazdaLatDelayToggles") {
+      ButtonControl *navButton = new ButtonControl(title, tr("MANAGE"), desc);
+      QObject::connect(navButton, &ButtonControl::clicked, [vehiclesLayout, mazdaLatDelayPanel, this]() {
+        openDescriptions(forceOpenDescriptions, toggles);
+        vehiclesLayout->setCurrentWidget(mazdaLatDelayPanel);
+      });
+      vehicleToggle = navButton;
+
+    } else if (param == "MazdaLongToggles") {
+      ButtonControl *navButton = new ButtonControl(title, tr("MANAGE"), desc);
+      QObject::connect(navButton, &ButtonControl::clicked, [vehiclesLayout, mazdaLongPanel, this]() {
+        openDescriptions(forceOpenDescriptions, toggles);
+        vehiclesLayout->setCurrentWidget(mazdaLongPanel);
+      });
+      vehicleToggle = navButton;
 
     } else if (param == "MazdaAutoTune") {
       ButtonControl *autoTuneButton = new ButtonControl(title, tr("RUN"), desc);
@@ -449,6 +485,12 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
       hkgList->addItem(vehicleToggle);
     } else if (hondaKeys.contains(param)) {
       hondaList->addItem(vehicleToggle);
+    } else if (mazdaLatAbcdKeys.contains(param)) {
+      mazdaLatAbcdList->addItem(vehicleToggle);
+    } else if (mazdaLatDelayKeys.contains(param)) {
+      mazdaLatDelayList->addItem(vehicleToggle);
+    } else if (mazdaLongKeys.contains(param)) {
+      mazdaLongList->addItem(vehicleToggle);
     } else if (mazdaKeys.contains(param)) {
       mazdaList->addItem(vehicleToggle);
     } else if (subaruKeys.contains(param)) {
