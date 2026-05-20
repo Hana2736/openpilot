@@ -684,17 +684,20 @@ class FrogPilotVariables:
     # Mazda panel's "Apply Delay Table" button after auto-fit). If set,
     # lagd interpolates liveDelay.lateralDelay from this table at runtime
     # instead of publishing a single value. Bad/empty/un-parseable JSON
-    # falls back to the default behavior.
+    # falls back to the default behavior. Stored as a plain tuple-of-tuples
+    # (not an ndarray) because toggle.__dict__ is json.dumps'd into the
+    # FrogPilotToggles param every update - ndarrays aren't serializable.
+    # lagd does np.asarray() on consumption.
     toggle.steer_delay_table = None
     raw_table = params.get("LatDelayTable", encoding="utf-8") or ""
     if raw_table:
       try:
         import json as _json
         bps = _json.loads(raw_table).get("breakpoints", [])
-        arr = np.asarray([(float(v), float(d)) for v, d in bps], dtype=np.float64)
-        if arr.shape[0] >= 2 and (np.diff(arr[:, 0]) > 0).all():
-          arr[:, 1] = np.clip(arr[:, 1], 0.05, 1.0)
-          toggle.steer_delay_table = arr
+        cleaned = tuple((float(v), float(np.clip(d, 0.05, 1.0))) for v, d in bps)
+        vs = [v for v, _ in cleaned]
+        if len(cleaned) >= 2 and all(b > a for a, b in zip(vs[:-1], vs[1:])):
+          toggle.steer_delay_table = cleaned
       except Exception:
         toggle.steer_delay_table = None
     toggle.use_steer_delay_table = toggle.steer_delay_table is not None

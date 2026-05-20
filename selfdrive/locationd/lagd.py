@@ -222,7 +222,7 @@ class LateralLagEstimator:
     # learner. The table is pre-validated (≥2 monotonic breakpoints, each
     # clipped to [0.05, 1.0]); we still re-clip the interp output for safety.
     if getattr(frogpilot_toggles, "use_steer_delay_table", False):
-      tbl = frogpilot_toggles.steer_delay_table
+      tbl = np.asarray(frogpilot_toggles.steer_delay_table, dtype=np.float64)
       liveDelay.lateralDelay = float(np.clip(
           np.interp(self.v_ego, tbl[:, 0], tbl[:, 1]), 0.05, 1.0))
     elif frogpilot_toggles.use_custom_steerActuatorDelay:
