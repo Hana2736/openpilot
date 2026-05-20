@@ -107,7 +107,10 @@ def _decode_accel_cmd(dat: bytes) -> int | None:
 def _extract_one(path: Path):
   """Returns dict of uniform 50 Hz arrays for one rlog, or None on read failure.
 
-  Keys: t, can_cmd (bus int), v_ego, a_ego, gas, brake, standstill, pitch.
+  Keys: t, can_cmd (bus int), v_ego, a_ego, gas, brake, standstill, pitch,
+        rpm (engine RPM, gear-as-(v_ego, rpm) proxy), accel_desired (MPC's
+        target_accel from carControl.actuators.accel - used for long delay
+        xcorr against a_ego), long_active.
   """
   try:
     dat = _read_rlog_bytes(path)
@@ -134,7 +137,8 @@ def _extract_one(path: Path):
   n = len(events)
   t_evt = np.empty(n, dtype=np.float64)
   cols = {k: np.full(n, np.nan, dtype=np.float64) for k in
-          ("can_cmd", "v_ego", "a_ego", "gas", "brake", "standstill", "pitch")}
+          ("can_cmd", "v_ego", "a_ego", "gas", "brake", "standstill", "pitch",
+           "rpm", "accel_desired", "long_active")}
 
   for i, ev in enumerate(events):
     t_evt[i] = ev.logMonoTime / 1e9
@@ -147,6 +151,11 @@ def _extract_one(path: Path):
         cols["gas"][i] = 1.0 if cs.gasPressed else 0.0
         cols["brake"][i] = 1.0 if cs.brakePressed else 0.0
         cols["standstill"][i] = 1.0 if cs.standstill else 0.0
+        cols["rpm"][i] = cs.engineRpm
+      elif which == "carControl":
+        cc = ev.carControl
+        cols["accel_desired"][i] = cc.actuators.accel
+        cols["long_active"][i] = 1.0 if cc.longActive else 0.0
       elif which == "liveLocationKalman":
         cols["pitch"][i] = ev.liveLocationKalman.orientationNED.value[1]
       elif which == "can":
@@ -247,30 +256,35 @@ def _rolling_std(x: np.ndarray, w: int):
 
 
 def _collect_steady_samples(rec):
-  """Returns (n,3) array of (v_ego_med, can_cmd_med, a_ego_med) per window."""
+  """Returns (n, 5) array of (v_ego, can_cmd, a_ego, pitch, rpm) medians per
+  steady-state window. Pitch is stored (not filtered) so the fit can apply
+  a gravity correction at fit time instead of throwing hill samples away.
+  RPM lets later fits bin by (v_ego, rpm) which is sufficient gear context
+  on a manual transmission (same speed at different RPM = different gear).
+  """
   w = int(WINDOW_SECONDS * GRID_HZ)
 
   cc = rec["can_cmd"]
   ae = rec["a_ego"]
   ve = rec["v_ego"]
+  ph = rec["pitch"]
+  rp = rec["rpm"]
   if cc.shape[0] < w:
-    return np.empty((0, 3), dtype=np.float32)
+    return np.empty((0, 5), dtype=np.float32)
 
   base_valid = (np.isfinite(cc) & np.isfinite(ae) & np.isfinite(ve)
-                & np.isfinite(rec["pitch"]) & np.isfinite(rec["gas"])
+                & np.isfinite(ph) & np.isfinite(rp) & np.isfinite(rec["gas"])
                 & np.isfinite(rec["brake"]) & np.isfinite(rec["standstill"]))
 
-  # Stay off samples where the driver is fighting the controller, or where
-  # the car is held against the brake at standstill (aEgo≈0 regardless of cmd).
+  # Driver-clean only. Pitch is no longer filtered - we store it.
   driver_clean = (rec["gas"] < 0.5) & (rec["brake"] < 0.5) & (rec["standstill"] < 0.5)
-  pitch_ok = np.abs(rec["pitch"]) <= PITCH_THRESH
 
   # Steady-state filters: can_cmd swing within tolerance, aEgo settled.
   cc_min, cc_max = _rolling_min_max(cc, w)
   cc_swing = cc_max - cc_min
   ae_std = _rolling_std(ae, w)
 
-  mask_all = base_valid & driver_clean & pitch_ok
+  mask_all = base_valid & driver_clean
   mask_f = mask_all.astype(np.float64)
   mask_min, _ = _rolling_min_max(mask_f, w)
 
@@ -279,9 +293,8 @@ def _collect_steady_samples(rec):
         & (mask_min > 0.5))
 
   if not ok.any():
-    return np.empty((0, 3), dtype=np.float32)
+    return np.empty((0, 5), dtype=np.float32)
 
-  # One sample per non-overlapping window.
   rows = []
   i = w - 1
   end = cc.shape[0]
@@ -290,12 +303,125 @@ def _collect_steady_samples(rec):
       lo = i - w + 1
       rows.append((float(np.median(ve[lo:i + 1])),
                    float(np.median(cc[lo:i + 1])),
-                   float(np.median(ae[lo:i + 1]))))
+                   float(np.median(ae[lo:i + 1])),
+                   float(np.median(ph[lo:i + 1])),
+                   float(np.median(rp[lo:i + 1]))))
       i += w
     else:
       i += 1
   if not rows:
-    return np.empty((0, 3), dtype=np.float32)
+    return np.empty((0, 5), dtype=np.float32)
+  return np.asarray(rows, dtype=np.float32)
+
+
+# --- long delay xcorr (per-window) -----------------------------------------
+#
+# Mirrors the lateral delay diagnostic (see frogpilot/common/lag_diagnostic.py)
+# but on the longitudinal signal pair: desired = carControl.actuators.accel,
+# actual = carState.aEgo. Both in m/s², same units, only time-shifted. The
+# lag between them is the end-to-end pipeline delay (carcontroller +
+# CAN + Mazda's onboard ACC + powertrain settling).
+
+# Same band-bass thresholds as lateral - long ping-pong (if any) would also
+# be around 1 Hz.
+DELAY_OSC_LO_HZ = 0.5
+DELAY_OSC_HI_HZ = 2.0
+DELAY_OSC_WINDOW_S = 2.0
+DELAY_OSC_RATIO = 0.35
+
+DELAY_WINDOW_LEN_S = 6.0
+DELAY_WINDOW_HOP_S = 2.0
+DELAY_MAX_LAG_S = 0.8
+DELAY_MIN_NCC = 0.70
+DELAY_MIN_ACCEL_STD = 0.10   # m/s² - need meaningful command variation
+
+
+def _moving_mean(x: np.ndarray, w: int) -> np.ndarray:
+  n = x.shape[0]
+  if w <= 1 or n < w:
+    return x.copy()
+  x = np.where(np.isnan(x), 0.0, x)
+  c = np.concatenate(([0.0], np.cumsum(x)))
+  out = (c[w:] - c[:-w]) / w
+  pad_lo = w // 2
+  pad_hi = n - out.shape[0] - pad_lo
+  return np.concatenate([np.full(pad_lo, out[0]), out, np.full(pad_hi, out[-1])])
+
+
+def _oscillation_mask_long(x: np.ndarray) -> np.ndarray:
+  if x.size < int(DELAY_OSC_WINDOW_S * GRID_HZ):
+    return np.zeros_like(x, dtype=bool)
+  hp_w = max(2, int(1.0 / (DELAY_OSC_LO_HZ * GRID_DT)))
+  lp_w = max(2, int(1.0 / (DELAY_OSC_HI_HZ * GRID_DT)))
+  hp = x - _moving_mean(x, hp_w)
+  bp = _moving_mean(hp, lp_w)
+  energy_w = int(DELAY_OSC_WINDOW_S * GRID_HZ)
+  bp_pow = _moving_mean(bp * bp, energy_w)
+  tot_pow = _moving_mean(x * x, energy_w) + 1e-9
+  return (bp_pow / tot_pow) > DELAY_OSC_RATIO
+
+
+def _xcorr_peak(desired: np.ndarray, actual: np.ndarray):
+  n = desired.size
+  if n < int(0.5 * GRID_HZ):
+    return None
+  x = desired - desired.mean()
+  y = actual - actual.mean()
+  sx, sy = x.std(), y.std()
+  if sx < 1e-6 or sy < 1e-6:
+    return None
+  x /= sx
+  y /= sy
+  max_lag = min(int(DELAY_MAX_LAG_S * GRID_HZ), n - 1)
+  ncc = np.empty(max_lag + 1, dtype=np.float64)
+  for k in range(max_lag + 1):
+    ncc[k] = float((x[: n - k] * y[k:]).sum() / (n - k))
+  peak = int(np.argmax(ncc))
+  if peak == 0 or peak == max_lag:
+    return None  # boundary artifact
+  return float(peak / GRID_HZ), float(ncc[peak])
+
+
+def _collect_delay_samples(rec):
+  """Returns (n, 4) float32 array of (v_ego, lag_s, ncc, rpm) per filtered
+  6s window. Filtering: OP long active, no driver override, command-side
+  variation >= MIN_ACCEL_STD, no 0.5-2 Hz oscillation contamination.
+  """
+  desired = rec["accel_desired"]
+  actual = rec["a_ego"]
+  v_ego = rec["v_ego"]
+  rpm = rec["rpm"]
+  long_act = rec["long_active"]
+  gas = rec["gas"]
+  brake = rec["brake"]
+  standstill = rec["standstill"]
+  n = desired.size
+
+  valid = (np.isfinite(desired) & np.isfinite(actual) & np.isfinite(v_ego)
+           & np.isfinite(rpm) & np.isfinite(long_act) & np.isfinite(gas)
+           & np.isfinite(brake) & np.isfinite(standstill)
+           & (long_act > 0.5) & (gas < 0.5) & (brake < 0.5) & (standstill < 0.5))
+  if not valid.any():
+    return np.empty((0, 4), dtype=np.float32)
+
+  osc = _oscillation_mask_long(desired)
+  valid &= ~osc
+
+  win = int(DELAY_WINDOW_LEN_S * GRID_HZ)
+  hop = int(DELAY_WINDOW_HOP_S * GRID_HZ)
+
+  rows = []
+  i = 0
+  while i + win <= n:
+    sl = slice(i, i + win)
+    if valid[sl].all() and desired[sl].std() >= DELAY_MIN_ACCEL_STD:
+      r = _xcorr_peak(desired[sl], actual[sl])
+      if r is not None and r[1] >= DELAY_MIN_NCC:
+        rows.append((float(np.median(v_ego[sl])), r[0], r[1],
+                     float(np.median(rpm[sl]))))
+    i += hop
+  if not rows:
+    return np.empty((0, 4), dtype=np.float32)
   return np.asarray(rows, dtype=np.float32)
 
 
