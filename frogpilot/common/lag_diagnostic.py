@@ -40,9 +40,9 @@ DEFAULT_BINS_MS = (8.0, 14.0, 20.0, 28.0, 40.0)  # match long_autotune above the
 GRID_HZ = 50.0
 GRID_DT = 1.0 / GRID_HZ
 
-MAX_LAG_S = 1.0                # same as lagd.MAX_LAG
+MAX_LAG_S = 0.8                # tightened from lagd's 1.0 (boundary artifacts otherwise)
 MIN_VEGO = 8.0                 # lower than lagd's 15.0 so the 8-14 bin gets samples
-MIN_OUTPUT_STD = 0.02          # window must have meaningful command activity
+MIN_SIGNAL_STD = 0.05          # m/s² - window needs meaningful lat-accel command activity
 
 WINDOW_LEN_S = 6.0             # cross-correlate over 6s chunks (300 samples)
 WINDOW_HOP_S = 2.0             # 4s overlap between chunks
@@ -87,18 +87,21 @@ def _oscillation_mask(output: np.ndarray) -> np.ndarray:
   return (bp_pow / tot_pow) > OSC_RATIO_THRESHOLD
 
 
-def _xcorr_lag(output: np.ndarray, lat_accel: np.ndarray) -> tuple[float, float] | None:
-  """Cross-correlate output against (-lat_accel) at lags ∈ [0, MAX_LAG_S].
+def _xcorr_lag(desired: np.ndarray, actual: np.ndarray) -> tuple[float, float] | None:
+  """Cross-correlate DESIRED lat_accel against ACTUAL lat_accel at lags ∈ [0, MAX_LAG_S].
 
-  Returns (peak_lag_s, peak_ncc) or None if signals are flat. The negation
-  matches lagd's convention (commanded torque drives the steering wheel one
-  way, which produces lat_accel the opposite way in the inertial frame).
+  Both inputs in m/s². Matches lagd.py's signal convention: a lag of L
+  means actual[t] best matches desired[t-L], i.e. actual trails desired
+  by L seconds. Returns (peak_lag_s, peak_ncc) or None.
+
+  Refuses a peak that lands at the boundary of the search range (lag=0
+  or lag=MAX) - those are usually noise artifacts, not real peaks.
   """
-  n = output.size
+  n = desired.size
   if n < int(0.5 * GRID_HZ):
     return None
-  x = output - output.mean()
-  y = (-lat_accel) - (-lat_accel).mean()
+  x = desired - desired.mean()
+  y = actual - actual.mean()
   sx, sy = x.std(), y.std()
   if sx < 1e-6 or sy < 1e-6:
     return None
@@ -112,6 +115,8 @@ def _xcorr_lag(output: np.ndarray, lat_accel: np.ndarray) -> tuple[float, float]
   for i, k in enumerate(lags):
     ncc[i] = float((x[: n - k] * y[k:]).sum() / (n - k))
   peak = int(np.argmax(ncc))
+  if peak == 0 or peak == lags.size - 1:
+    return None  # boundary - not a real peak
   return float(peak / GRID_HZ), float(ncc[peak])
 
 
@@ -143,7 +148,8 @@ def _extract_lateral(path: Path):
   n = len(events)
   t_evt = np.empty(n, dtype=np.float64)
   cols = {k: np.full(n, np.nan, dtype=np.float64) for k in
-          ("output", "lat_accel", "v_ego", "steering_pressed", "lat_active")}
+          ("desired_curvature", "actual_lat_accel", "v_ego",
+           "steering_pressed", "lat_active")}
 
   for i, ev in enumerate(events):
     t_evt[i] = ev.logMonoTime / 1e9
@@ -156,11 +162,13 @@ def _extract_lateral(path: Path):
       elif which == "carControl":
         cols["lat_active"][i] = 1.0 if ev.carControl.latActive else 0.0
       elif which == "controlsState":
-        lcs = ev.controlsState.lateralControlState
+        # lagd's signal convention: desiredCurvature * v² is what the planner
+        # asked for; torqueState.actualLateralAccel is what we observed.
+        cs = ev.controlsState
+        cols["desired_curvature"][i] = cs.desiredCurvature
+        lcs = cs.lateralControlState
         if lcs.which() == "torqueState":
-          ts = lcs.torqueState
-          cols["output"][i] = ts.output
-          cols["lat_accel"][i] = ts.actualLateralAccel
+          cols["actual_lat_accel"][i] = lcs.torqueState.actualLateralAccel
     except Exception:
       continue
 
@@ -186,20 +194,23 @@ def _extract_lateral(path: Path):
 # --- per-bin analysis ------------------------------------------------------
 
 def _process_log(rec, per_bin):
-  """Sweep a record into per-bin lists of (filt_lag, unfilt_lag, ncc_filt, ncc_unfilt)."""
-  output = rec["output"]
-  lat_accel = rec["lat_accel"]
+  """Sweep a record into per-bin lists of cross-correlation peaks."""
   v_ego = rec["v_ego"]
   steering = rec["steering_pressed"]
   lat_act = rec["lat_active"]
-  n = output.size
+  # lagd-style signals: desired = curvature * v_ego², actual = torqueState lat_accel
+  desired = rec["desired_curvature"] * v_ego * v_ego
+  actual = rec["actual_lat_accel"]
+  n = desired.size
 
-  valid = (np.isfinite(output) & np.isfinite(lat_accel) & np.isfinite(v_ego)
+  valid = (np.isfinite(desired) & np.isfinite(actual) & np.isfinite(v_ego)
            & (lat_act > 0.5) & (steering < 0.5) & (v_ego >= MIN_VEGO))
   if not valid.any():
     return
 
-  osc = _oscillation_mask(output)
+  # Detect ping-pong from the DESIRED signal - if the planner itself is
+  # oscillating, that's the signature we want to exclude.
+  osc = _oscillation_mask(desired)
   valid_filt = valid & ~osc
 
   win = int(WINDOW_LEN_S * GRID_HZ)
@@ -211,12 +222,12 @@ def _process_log(rec, per_bin):
     if valid[sl].all():
       v_med = float(np.median(v_ego[sl]))
       bin_idx = _find_bin(v_med)
-      if bin_idx is not None and output[sl].std() >= MIN_OUTPUT_STD:
-        r_unfilt = _xcorr_lag(output[sl], lat_accel[sl])
+      if bin_idx is not None and desired[sl].std() >= MIN_SIGNAL_STD:
+        r_unfilt = _xcorr_lag(desired[sl], actual[sl])
         if r_unfilt is not None and r_unfilt[1] >= MIN_NCC:
           per_bin[bin_idx]["unfilt"].append(r_unfilt)
         if valid_filt[sl].all():
-          r_filt = _xcorr_lag(output[sl], lat_accel[sl])
+          r_filt = _xcorr_lag(desired[sl], actual[sl])
           if r_filt is not None and r_filt[1] >= MIN_NCC:
             per_bin[bin_idx]["filt"].append(r_filt)
     i += hop
@@ -262,10 +273,10 @@ def main():
 
   print(f"Scanning {len(rlogs)} rlogs for lateral-delay samples...")
   print(f"(Filter: vEgo>={MIN_VEGO} m/s, latActive, no driver override, "
-        f"output_std>={MIN_OUTPUT_STD}; windows: {WINDOW_LEN_S}s/{WINDOW_HOP_S}s; "
-        f"NCC≥{MIN_NCC}.)")
+        f"desired_lat_accel_std>={MIN_SIGNAL_STD}; windows: {WINDOW_LEN_S}s/"
+        f"{WINDOW_HOP_S}s; max_lag={MAX_LAG_S}s; NCC≥{MIN_NCC}.)")
   print(f"(Ping-pong filter: bandpass {OSC_LO_HZ}-{OSC_HI_HZ} Hz energy ratio > "
-        f"{OSC_RATIO_THRESHOLD}.)\n")
+        f"{OSC_RATIO_THRESHOLD} on desired_lat_accel.)\n")
 
   per_bin = [{"unfilt": [], "filt": []} for _ in range(len(DEFAULT_BINS_MS) - 1)]
   t_start = time.time()
