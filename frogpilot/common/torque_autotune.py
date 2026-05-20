@@ -52,12 +52,14 @@ LAT_DEADZONE_DEFAULT = 0.05  # only the default; the live value is adjustable in
 ROLLING_WINDOW = 500
 ROLLING_STD_MAX = 1.0
 
-# siglin model is now (sig*b + la*c + d): a, b, c are gains and are only
-# constrained to be positive; d is an additive torque offset and may be
-# negative, so it is left fully unbounded. We intentionally do NOT clamp the
-# gains to a "sane" range - the GUI sliders clamp what actually gets applied.
-PARAM_LO = np.array([1e-6, 1e-6, 1e-6, -np.inf])
-PARAM_HI = np.array([np.inf, np.inf, np.inf, np.inf])
+# siglin model is now (sig*b + la*c + d): a, b, c are gains constrained to
+# the same ranges the GUI sliders enforce (so we don't write a "ridiculous"
+# value into the live params - interface.py reads them raw and Apply writes
+# them straight through; the slider only clamps when the user opens it).
+# a > 30 is non-physical: it collapses the sigmoid into a near-step function
+# at the origin, sending slope-at-zero through the roof.
+PARAM_LO = np.array([1e-6, 1e-6, 1e-6, -1.0])
+PARAM_HI = np.array([30.0, 3.0, 3.0, 1.0])
 
 params = Params()
 
@@ -520,8 +522,12 @@ def apply_pending() -> None:
     _set_status("Previewed tune was invalid. Re-run Auto-Tune.")
     return
 
+  # Defensive clip: even though new fits are bounded, old pending JSONs may
+  # have escaped to silly values (e.g. a=576) under the previous unbounded
+  # PARAM_HI. interface.py reads these raw, so clip on Apply to be safe.
+  vals = tuple(float(np.clip(v, lo, hi)) for v, lo, hi in zip(vals, PARAM_LO, PARAM_HI))
   for suffix, value in zip(("A", "B", "C", "D"), vals):
-    params.put_float(f"{prefix}Tune{suffix}", float(value))
+    params.put_float(f"{prefix}Tune{suffix}", value)
   params.remove(PENDING_PARAM)
   _set_status(f"Done|Applied — reboot to use|{prefix} applied  "
               f"a={vals[0]:.5f}  b={vals[1]:.5f}  c={vals[2]:.5f}  d={vals[3]:.5f}")
