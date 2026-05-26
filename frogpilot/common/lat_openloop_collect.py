@@ -54,7 +54,7 @@ STORE_DIR = Path("/data/media/0/lat_openloop")
 SAMPLES_PATH = STORE_DIR / "samples.f32"
 PROCESSED_PATH = STORE_DIR / "processed.json"
 SCHEMA_PATH = STORE_DIR / "schema_version"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # v1 read lat_accel from torqueState (always 0 when lat off) - bumped to use IMU
 
 SAMPLE_COLS = 5
 SAMPLE_BYTES = SAMPLE_COLS * 4
@@ -214,12 +214,13 @@ def extract_segment(path: Path):
         cols["eps_motor_torque"][i] = cs.steeringTorqueEps
       elif which == "carControl":
         cols["lat_active"][i] = 1.0 if event.carControl.latActive else 0.0
-      elif which == "controlsState":
-        lcs = event.controlsState.lateralControlState
-        if lcs.which() == "torqueState":
-          cols["lat_accel"][i] = lcs.torqueState.actualLateralAccel
       elif which == "liveLocationKalman":
-        cols["pitch"][i] = event.liveLocationKalman.orientationNED.value[1]
+        llk = event.liveLocationKalman
+        cols["pitch"][i] = llk.orientationNED.value[1]
+        # Lateral accel from IMU (vehicle body frame y-axis). torqueState's
+        # actualLateralAccel doesn't publish when lat control is OFF, so
+        # this is the only source that works for open-loop windows.
+        cols["lat_accel"][i] = llk.acceleration.value[1]
     except Exception:
       continue
 
