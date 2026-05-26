@@ -197,6 +197,8 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"HondaLowSpeedPedal", tr("Responsive Pedal at Low Speeds"), tr("<b>Improves acceleration from a standstill for a more responsive throttle feel in city driving.</b>"), ""},
 
     {"MazdaToggles", tr("Mazda Settings"), tr("Mazda lateral and longitudinal tuning."), ""},
+    {"MazdaCollectAll", tr("Collect All (whole stack)"), tr("Sequentially ingest every Mazda rolling store: long (static+delay), lat delay, open-loop lat + K calibration. Parked only. Each store's per-feature button shows live progress."), ""},
+    {"MazdaFitAll", tr("Fit All (whole stack)"), tr("Sequentially run every Mazda fitter: long delay, long static map, lat delay, open-loop lat. Apply remains per-feature so you can sanity-check each preview before committing."), ""},
     {"MazdaLatAbcdToggles", tr("Lateral ABCD Tuning"), tr("Sigmoid+linear tune (a/b/c/d) and per-model sliders."), ""},
     {"MazdaLatDelayToggles", tr("Lateral Delay Tuning"), tr("Per-speed steerActuatorDelay breakpoint table."), ""},
     {"MazdaLongToggles", tr("Longitudinal Tuning"), tr("Gen2 long static-map sample collector."), ""},
@@ -294,6 +296,32 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
         vehiclesLayout->setCurrentWidget(mazdaPanel);
       });
       vehicleToggle = mazdaButton;
+
+    } else if (param == "MazdaCollectAll") {
+      ButtonControl *mazdaCollectAllButton = new ButtonControl(title, tr("COLLECT"), desc);
+      QObject::connect(mazdaCollectAllButton, &ButtonControl::clicked, [mazdaCollectAllButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Collect All can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        params_memory.put("MazdaTuneStackStatus", "Queued...");
+        params_memory.putBool("MazdaCollectAll", true);
+        mazdaCollectAllButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = mazdaCollectAllButton;
+
+    } else if (param == "MazdaFitAll") {
+      ButtonControl *mazdaFitAllButton = new ButtonControl(title, tr("FIT"), desc);
+      QObject::connect(mazdaFitAllButton, &ButtonControl::clicked, [mazdaFitAllButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Fit All can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        params_memory.put("MazdaTuneStackStatus", "Queued...");
+        params_memory.putBool("MazdaFitAll", true);
+        mazdaFitAllButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = mazdaFitAllButton;
 
     } else if (param == "MazdaLatAbcdToggles") {
       ButtonControl *navButton = new ButtonControl(title, tr("MANAGE"), desc);
@@ -857,6 +885,30 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
           btn->showDescription();
         } else if (!latOpenLoopStatus.isEmpty()) {
           btn->setValue(latOpenLoopStatus);
+        }
+      }
+    }
+  }
+
+  // Tune-stack status: shared across the top-level Collect All / Fit All
+  // buttons.  Per-feature statuses still drive the individual buttons; this
+  // one is a separate channel so the stack progress doesn't fight the per-
+  // feature messages.
+  QString tuneStackStatus = QString::fromStdString(params_memory.get("MazdaTuneStackStatus"));
+  if (tuneStackStatus != tuneStackStatusShown) {
+    tuneStackStatusShown = tuneStackStatus;
+    QStringList parts = tuneStackStatus.split('|');
+    QString state = parts.value(0);
+    const bool isStructured = (state == "Collect" || state == "Fit" || state == "Done"
+                               || state == "Refused") && parts.size() >= 3;
+    for (const QString &key : {"MazdaCollectAll", "MazdaFitAll"}) {
+      if (ButtonControl *btn = qobject_cast<ButtonControl*>(toggles[key])) {
+        if (isStructured) {
+          btn->setValue(parts.value(1));
+          btn->setDescription(parts.value(2));
+          btn->showDescription();
+        } else if (!tuneStackStatus.isEmpty()) {
+          btn->setValue(tuneStackStatus);
         }
       }
     }

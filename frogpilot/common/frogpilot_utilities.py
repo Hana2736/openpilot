@@ -44,6 +44,7 @@ locks = {
   "mazda_long_static": threading.Lock(),
   "mazda_lat_delay": threading.Lock(),
   "mazda_lat_openloop": threading.Lock(),
+  "mazda_tune_stack": threading.Lock(),
   "update_checks": threading.Lock(),
   "update_maps": threading.Lock(),
   "update_openpilot": threading.Lock(),

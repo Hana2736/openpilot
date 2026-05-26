@@ -73,6 +73,59 @@ def assets_checks(model_manager, theme_manager, frogpilot_toggles):
     if asset_to_download:
       run_thread_with_lock("download_theme", theme_manager.download_theme, (asset_type, asset_to_download, asset_param, frogpilot_toggles))
 
+def _stack_status(msg: str) -> None:
+  params_memory.put("MazdaTuneStackStatus", msg)
+
+
+def run_collect_all() -> None:
+  """Sequentially ingest every Mazda rolling store.  Each step's per-feature
+  status param is updated by the underlying collector; this function only
+  writes the combined MazdaTuneStackStatus so the top-of-panel button shows
+  a single progress line for the whole stack."""
+  steps = (
+    ("Long (static + delay)", run_long_collect),
+    ("Lat delay",             run_lat_delay_collect),
+    ("Open-loop lat (+ K)",   run_lat_openloop_collect),
+  )
+  for i, (label, fn) in enumerate(steps, 1):
+    _stack_status(f"Collect|Step {i}/{len(steps)}: {label}|"
+                  f"Running collector {i} of {len(steps)} — see individual button for live progress.")
+    try:
+      fn()
+    except Exception as e:
+      _stack_status(f"Refused|{label} crashed|{label} collector raised: {e!r}. "
+                    f"Other steps not run.  See individual buttons for details.")
+      return
+  _stack_status(f"Done|All {len(steps)} collectors ran|"
+                f"Collected: long (static + delay), lat delay, open-loop lat + K calibration. "
+                f"Each store's own status button shows sample counts.")
+
+
+def run_fit_all() -> None:
+  """Sequentially run every Mazda fitter.  Each writes its own Pending +
+  per-feature status; this function only writes the combined stack status.
+  Apply remains per-feature so the user can sanity-check each before
+  committing."""
+  steps = (
+    ("Long delay",        run_long_delay_fit),
+    ("Long static map",   run_long_static_fit),
+    ("Lat delay",         run_lat_delay_fit),
+    ("Open-loop lat",     run_lat_openloop_fit),
+  )
+  for i, (label, fn) in enumerate(steps, 1):
+    _stack_status(f"Fit|Step {i}/{len(steps)}: {label}|"
+                  f"Running fitter {i} of {len(steps)} — see individual button for the preview.")
+    try:
+      fn()
+    except Exception as e:
+      _stack_status(f"Refused|{label} crashed|{label} fitter raised: {e!r}. "
+                    f"Other steps not run.  See individual buttons for details.")
+      return
+  _stack_status(f"Done|All {len(steps)} fitters ran|"
+                f"Previewed: long delay, long static map, lat delay, open-loop lat. "
+                f"Tap each individual Apply to commit; this stack button does NOT auto-apply.")
+
+
 def autotune_check(started):
   # Auto-Tune is heavy (reads many rlogs) so it only runs while parked.
   if started:
@@ -146,6 +199,14 @@ def autotune_check(started):
     params_memory.remove("LatOpenLoopCollect")
     params_memory.put("LatOpenLoopStatus", "Queued...")
     run_thread_with_lock("mazda_lat_openloop", run_lat_openloop_collect)
+  if params_memory.get_bool("MazdaCollectAll"):
+    params_memory.remove("MazdaCollectAll")
+    params_memory.put("MazdaTuneStackStatus", "Queued...")
+    run_thread_with_lock("mazda_tune_stack", run_collect_all)
+  if params_memory.get_bool("MazdaFitAll"):
+    params_memory.remove("MazdaFitAll")
+    params_memory.put("MazdaTuneStackStatus", "Queued...")
+    run_thread_with_lock("mazda_tune_stack", run_fit_all)
 
 
 def update_checks(model_manager, now, theme_manager, frogpilot_toggles, boot_run=False):

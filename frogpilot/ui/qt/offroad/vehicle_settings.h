@@ -27,6 +27,7 @@ private:
   QString longDelayStatusShown;
   QString longStaticStatusShown;
   QString latOpenLoopStatusShown;
+  QString tuneStackStatusShown;
 
   std::map<QString, AbstractControl*> toggles;
 
@@ -59,6 +60,7 @@ private:
                              "LongAutoTuneCollect", "LongDelayFit", "LongDelayApply", "LongDelayReset",
                              "LongStaticFit", "LongStaticApply", "LongStaticReset",
                              "LatOpenLoopCollect", "LatOpenLoopFit", "LatOpenLoopApply", "LatOpenLoopReset",
+                             "MazdaCollectAll", "MazdaFitAll",
                              "MazdaLatAbcdToggles", "MazdaLatDelayToggles", "MazdaLongToggles"};
   QSet<QString> longitudinalKeys = {"ExperimentalGMTune", "FrogsGoMoosTweak", "HondaAltTune", "HondaMaxBrake", "HondaLowSpeedPedal", "LongPitch", "NewLongAPI", "SNGHack", "SubaruSNG", "VoltSNG"};
   QSet<QString> subaruKeys = {"SubaruSNG"};
