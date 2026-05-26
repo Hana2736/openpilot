@@ -155,10 +155,19 @@ class LongControl:
       v_target_now = interp(t_since_plan, CONTROL_N_T_IDX, speeds)
       a_target_now = interp(t_since_plan, CONTROL_N_T_IDX, long_plan.accels)
 
-      v_target = interp(frogpilot_toggles.longitudinalActuatorDelay + t_since_plan, CONTROL_N_T_IDX, speeds)
-      a_target = 2 * (v_target - v_target_now) / frogpilot_toggles.longitudinalActuatorDelay - a_target_now
+      # Per-speed long-delay table (Mazda auto-tune) takes priority over the
+      # single scalar when present. Computed once so v_target and the
+      # a_target denominator use the same delay (they have to match for
+      # the dv/dt approximation to be consistent).
+      long_delay = frogpilot_toggles.longitudinalActuatorDelay
+      if getattr(frogpilot_toggles, "use_long_delay_table", False):
+        tbl = frogpilot_toggles.long_delay_table
+        long_delay = float(interp(CS.vEgo, [v for v, _ in tbl], [d for _, d in tbl]))
 
-      v_target_1sec = interp(frogpilot_toggles.longitudinalActuatorDelay + t_since_plan + 1.0, CONTROL_N_T_IDX, speeds)
+      v_target = interp(long_delay + t_since_plan, CONTROL_N_T_IDX, speeds)
+      a_target = 2 * (v_target - v_target_now) / long_delay - a_target_now
+
+      v_target_1sec = interp(long_delay + t_since_plan + 1.0, CONTROL_N_T_IDX, speeds)
     else:
       v_target = 0.0
       v_target_now = 0.0

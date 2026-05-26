@@ -221,6 +221,9 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"LatDelayFit", tr("Fit Lat Delay Table"), tr("Build a per-speed delay breakpoint table from the store. Previews first."), ""},
     {"LatDelayApply", tr("Apply Lat Delay Table"), tr("Write the previewed delay table; lagd will interpolate it at runtime. Reboot after."), ""},
     {"LatDelayReset", tr("Reset Lat Delay Table"), tr("Clear the applied delay table; fall back to lagd's learned single value."), ""},
+    {"LongDelayFit", tr("Fit Long Delay Table"), tr("Build a per-speed longitudinalActuatorDelay breakpoint table from the delay store. Previews first."), ""},
+    {"LongDelayApply", tr("Apply Long Delay Table"), tr("Write the previewed long-delay table; the long planner/controller will interpolate it at runtime. Reboot after."), ""},
+    {"LongDelayReset", tr("Reset Long Delay Table"), tr("Clear the applied long-delay table; fall back to the single scalar longitudinalActuatorDelay."), ""},
 
     {"SubaruToggles", tr("Subaru Settings"), tr("<b>FrogPilot features for Subaru vehicles.</b>"), ""},
     {"SubaruSNG", tr("Stop and Go"), tr("Stop and go for supported Subaru vehicles."), ""},
@@ -430,6 +433,46 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
         params_memory.putBool("LatDelayReset", true);
       });
       vehicleToggle = latDelayResetButton;
+
+    } else if (param == "LongDelayFit") {
+      ButtonControl *longDelayFitButton = new ButtonControl(title, tr("FIT"), desc);
+      QObject::connect(longDelayFitButton, &ButtonControl::clicked, [longDelayFitButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Fit can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        params_memory.put("LongDelayStatus", "Queued...");
+        params_memory.putBool("LongDelayFit", true);
+        longDelayFitButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = longDelayFitButton;
+
+    } else if (param == "LongDelayApply") {
+      ButtonControl *longDelayApplyButton = new ButtonControl(title, tr("APPLY"), desc);
+      QObject::connect(longDelayApplyButton, &ButtonControl::clicked, [this]() {
+        QString status = QString::fromStdString(params_memory.get("LongDelayStatus"));
+        QStringList parts = status.split('|');
+        QString detail = (parts.value(0) == "Preview" && parts.size() >= 3) ? parts.value(2) : QString();
+        if (detail.isEmpty()) {
+          ConfirmationDialog::alert(tr("No previewed long-delay table to apply. Run Fit first."), this);
+          return;
+        }
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Apply this longitudinal delay table?\n\n") + detail, this)) {
+          return;
+        }
+        params_memory.putBool("LongDelayApply", true);
+      });
+      vehicleToggle = longDelayApplyButton;
+
+    } else if (param == "LongDelayReset") {
+      ButtonControl *longDelayResetButton = new ButtonControl(title, tr("RESET"), desc);
+      QObject::connect(longDelayResetButton, &ButtonControl::clicked, [this]() {
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Clear the applied long-delay table?"), this)) {
+          return;
+        }
+        params_memory.putBool("LongDelayReset", true);
+      });
+      vehicleToggle = longDelayResetButton;
 
     } else if (mazdaKeys.contains(param)) {
       // a: gain 0-30, b/c: gains 0-3, d: signed torque offset -1..1
@@ -648,6 +691,28 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
           btn->showDescription();
         } else if (!latDelayStatus.isEmpty()) {
           btn->setValue(latDelayStatus);
+        }
+      }
+    }
+  }
+
+  // Long-delay status is shared across Fit/Apply buttons (no Collect button -
+  // the long collector populates the delay store as a side effect already).
+  QString longDelayStatus = QString::fromStdString(params_memory.get("LongDelayStatus"));
+  if (longDelayStatus != longDelayStatusShown) {
+    longDelayStatusShown = longDelayStatus;
+    QStringList parts = longDelayStatus.split('|');
+    QString state = parts.value(0);
+    const bool isStructured = (state == "Idle" || state == "Preview" || state == "Done"
+                               || state == "Refused") && parts.size() >= 3;
+    for (const QString &key : {"LongDelayFit", "LongDelayApply"}) {
+      if (ButtonControl *btn = qobject_cast<ButtonControl*>(toggles[key])) {
+        if (isStructured) {
+          btn->setValue(parts.value(1));
+          btn->setDescription(parts.value(2));
+          btn->showDescription();
+        } else if (!longDelayStatus.isEmpty()) {
+          btn->setValue(longDelayStatus);
         }
       }
     }

@@ -172,7 +172,15 @@ class LongitudinalPlanner:
     self.a_desired = float(np.interp(self.dt, CONTROL_N_T_IDX, self.a_desired_trajectory))
     self.v_desired_filter.x = self.v_desired_filter.x + self.dt * (self.a_desired + a_prev) / 2.0
 
-    action_t = frogpilot_toggles.longitudinalActuatorDelay + DT_MDL
+    # Per-speed long-delay table (Mazda auto-tune) takes priority over the
+    # single scalar when present. v_ego is current car speed; the MPC's
+    # action_t is delay+DT_MDL "what we plan now will land in this much
+    # wall time."
+    long_delay = frogpilot_toggles.longitudinalActuatorDelay
+    if getattr(frogpilot_toggles, "use_long_delay_table", False):
+      tbl = frogpilot_toggles.long_delay_table
+      long_delay = float(np.interp(v_ego, [v for v, _ in tbl], [d for _, d in tbl]))
+    action_t = long_delay + DT_MDL
     output_a_target_mpc, output_should_stop_mpc = get_accel_from_plan(self.v_desired_trajectory, self.a_desired_trajectory, CONTROL_N_T_IDX,
                                                                         action_t=action_t, vEgoStopping=frogpilot_toggles.vEgoStopping)
     output_a_target_e2e = sm['modelV2'].action.desiredAcceleration

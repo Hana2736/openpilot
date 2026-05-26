@@ -711,6 +711,25 @@ class FrogPilotVariables:
 
     advanced_longitudinal_tuning = toggle.openpilot_longitudinal and (params.get_bool("AdvancedLongitudinalTune") if toggle.tuning_level >= level["AdvancedLongitudinalTune"] else default.get_bool("AdvancedLongitudinalTune"))
     toggle.longitudinalActuatorDelay = np.clip(params.get_float("LongitudinalActuatorDelay"), 0, 1) if advanced_longitudinal_tuning and toggle.tuning_level >= level["LongitudinalActuatorDelay"] else longitudinalActuatorDelay
+    # Optional per-speed long-delay breakpoint table (applied via the Mazda
+    # panel's "Apply Long Delay Table" button after auto-fit). longcontrol
+    # and longitudinal_planner interp this by current v_ego at runtime
+    # instead of using the single scalar. Stored tuple-of-tuples (not
+    # ndarray) - toggle.__dict__ is json.dumps'd every update and ndarrays
+    # aren't serializable. Consumers do np.interp on the tuple directly.
+    toggle.long_delay_table = None
+    raw_long_table = params.get("LongDelayTable", encoding="utf-8") or ""
+    if raw_long_table:
+      try:
+        import json as _json
+        long_bps = _json.loads(raw_long_table).get("breakpoints", [])
+        cleaned_long = tuple((float(v), float(np.clip(d, 0.05, 1.0))) for v, d in long_bps)
+        vs_long = [v for v, _ in cleaned_long]
+        if len(cleaned_long) >= 2 and all(b > a for a, b in zip(vs_long[:-1], vs_long[1:])):
+          toggle.long_delay_table = cleaned_long
+      except Exception:
+        toggle.long_delay_table = None
+    toggle.use_long_delay_table = toggle.long_delay_table is not None
     toggle.max_desired_acceleration = np.clip(params.get_float("MaxDesiredAcceleration"), 0.1, 4.0) if advanced_longitudinal_tuning and toggle.tuning_level >= level["MaxDesiredAcceleration"] else default.get_float("MaxDesiredAcceleration")
     toggle.startAccel = np.clip(params.get_float("StartAccel"), 0, 4) if advanced_longitudinal_tuning and toggle.tuning_level >= level["StartAccel"] else startAccel
     toggle.stopAccel = np.clip(params.get_float("StopAccel"), -4, 0) if advanced_longitudinal_tuning and toggle.tuning_level >= level["StopAccel"] else stopAccel

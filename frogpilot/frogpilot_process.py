@@ -21,6 +21,13 @@ from openpilot.frogpilot.common.lat_delay_collect import (
   run_fit as run_lat_delay_fit,
 )
 from openpilot.frogpilot.common.long_collect import restore_idle_status as restore_long_idle_status, run_collect as run_long_collect
+from openpilot.frogpilot.common.long_delay_collect import (
+  apply_pending as apply_long_delay,
+  reset_table as reset_long_delay,
+  restore_idle_status as restore_long_delay_idle_status,
+  restore_preview_status as restore_long_delay_preview_status,
+  run_fit as run_long_delay_fit,
+)
 from openpilot.frogpilot.common.torque_autotune import apply_pending, restore_preview_status, run_autotune
 from openpilot.frogpilot.controls.frogpilot_planner import FrogPilotPlanner
 from openpilot.frogpilot.system.frogpilot_stats import send_stats
@@ -84,6 +91,18 @@ def autotune_check(started):
     params_memory.remove("LatDelayCollect")
     params_memory.put("LatDelayStatus", "Queued...")
     run_thread_with_lock("mazda_lat_delay", run_lat_delay_collect)
+  restore_long_delay_preview_status()
+  restore_long_delay_idle_status()
+  if params_memory.get_bool("LongDelayReset"):
+    params_memory.remove("LongDelayReset")
+    reset_long_delay()
+  if params_memory.get_bool("LongDelayApply"):
+    params_memory.remove("LongDelayApply")
+    apply_long_delay()
+  if params_memory.get_bool("LongDelayFit"):
+    params_memory.remove("LongDelayFit")
+    params_memory.put("LongDelayStatus", "Fitting...")
+    run_thread_with_lock("mazda_long_delay", run_long_delay_fit)
 
 
 def update_checks(model_manager, now, theme_manager, frogpilot_toggles, boot_run=False):
