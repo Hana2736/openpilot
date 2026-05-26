@@ -62,6 +62,14 @@ MIN_CMD_MAG = 0.10  # m/s^2
 MIN_DELAY_S = 0.05
 MAX_DELAY_S = 0.80
 
+# Plant-measured per-side defaults for Mazda, used by frogpilot_variables
+# when no fitted table is present. Source: mazda/interface.py:137 comment
+# "gas is 0.25s and brake looks like 0.5". Flat 2-point tables (constant
+# vs v_ego) until enough Experimental-mode samples accrue to refine into
+# per-speed curves. Fitted tables override these on apply.
+DEFAULT_TABLE_THROTTLE = ((0.0, 0.25), (40.0, 0.25))
+DEFAULT_TABLE_BRAKE = ((0.0, 0.50), (40.0, 0.50))
+
 BIN_CENTERS_MS = tuple(0.5 * (lo + hi) for lo, hi in zip(DEFAULT_BINS_MS[:-1], DEFAULT_BINS_MS[1:]))
 
 

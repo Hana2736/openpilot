@@ -134,7 +134,7 @@ class CarInterface(CarInterfaceBase):
       ret.experimentalLongitudinalAvailable = True
       ret.stopAccel = -.5
       ret.vEgoStarting = .2
-      ret.longitudinalActuatorDelay = 0.35 # gas is 0.25s and brake looks like 0.5
+      ret.longitudinalActuatorDelay = 0.35  # CP scalar (gas ~0.25s, brake ~0.5s); split per-side defaults live in frogpilot/common/long_delay_collect.py and override this at consumer sites
       ret.longitudinalTuning.kpBP = [0., 5., 35.]
       ret.longitudinalTuning.kpV = [0.0, 0.0, 0.0]
       ret.longitudinalTuning.kiBP = [0., 35.]

@@ -736,6 +736,18 @@ class FrogPilotVariables:
       return None
     toggle.long_delay_table_throttle = _load_long_delay("LongDelayTableThrottle")
     toggle.long_delay_table_brake = _load_long_delay("LongDelayTableBrake")
+    # Mazda plant defaults (gas ~0.25s, brake ~0.5s per mazda/interface.py
+    # comment) when no fitted table is present. Means the throttle/brake
+    # split is live from day one; the fitter just refines into a per-speed
+    # curve once enough Experimental-mode data accrues.
+    if toggle.car_make == "mazda":
+      from openpilot.frogpilot.common.long_delay_collect import (
+        DEFAULT_TABLE_BRAKE, DEFAULT_TABLE_THROTTLE,
+      )
+      if toggle.long_delay_table_throttle is None:
+        toggle.long_delay_table_throttle = DEFAULT_TABLE_THROTTLE
+      if toggle.long_delay_table_brake is None:
+        toggle.long_delay_table_brake = DEFAULT_TABLE_BRAKE
     toggle.use_long_delay_table = (toggle.long_delay_table_throttle is not None
                                    or toggle.long_delay_table_brake is not None)
     toggle.max_desired_acceleration = np.clip(params.get_float("MaxDesiredAcceleration"), 0.1, 4.0) if advanced_longitudinal_tuning and toggle.tuning_level >= level["MaxDesiredAcceleration"] else default.get_float("MaxDesiredAcceleration")
