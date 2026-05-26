@@ -28,6 +28,21 @@ from openpilot.frogpilot.common.long_delay_collect import (
   restore_preview_status as restore_long_delay_preview_status,
   run_fit as run_long_delay_fit,
 )
+from openpilot.frogpilot.common.long_static_collect import (
+  apply_pending as apply_long_static,
+  reset_table as reset_long_static,
+  restore_idle_status as restore_long_static_idle_status,
+  restore_preview_status as restore_long_static_preview_status,
+  run_fit as run_long_static_fit,
+)
+from openpilot.frogpilot.common.lat_openloop_collect import (
+  apply_pending as apply_lat_openloop,
+  reset_table as reset_lat_openloop,
+  restore_idle_status as restore_lat_openloop_idle_status,
+  restore_preview_status as restore_lat_openloop_preview_status,
+  run_collect as run_lat_openloop_collect,
+  run_fit as run_lat_openloop_fit,
+)
 from openpilot.frogpilot.common.torque_autotune import apply_pending, restore_preview_status, run_autotune
 from openpilot.frogpilot.controls.frogpilot_planner import FrogPilotPlanner
 from openpilot.frogpilot.system.frogpilot_stats import send_stats
@@ -103,6 +118,34 @@ def autotune_check(started):
     params_memory.remove("LongDelayFit")
     params_memory.put("LongDelayStatus", "Fitting...")
     run_thread_with_lock("mazda_long_delay", run_long_delay_fit)
+  restore_long_static_preview_status()
+  restore_long_static_idle_status()
+  if params_memory.get_bool("LongStaticReset"):
+    params_memory.remove("LongStaticReset")
+    reset_long_static()
+  if params_memory.get_bool("LongStaticApply"):
+    params_memory.remove("LongStaticApply")
+    apply_long_static()
+  if params_memory.get_bool("LongStaticFit"):
+    params_memory.remove("LongStaticFit")
+    params_memory.put("LongStaticStatus", "Fitting...")
+    run_thread_with_lock("mazda_long_static", run_long_static_fit)
+  restore_lat_openloop_preview_status()
+  restore_lat_openloop_idle_status()
+  if params_memory.get_bool("LatOpenLoopReset"):
+    params_memory.remove("LatOpenLoopReset")
+    reset_lat_openloop()
+  if params_memory.get_bool("LatOpenLoopApply"):
+    params_memory.remove("LatOpenLoopApply")
+    apply_lat_openloop()
+  if params_memory.get_bool("LatOpenLoopFit"):
+    params_memory.remove("LatOpenLoopFit")
+    params_memory.put("LatOpenLoopStatus", "Fitting...")
+    run_thread_with_lock("mazda_lat_openloop", run_lat_openloop_fit)
+  if params_memory.get_bool("LatOpenLoopCollect"):
+    params_memory.remove("LatOpenLoopCollect")
+    params_memory.put("LatOpenLoopStatus", "Queued...")
+    run_thread_with_lock("mazda_lat_openloop", run_lat_openloop_collect)
 
 
 def update_checks(model_manager, now, theme_manager, frogpilot_toggles, boot_run=False):

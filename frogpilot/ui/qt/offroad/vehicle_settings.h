@@ -25,6 +25,8 @@ private:
   QString longCollectStatusShown;
   QString latDelayStatusShown;
   QString longDelayStatusShown;
+  QString longStaticStatusShown;
+  QString latOpenLoopStatusShown;
 
   std::map<QString, AbstractControl*> toggles;
 
@@ -43,9 +45,11 @@ private:
                                     "MazdaCX30TuneA", "MazdaCX30TuneB", "MazdaCX30TuneC", "MazdaCX30TuneD",
                                     "MazdaCX50TuneA", "MazdaCX50TuneB", "MazdaCX50TuneC", "MazdaCX50TuneD",
                                     "MazdaAutoTune", "MazdaAutoTuneApply", "MazdaAutoTuneDeadzone",
-                                    "MazdaTuneReset"};
+                                    "MazdaTuneReset",
+                                    "LatOpenLoopCollect", "LatOpenLoopFit", "LatOpenLoopApply", "LatOpenLoopReset"};
   QSet<QString> mazdaLatDelayKeys = {"LatDelayCollect", "LatDelayFit", "LatDelayApply", "LatDelayReset"};
-  QSet<QString> mazdaLongKeys = {"LongAutoTuneCollect", "LongDelayFit", "LongDelayApply", "LongDelayReset"};
+  QSet<QString> mazdaLongKeys = {"LongAutoTuneCollect", "LongDelayFit", "LongDelayApply", "LongDelayReset",
+                                 "LongStaticFit", "LongStaticApply", "LongStaticReset"};
   QSet<QString> mazdaKeys = {"Mazda3TuneA", "Mazda3TuneB", "Mazda3TuneC", "Mazda3TuneD",
                              "MazdaCX30TuneA", "MazdaCX30TuneB", "MazdaCX30TuneC", "MazdaCX30TuneD",
                              "MazdaCX50TuneA", "MazdaCX50TuneB", "MazdaCX50TuneC", "MazdaCX50TuneD",
@@ -53,6 +57,8 @@ private:
                              "MazdaTuneReset",
                              "LatDelayCollect", "LatDelayFit", "LatDelayApply", "LatDelayReset",
                              "LongAutoTuneCollect", "LongDelayFit", "LongDelayApply", "LongDelayReset",
+                             "LongStaticFit", "LongStaticApply", "LongStaticReset",
+                             "LatOpenLoopCollect", "LatOpenLoopFit", "LatOpenLoopApply", "LatOpenLoopReset",
                              "MazdaLatAbcdToggles", "MazdaLatDelayToggles", "MazdaLongToggles"};
   QSet<QString> longitudinalKeys = {"ExperimentalGMTune", "FrogsGoMoosTweak", "HondaAltTune", "HondaMaxBrake", "HondaLowSpeedPedal", "LongPitch", "NewLongAPI", "SNGHack", "SubaruSNG", "VoltSNG"};
   QSet<QString> subaruKeys = {"SubaruSNG"};

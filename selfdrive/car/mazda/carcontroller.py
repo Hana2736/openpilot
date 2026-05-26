@@ -14,6 +14,48 @@ import cereal.messaging as messaging
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 LongCtrlState = car.CarControl.Actuators.LongControlState
 
+# Safety clip for the static-map inverse path.  The stock affine
+# (`a*200 + 2000`) reaches roughly [1400, 2400] in worst-case brake/accel;
+# we give the inverse-table output a slightly wider envelope so a small
+# fit error never silently saturates, but cap absolute extremes since
+# values far outside this range would be Mazda's onboard ACC ignoring or
+# misinterpreting the command.  Stock affine output is intentionally NOT
+# clipped here - that path keeps its pre-existing behavior.
+_GEN2_CMD_LO = 1200
+_GEN2_CMD_HI = 2600
+
+
+def _compute_can_cmd(target_accel, v_ego, p, frogpilot_toggles):
+  """Map target_accel (m/s²) -> 12-bit ACCEL_CMD CAN integer.
+
+  Default: the stock global affine `target_accel * accel_scale + accel_offset`,
+  unclipped (preserves existing behavior so toggling the static map off
+  reverts exactly).
+
+  Table path: per-bin pwl-deadband inverse interpolated at v_ego.
+    target_accel > 0:  can = target_accel / s_pos + dz_hi
+    target_accel < 0:  can = target_accel / s_neg + dz_lo
+    target_accel == 0: can = midpoint of [dz_lo, dz_hi]
+  Output hard-clipped to [_GEN2_CMD_LO, _GEN2_CMD_HI].
+  """
+  if not getattr(frogpilot_toggles, "use_long_static_map", False):
+    return int(target_accel * p.accel_scale + p.accel_offset)
+
+  tbl = frogpilot_toggles.long_static_map_table  # tuple of (v, dz_lo, dz_hi, s_pos, s_neg)
+  vs = [row[0] for row in tbl]
+  dz_lo = float(np.interp(v_ego, vs, [row[1] for row in tbl]))
+  dz_hi = float(np.interp(v_ego, vs, [row[2] for row in tbl]))
+  s_pos = float(np.interp(v_ego, vs, [row[3] for row in tbl]))
+  s_neg = float(np.interp(v_ego, vs, [row[4] for row in tbl]))
+
+  if target_accel > 0:
+    can = target_accel / max(s_pos, 1e-6) + dz_hi
+  elif target_accel < 0:
+    can = target_accel / max(s_neg, 1e-6) + dz_lo
+  else:
+    can = 0.5 * (dz_lo + dz_hi)
+  return int(np.clip(can, _GEN2_CMD_LO, _GEN2_CMD_HI))
+
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_name, CP, VM):
@@ -138,7 +180,7 @@ class CarController(CarControllerBase):
         target_accel *= brake_mult
 
       target_accel = max(p.accel_min, target_accel)
-      raw_acc_output = int((target_accel * p.accel_scale) + p.accel_offset)
+      raw_acc_output = _compute_can_cmd(target_accel, CS.out.vEgo, p, frogpilot_toggles)
       OPlong = (self.params.get_bool("ExperimentalLongitudinalEnabled") and CC.longActive)
 
       if OPlong:

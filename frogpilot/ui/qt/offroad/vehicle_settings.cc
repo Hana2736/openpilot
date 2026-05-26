@@ -224,6 +224,13 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"LongDelayFit", tr("Fit Long Delay Table"), tr("Build a per-speed longitudinalActuatorDelay breakpoint table from the delay store. Previews first."), ""},
     {"LongDelayApply", tr("Apply Long Delay Table"), tr("Write the previewed long-delay table; the long planner/controller will interpolate it at runtime. Reboot after."), ""},
     {"LongDelayReset", tr("Reset Long Delay Table"), tr("Clear the applied long-delay table; fall back to the single scalar longitudinalActuatorDelay."), ""},
+    {"LongStaticFit", tr("Fit Long Static Map"), tr("Build a per-speed piecewise-affine-with-deadband table from the long static store. Replaces the global accel_scale/accel_offset affine. Previews first."), ""},
+    {"LongStaticApply", tr("Apply Long Static Map"), tr("Write the previewed static map; carcontroller will invert the plant per (target_accel, v_ego) at runtime. Reboot after."), ""},
+    {"LongStaticReset", tr("Reset Long Static Map"), tr("Clear the applied static map; fall back to the global accel_scale/accel_offset affine."), ""},
+    {"LatOpenLoopCollect", tr("Collect Open-Loop Lat Samples"), tr("Ingest rlogs into the open-loop lateral store (lat-off driver-steered windows). Parked only."), ""},
+    {"LatOpenLoopFit", tr("Fit Open-Loop Lat"), tr("Fit siglin on the open-loop store. Result is in raw EPS torque units; treat as diagnostic for now."), ""},
+    {"LatOpenLoopApply", tr("Apply Open-Loop Lat"), tr("Currently disabled — pending unit calibration. The previewed values are still readable for manual sanity-check."), ""},
+    {"LatOpenLoopReset", tr("Reset Open-Loop Lat"), tr("Clear the previewed open-loop fit."), ""},
 
     {"SubaruToggles", tr("Subaru Settings"), tr("<b>FrogPilot features for Subaru vehicles.</b>"), ""},
     {"SubaruSNG", tr("Stop and Go"), tr("Stop and go for supported Subaru vehicles."), ""},
@@ -474,6 +481,92 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
       });
       vehicleToggle = longDelayResetButton;
 
+    } else if (param == "LongStaticFit") {
+      ButtonControl *longStaticFitButton = new ButtonControl(title, tr("FIT"), desc);
+      QObject::connect(longStaticFitButton, &ButtonControl::clicked, [longStaticFitButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Fit can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        params_memory.put("LongStaticStatus", "Queued...");
+        params_memory.putBool("LongStaticFit", true);
+        longStaticFitButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = longStaticFitButton;
+
+    } else if (param == "LongStaticApply") {
+      ButtonControl *longStaticApplyButton = new ButtonControl(title, tr("APPLY"), desc);
+      QObject::connect(longStaticApplyButton, &ButtonControl::clicked, [this]() {
+        QString status = QString::fromStdString(params_memory.get("LongStaticStatus"));
+        QStringList parts = status.split('|');
+        QString detail = (parts.value(0) == "Preview" && parts.size() >= 3) ? parts.value(2) : QString();
+        if (detail.isEmpty()) {
+          ConfirmationDialog::alert(tr("No previewed static map to apply. Run Fit first."), this);
+          return;
+        }
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Apply this longitudinal static map?\n\nThis replaces the carcontroller's affine accel→CAN map with a per-speed table. Reboot after to use.\n\n") + detail, this)) {
+          return;
+        }
+        params_memory.putBool("LongStaticApply", true);
+      });
+      vehicleToggle = longStaticApplyButton;
+
+    } else if (param == "LongStaticReset") {
+      ButtonControl *longStaticResetButton = new ButtonControl(title, tr("RESET"), desc);
+      QObject::connect(longStaticResetButton, &ButtonControl::clicked, [this]() {
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Clear the applied static map? carcontroller will revert to the stock global affine."), this)) {
+          return;
+        }
+        params_memory.putBool("LongStaticReset", true);
+      });
+      vehicleToggle = longStaticResetButton;
+
+    } else if (param == "LatOpenLoopCollect") {
+      ButtonControl *latOpenLoopCollectButton = new ButtonControl(title, tr("COLLECT"), desc);
+      QObject::connect(latOpenLoopCollectButton, &ButtonControl::clicked, [latOpenLoopCollectButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Collection can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        params_memory.put("LatOpenLoopStatus", "Queued...");
+        params_memory.putBool("LatOpenLoopCollect", true);
+        latOpenLoopCollectButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = latOpenLoopCollectButton;
+
+    } else if (param == "LatOpenLoopFit") {
+      ButtonControl *latOpenLoopFitButton = new ButtonControl(title, tr("FIT"), desc);
+      QObject::connect(latOpenLoopFitButton, &ButtonControl::clicked, [latOpenLoopFitButton, this]() {
+        if (started) {
+          ConfirmationDialog::alert(tr("Fit can only run while parked. Try again when stopped."), this);
+          return;
+        }
+        params_memory.put("LatOpenLoopStatus", "Queued...");
+        params_memory.putBool("LatOpenLoopFit", true);
+        latOpenLoopFitButton->setValue(tr("Queued..."));
+      });
+      vehicleToggle = latOpenLoopFitButton;
+
+    } else if (param == "LatOpenLoopApply") {
+      ButtonControl *latOpenLoopApplyButton = new ButtonControl(title, tr("APPLY"), desc);
+      QObject::connect(latOpenLoopApplyButton, &ButtonControl::clicked, [this]() {
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Apply is currently disabled (raw EPS units need calibration). Trigger the apply path anyway so its diagnostic message lands in the status bar?"), this)) {
+          return;
+        }
+        params_memory.putBool("LatOpenLoopApply", true);
+      });
+      vehicleToggle = latOpenLoopApplyButton;
+
+    } else if (param == "LatOpenLoopReset") {
+      ButtonControl *latOpenLoopResetButton = new ButtonControl(title, tr("RESET"), desc);
+      QObject::connect(latOpenLoopResetButton, &ButtonControl::clicked, [this]() {
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Clear the previewed open-loop fit?"), this)) {
+          return;
+        }
+        params_memory.putBool("LatOpenLoopReset", true);
+      });
+      vehicleToggle = latOpenLoopResetButton;
+
     } else if (mazdaKeys.contains(param)) {
       // a: gain 0-30, b/c: gains 0-3, d: signed torque offset -1..1
       float mazdaMinValue = param.endsWith("D") ? -1.0f : 0.0f;
@@ -713,6 +806,50 @@ void FrogPilotVehiclesPanel::updateState(const UIState &s) {
           btn->showDescription();
         } else if (!longDelayStatus.isEmpty()) {
           btn->setValue(longDelayStatus);
+        }
+      }
+    }
+  }
+
+  // Long-static status is shared across Fit/Apply buttons (no Collect -
+  // long_collect's static store population is shared with the delay path).
+  QString longStaticStatus = QString::fromStdString(params_memory.get("LongStaticStatus"));
+  if (longStaticStatus != longStaticStatusShown) {
+    longStaticStatusShown = longStaticStatus;
+    QStringList parts = longStaticStatus.split('|');
+    QString state = parts.value(0);
+    const bool isStructured = (state == "Idle" || state == "Preview" || state == "Done"
+                               || state == "Refused") && parts.size() >= 3;
+    for (const QString &key : {"LongStaticFit", "LongStaticApply"}) {
+      if (ButtonControl *btn = qobject_cast<ButtonControl*>(toggles[key])) {
+        if (isStructured) {
+          btn->setValue(parts.value(1));
+          btn->setDescription(parts.value(2));
+          btn->showDescription();
+        } else if (!longStaticStatus.isEmpty()) {
+          btn->setValue(longStaticStatus);
+        }
+      }
+    }
+  }
+
+  // Open-loop lateral status: shared across Collect/Fit/Apply.  Apply is
+  // gated on calibration so its message will land here when poked.
+  QString latOpenLoopStatus = QString::fromStdString(params_memory.get("LatOpenLoopStatus"));
+  if (latOpenLoopStatus != latOpenLoopStatusShown) {
+    latOpenLoopStatusShown = latOpenLoopStatus;
+    QStringList parts = latOpenLoopStatus.split('|');
+    QString state = parts.value(0);
+    const bool isStructured = (state == "Idle" || state == "Collect" || state == "Preview"
+                               || state == "Done" || state == "Refused") && parts.size() >= 3;
+    for (const QString &key : {"LatOpenLoopCollect", "LatOpenLoopFit", "LatOpenLoopApply"}) {
+      if (ButtonControl *btn = qobject_cast<ButtonControl*>(toggles[key])) {
+        if (isStructured) {
+          btn->setValue(parts.value(1));
+          btn->setDescription(parts.value(2));
+          btn->showDescription();
+        } else if (!latOpenLoopStatus.isEmpty()) {
+          btn->setValue(latOpenLoopStatus);
         }
       }
     }

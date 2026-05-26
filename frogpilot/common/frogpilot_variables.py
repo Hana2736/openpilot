@@ -750,6 +750,25 @@ class FrogPilotVariables:
         toggle.long_delay_table_brake = DEFAULT_TABLE_BRAKE
     toggle.use_long_delay_table = (toggle.long_delay_table_throttle is not None
                                    or toggle.long_delay_table_brake is not None)
+    # Optional per-speed longitudinal static-map table (Mazda auto-tune).
+    # Replaces the global affine accel_scale/accel_offset with per-bin
+    # (dz_lo, dz_hi, s_pos, s_neg) so carcontroller can invert the plant
+    # per current v_ego.  carcontroller hard-clips its CAN output to a
+    # safe range regardless.  Stored tuple-of-tuples for the same
+    # ndarray-serialization reason as the delay tables.
+    toggle.long_static_map_table = None
+    raw_static = params.get("LongStaticMapTable", encoding="utf-8") or ""
+    if raw_static:
+      try:
+        import json as _json
+        bps = _json.loads(raw_static).get("breakpoints", [])
+        cleaned = tuple(tuple(float(x) for x in entry) for entry in bps if len(entry) == 5)
+        vs = [v for v, *_ in cleaned]
+        if len(cleaned) >= 2 and all(b > a for a, b in zip(vs[:-1], vs[1:])):
+          toggle.long_static_map_table = cleaned
+      except Exception:
+        toggle.long_static_map_table = None
+    toggle.use_long_static_map = toggle.long_static_map_table is not None
     toggle.max_desired_acceleration = np.clip(params.get_float("MaxDesiredAcceleration"), 0.1, 4.0) if advanced_longitudinal_tuning and toggle.tuning_level >= level["MaxDesiredAcceleration"] else default.get_float("MaxDesiredAcceleration")
     toggle.startAccel = np.clip(params.get_float("StartAccel"), 0, 4) if advanced_longitudinal_tuning and toggle.tuning_level >= level["StartAccel"] else startAccel
     toggle.stopAccel = np.clip(params.get_float("StopAccel"), -4, 0) if advanced_longitudinal_tuning and toggle.tuning_level >= level["StopAccel"] else stopAccel
