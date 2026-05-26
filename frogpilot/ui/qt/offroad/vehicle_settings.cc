@@ -228,8 +228,8 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"LongStaticApply", tr("Apply Long Static Map"), tr("Write the previewed static map; carcontroller will invert the plant per (target_accel, v_ego) at runtime. Reboot after."), ""},
     {"LongStaticReset", tr("Reset Long Static Map"), tr("Clear the applied static map; fall back to the global accel_scale/accel_offset affine."), ""},
     {"LatOpenLoopCollect", tr("Collect Open-Loop Lat Samples"), tr("Ingest rlogs into the open-loop lateral store (lat-off driver-steered windows). Parked only."), ""},
-    {"LatOpenLoopFit", tr("Fit Open-Loop Lat"), tr("Fit siglin on the open-loop store. Result is in raw EPS torque units; treat as diagnostic for now."), ""},
-    {"LatOpenLoopApply", tr("Apply Open-Loop Lat"), tr("Currently disabled — pending unit calibration. The previewed values are still readable for manual sanity-check."), ""},
+    {"LatOpenLoopFit", tr("Fit Open-Loop Lat"), tr("Fit siglin on the open-loop store, auto-compute K from the calibration store, and convert to OP-normalized a/b/c/d. Previews first."), ""},
+    {"LatOpenLoopApply", tr("Apply Open-Loop Lat"), tr("Write the converted open-loop fit to Mazda{Model}TuneA-D. Requires K calibration (auto-accumulated from any lat-ON driving) and the ±1 coverage gate."), ""},
     {"LatOpenLoopReset", tr("Reset Open-Loop Lat"), tr("Clear the previewed open-loop fit."), ""},
 
     {"SubaruToggles", tr("Subaru Settings"), tr("<b>FrogPilot features for Subaru vehicles.</b>"), ""},
@@ -550,7 +550,14 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     } else if (param == "LatOpenLoopApply") {
       ButtonControl *latOpenLoopApplyButton = new ButtonControl(title, tr("APPLY"), desc);
       QObject::connect(latOpenLoopApplyButton, &ButtonControl::clicked, [this]() {
-        if (!FrogPilotConfirmationDialog::yesorno(tr("Apply is currently disabled (raw EPS units need calibration). Trigger the apply path anyway so its diagnostic message lands in the status bar?"), this)) {
+        QString status = QString::fromStdString(params_memory.get("LatOpenLoopStatus"));
+        QStringList parts = status.split('|');
+        QString detail = (parts.value(0) == "Preview" && parts.size() >= 3) ? parts.value(2) : QString();
+        if (detail.isEmpty()) {
+          ConfirmationDialog::alert(tr("No previewed open-loop fit to apply. Run Fit first."), this);
+          return;
+        }
+        if (!FrogPilotConfirmationDialog::yesorno(tr("Overwrite Mazda{Model}TuneA/B/C/D with the open-loop fit?\n\nApply will refuse internally if K calibration isn't ready or the ±1 coverage gate fails - safe to tap.\n\n") + detail, this)) {
           return;
         }
         params_memory.putBool("LatOpenLoopApply", true);

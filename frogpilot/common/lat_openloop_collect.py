@@ -1,39 +1,36 @@
 #!/usr/bin/env python3
-# Mazda open-loop lateral rolling collector + siglin fitter.
+# Mazda open-loop lateral rolling collector + siglin fitter + auto-K apply.
 #
-# Lives alongside torque_autotune.py (which collects closed-loop torqueState
-# samples for the math-lock-anchored fit).  This module exists because that
-# closed-loop store has a fundamental identifiability problem: the lat
-# controller is in the loop, so the recorded (torque, lat_accel) pairs are
-# never truly open-loop and `a` (sigmoid curvature) is unidentifiable from
-# the data.
+# Closed-loop torque_autotune cannot identify siglin's `a` because the
+# (torque, lat_accel) pairs are sampled under OP's lat controller (whatever
+# tune we ship biases the data toward itself).  This module fixes that:
 #
-# Open-loop sampling: we filter rlog windows where lat control is DISENGAGED
-# (carControl.latActive=False) and the driver is actively steering
-# (|cs.steeringTorque| > MIN_DRIVER_TORQUE).  In that regime, the EPS motor
-# torque (cs.steeringTorqueEps) is the only force driving the wheel; the
-# resulting lateral acceleration is the plant's pure response.
+#   1. Open-loop store: rlog windows where lat is DISENGAGED and the
+#      driver is actively steering.  In that regime the only force on
+#      the wheel is the EPS motor (assist + driver input through it),
+#      so (eps_motor_torque -> lat_accel) is the plant's unbiased
+#      response.  Fit siglin on this -> a/b/c/d in raw EPS-motor units.
 #
-# Schema v1, 5 cols (float32 each):
-#   0: driver_torque_raw      (cs.steeringTorque, raw EPS-driver units)
-#   1: eps_motor_torque_raw   (cs.steeringTorqueEps, raw EPS-motor units)
-#   2: lat_accel              (m/s², from torqueState.actualLateralAccel
-#                              OR derived yawRate*vEgo as fallback)
-#   3: v_ego                  (m/s)
-#   4: pitch                  (rad, liveLocationKalman.orientationNED.value[1])
+#   2. Calibration store: from the SAME rlogs' lat-ON windows, paired
+#      (torqueState.output, cs.steeringTorqueEps).  Robust linear
+#      regression gives K = EPS-units per OP-normalized unit.  This is
+#      the unknown that lets us scale the open-loop fit into the
+#      [-1,+1] OP normalization that Mazda{Model}TuneA/B/C/D expect.
+#      siglin under scaling: a stays the same, b/c/d divide by K.
 #
-# We store BOTH torque signals because the plant we want to identify is
-# (eps_motor_torque -> lat_accel), but the driver_torque is useful both for
-# filtering (driver actually steering) and for cross-referencing later when
-# we figure out the unit conversion to OP-normalized torque.
+#   3. Apply: convert open-loop a/b/c/d via K, run the same coverage
+#      gate as torque_autotune (siglin must reach ±1 over lat_accel ∈
+#      [-8, 8]), clip to PARAM_LO/HI, write Mazda{Model}TuneA-D.
 #
-# Apply path: REFUSES for now and surfaces the fit values in the status.
-# Reason: a siglin fit in raw EPS-motor-torque units is not directly
-# applicable to OP's normalized torque output [-1,1] without a calibration
-# constant.  Future work: a "calibration collector" that records both
-# torqueState.output AND steeringTorqueEps during closed-loop driving so
-# we can solve for the scaling factor, then this apply path can write
-# Mazda{Model}TuneA/B/C/D directly.
+# Both stores accumulate via the same Collect tap (one rlog pass, two
+# files written).  Either passively from normal driving (any time you
+# disengage OP and steer) or actively from a parking-lot serpentine
+# session - whichever produces the data faster.
+#
+# Schemas:
+#   samples.f32      v1, 5 cols: driver_torque, eps_motor_torque,
+#                                 lat_accel, v_ego, pitch
+#   cal_samples.f32  v1, 2 cols: torque_output_normalized, eps_motor_torque
 
 import bz2
 import json
@@ -42,28 +39,48 @@ from pathlib import Path
 
 import numpy as np
 
-from cereal import log as capnp_log
+from cereal import car, log as capnp_log
 from openpilot.common.params import Params
 from openpilot.frogpilot.common.torque_autotune import _ffill, find_rlogs
+from openpilot.selfdrive.car.mazda.interface import (
+  NON_LINEAR_TORQUE_DEFAULTS, SIGLIN_TORQUE_PARAM_PREFIX,
+)
 
 # --- storage ---------------------------------------------------------------
 
 STORE_DIR = Path("/data/media/0/lat_openloop")
 SAMPLES_PATH = STORE_DIR / "samples.f32"
+CAL_SAMPLES_PATH = STORE_DIR / "cal_samples.f32"
 PROCESSED_PATH = STORE_DIR / "processed.json"
 SCHEMA_PATH = STORE_DIR / "schema_version"
 SCHEMA_VERSION = 1
 
 SAMPLE_COLS = 5
 SAMPLE_BYTES = SAMPLE_COLS * 4
-MAX_STORE_BYTES = 100 * 1024 * 1024            # 100 MB rolling budget
+CAL_SAMPLE_COLS = 2
+CAL_SAMPLE_BYTES = CAL_SAMPLE_COLS * 4
+MAX_STORE_BYTES = 100 * 1024 * 1024
 
-# --- filters ---------------------------------------------------------------
+# --- open-loop filters -----------------------------------------------------
 
-MIN_DRIVER_TORQUE = 0.3        # raw EPS units; below this the driver is just resting hand
-MIN_VEGO = 1.0                 # m/s - exclude standstill (no lat_accel observable)
-MAX_VEGO = 18.0                # m/s - open-loop sweep is meant for low/mid speeds
-MIN_LAT_ACCEL_MAG = 0.05       # m/s² - below this is near-noise floor
+MIN_DRIVER_TORQUE = 0.3        # raw EPS units; below = hand resting
+MIN_VEGO = 1.0
+MAX_VEGO = 18.0
+MIN_LAT_ACCEL_MAG = 0.05
+
+# --- calibration filters ---------------------------------------------------
+# Want clean lat-ON samples where OP is actually pushing the wheel and the
+# EPS torque reading isn't dominated by sensor noise around zero.
+CAL_MIN_OP_OUTPUT_MAG = 0.05   # OP commanding meaningfully
+CAL_MIN_EPS_TORQUE_MAG = 5.0   # EPS motor responding meaningfully
+CAL_MIN_VEGO = 3.0
+CAL_MIN_PAIRS = 200            # min samples to compute K
+CAL_K_MIN = 20.0               # sanity bounds on K
+CAL_K_MAX = 2000.0
+
+# --- siglin parameter bounds (mirror torque_autotune for safety) -----------
+PARAM_LO = np.array([1e-6, 1e-6, 1e-6, -1.0])
+PARAM_HI = np.array([30.0, 3.0, 3.0, 1.0])
 
 STATUS_PARAM = "LatOpenLoopStatus"
 PENDING_PARAM = "LatOpenLoopPending"
@@ -84,7 +101,7 @@ def _migrate_schema() -> None:
   except Exception:
     current = 0
   if current < SCHEMA_VERSION:
-    for p in (SAMPLES_PATH, PROCESSED_PATH):
+    for p in (SAMPLES_PATH, CAL_SAMPLES_PATH, PROCESSED_PATH):
       try:
         p.unlink()
       except FileNotFoundError:
@@ -103,40 +120,53 @@ def _save_processed(processed: set[str]) -> None:
   PROCESSED_PATH.write_text(json.dumps(sorted(processed)))
 
 
-def _append_samples(rows: np.ndarray) -> None:
-  with open(SAMPLES_PATH, "ab") as f:
+def _append_rows(path: Path, rows: np.ndarray) -> None:
+  with open(path, "ab") as f:
     f.write(rows.tobytes())
 
 
-def _trim_store() -> None:
+def _trim_one(path: Path, sample_bytes: int) -> None:
   try:
-    size = SAMPLES_PATH.stat().st_size
+    size = path.stat().st_size
   except FileNotFoundError:
     return
   if size <= MAX_STORE_BYTES:
     return
-  keep_rows = MAX_STORE_BYTES // SAMPLE_BYTES
-  drop_bytes = size - keep_rows * SAMPLE_BYTES
-  tmp = SAMPLES_PATH.with_suffix(".tmp")
-  with open(SAMPLES_PATH, "rb") as src, open(tmp, "wb") as dst:
+  keep_rows = MAX_STORE_BYTES // sample_bytes
+  drop_bytes = size - keep_rows * sample_bytes
+  tmp = path.with_suffix(".tmp")
+  with open(path, "rb") as src, open(tmp, "wb") as dst:
     src.seek(drop_bytes)
     while True:
       chunk = src.read(8 * 1024 * 1024)
       if not chunk:
         break
       dst.write(chunk)
-  os.replace(tmp, SAMPLES_PATH)
+  os.replace(tmp, path)
+
+
+def _trim_store() -> None:
+  _trim_one(SAMPLES_PATH, SAMPLE_BYTES)
+  _trim_one(CAL_SAMPLES_PATH, CAL_SAMPLE_BYTES)
+
+
+def _load_rows(path: Path, cols: int) -> np.ndarray:
+  if not path.is_file():
+    return np.empty((0, cols), dtype=np.float32)
+  try:
+    arr = np.fromfile(path, dtype=np.float32)
+  except MemoryError:
+    return np.empty((0, cols), dtype=np.float32)
+  arr = arr[:arr.shape[0] - (arr.shape[0] % cols)]
+  return arr.reshape(-1, cols)
 
 
 def load_store() -> np.ndarray:
-  if not SAMPLES_PATH.is_file():
-    return np.empty((0, SAMPLE_COLS), dtype=np.float32)
-  try:
-    arr = np.fromfile(SAMPLES_PATH, dtype=np.float32)
-  except MemoryError:
-    return np.empty((0, SAMPLE_COLS), dtype=np.float32)
-  arr = arr[:arr.shape[0] - (arr.shape[0] % SAMPLE_COLS)]
-  return arr.reshape(-1, SAMPLE_COLS)
+  return _load_rows(SAMPLES_PATH, SAMPLE_COLS)
+
+
+def load_cal_store() -> np.ndarray:
+  return _load_rows(CAL_SAMPLES_PATH, CAL_SAMPLE_COLS)
 
 
 # --- rlog extraction -------------------------------------------------------
@@ -149,13 +179,14 @@ def _read_rlog_bytes(path: Path) -> bytes:
   return dat
 
 
-EMPTY_SAMPLES = np.empty((0, SAMPLE_COLS), dtype=np.float32)
-
-
 def extract_segment(path: Path):
-  """Extract per-event open-loop samples from one rlog.  Returns (N, 5) float32.
-  Empty (0, 5) is "log read OK, no usable open-loop windows" -> mark processed.
-  None is "log unreadable" -> caller leaves it unprocessed for retry.
+  """Returns (openloop_rows, cal_rows) tuple of float32 arrays, or None.
+  openloop_rows: (N, 5) for lat-OFF driver-steered windows.
+  cal_rows: (M, 2) for lat-ON OP-commanding windows.
+  Empty array on either side is fine ("nothing usable in that regime"
+  for this rlog); both empty still marks the rlog processed.
+  None means the log couldn't be read - caller leaves it OUT of processed
+  for a retry.
   """
   try:
     dat = _read_rlog_bytes(path)
@@ -171,7 +202,7 @@ def extract_segment(path: Path):
       except StopIteration:
         break
       except Exception:
-        break       # truncated tail, salvage what we have
+        break
   except Exception:
     return None
 
@@ -182,7 +213,7 @@ def extract_segment(path: Path):
 
   cols = {k: np.full(n, np.nan) for k in
           ("driver_torque", "eps_motor_torque", "lat_accel",
-           "v_ego", "pitch", "lat_active")}
+           "v_ego", "pitch", "lat_active", "op_output")}
 
   for i, event in enumerate(events):
     try:
@@ -197,7 +228,9 @@ def extract_segment(path: Path):
       elif which == "controlsState":
         lcs = event.controlsState.lateralControlState
         if lcs.which() == "torqueState":
-          cols["lat_accel"][i] = lcs.torqueState.actualLateralAccel
+          ts = lcs.torqueState
+          cols["lat_accel"][i] = ts.actualLateralAccel
+          cols["op_output"][i] = ts.output
       elif which == "liveLocationKalman":
         cols["pitch"][i] = event.liveLocationKalman.orientationNED.value[1]
     except Exception:
@@ -206,29 +239,72 @@ def extract_segment(path: Path):
   for k in cols:
     cols[k] = _ffill(cols[k])
 
-  valid = np.ones(n, dtype=bool)
-  for k in cols:
-    valid &= ~np.isnan(cols[k])
+  base_valid = np.ones(n, dtype=bool)
+  for k in ("driver_torque", "eps_motor_torque", "lat_accel", "v_ego",
+            "pitch", "lat_active", "op_output"):
+    base_valid &= ~np.isnan(cols[k])
 
-  # Open-loop window definition:
-  #   lat OFF, driver actively steering, real lat_accel, moderate speed.
-  keep = valid
-  keep &= cols["lat_active"] < 0.5                                # OP lat OFF
-  keep &= np.abs(cols["driver_torque"]) >= MIN_DRIVER_TORQUE      # driver actually steering
-  keep &= np.abs(cols["lat_accel"]) >= MIN_LAT_ACCEL_MAG          # above noise floor
-  keep &= (cols["v_ego"] >= MIN_VEGO) & (cols["v_ego"] <= MAX_VEGO)
+  # Open-loop: lat OFF, driver actively steering, real lat_accel, low-mid speed.
+  ol_keep = base_valid.copy()
+  ol_keep &= cols["lat_active"] < 0.5
+  ol_keep &= np.abs(cols["driver_torque"]) >= MIN_DRIVER_TORQUE
+  ol_keep &= np.abs(cols["lat_accel"]) >= MIN_LAT_ACCEL_MAG
+  ol_keep &= (cols["v_ego"] >= MIN_VEGO) & (cols["v_ego"] <= MAX_VEGO)
 
-  if not keep.any():
-    return EMPTY_SAMPLES
+  # Calibration: lat ON, OP commanding meaningfully, EPS responding meaningfully.
+  cal_keep = base_valid.copy()
+  cal_keep &= cols["lat_active"] >= 0.5
+  cal_keep &= np.abs(cols["op_output"]) >= CAL_MIN_OP_OUTPUT_MAG
+  cal_keep &= np.abs(cols["eps_motor_torque"]) >= CAL_MIN_EPS_TORQUE_MAG
+  cal_keep &= cols["v_ego"] >= CAL_MIN_VEGO
 
-  return np.stack([cols["driver_torque"][keep],
-                   cols["eps_motor_torque"][keep],
-                   cols["lat_accel"][keep],
-                   cols["v_ego"][keep],
-                   cols["pitch"][keep]], axis=1).astype(np.float32)
+  if ol_keep.any():
+    ol_rows = np.stack([cols["driver_torque"][ol_keep],
+                        cols["eps_motor_torque"][ol_keep],
+                        cols["lat_accel"][ol_keep],
+                        cols["v_ego"][ol_keep],
+                        cols["pitch"][ol_keep]], axis=1).astype(np.float32)
+  else:
+    ol_rows = np.empty((0, SAMPLE_COLS), dtype=np.float32)
+
+  if cal_keep.any():
+    cal_rows = np.stack([cols["op_output"][cal_keep],
+                         cols["eps_motor_torque"][cal_keep]], axis=1).astype(np.float32)
+  else:
+    cal_rows = np.empty((0, CAL_SAMPLE_COLS), dtype=np.float32)
+
+  return ol_rows, cal_rows
 
 
-# --- fit -------------------------------------------------------------------
+# --- K calibration ---------------------------------------------------------
+
+def compute_K() -> dict | None:
+  """Robust slope of eps_motor_torque ≈ K * torqueState.output.
+
+  Theil-Sen style: take per-sample slope eps/output (signed), filter to
+  same-sign pairs (we don't want the slope to flip sign from sensor
+  noise), use the median as the K estimate.  Returns None if insufficient
+  or out-of-sanity-range data.
+  """
+  cal = load_cal_store()
+  if cal.shape[0] < CAL_MIN_PAIRS:
+    return None
+  op_out = cal[:, 0].astype(np.float64)
+  eps_t = cal[:, 1].astype(np.float64)
+  # Same-sign only.
+  same_sign = (op_out * eps_t) > 0
+  if same_sign.sum() < CAL_MIN_PAIRS:
+    return None
+  slopes = eps_t[same_sign] / op_out[same_sign]
+  K = float(np.median(slopes))
+  K_mad = float(np.median(np.abs(slopes - K)))
+  if not (CAL_K_MIN <= K <= CAL_K_MAX):
+    return {"K": K, "K_mad": K_mad, "n": int(same_sign.sum()),
+            "ok": False, "reason": f"K={K:.1f} outside sanity bounds [{CAL_K_MIN},{CAL_K_MAX}]"}
+  return {"K": K, "K_mad": K_mad, "n": int(same_sign.sum()), "ok": True}
+
+
+# --- siglin curve fitting --------------------------------------------------
 
 def siglin(x, a, b, c, d):
   s = a * x
@@ -278,9 +354,9 @@ def _curve_fit_lm(x, y, p0, lo, hi, max_iter=200):
 
 
 def fit_store() -> dict | None:
-  """Fits siglin to (eps_motor_torque, -lat_accel).  Returns the fit + a
-  diagnostic dict.  Params are in RAW EPS-motor-torque units, not OP
-  normalized [-1,1] units - apply path refuses for now.
+  """Fits siglin on (eps_motor_torque, -lat_accel) in raw EPS units,
+  then computes K from calibration store and converts to OP-normalized
+  units.  Returns combined dict, or None if either side fails.
   """
   data = load_store()
   if data.shape[0] < 200:
@@ -289,40 +365,73 @@ def fit_store() -> dict | None:
   eps_t = data[:, 1].astype(np.float64)
   lat_a = data[:, 2].astype(np.float64)
   v_ego = data[:, 3].astype(np.float64)
-  pitch = data[:, 4].astype(np.float64)
 
-  # Same direction convention as torque_autotune: x = -lat_accel, y = torque
   x = -lat_a
   y = eps_t
 
-  # Bounds intentionally wide since units are raw, not OP-normalized.
-  lo = np.array([1e-6, 1e-6, 1e-6, -10.0])
-  hi = np.array([100.0, 10.0, 5.0, 10.0])
-  p, cost = _curve_fit_lm(x, y, np.array([6.0, 0.5, 0.1, 0.0]), lo, hi)
-  a, b, c, d = (float(v) for v in p)
+  # Bounds wide because we're fitting in raw EPS torque units (typically
+  # tens to low hundreds in EPS units).  Converted to OP-norm below.
+  lo_eps = np.array([1e-6, 1e-6, 1e-6, -200.0])
+  hi_eps = np.array([100.0, 500.0, 100.0, 200.0])
+  p, cost = _curve_fit_lm(x, y, np.array([6.0, 50.0, 5.0, 0.0]), lo_eps, hi_eps)
+  a_eps, b_eps, c_eps, d_eps = (float(v) for v in p)
 
-  return {
-    "a": a, "b": b, "c": c, "d": d,
-    "slope_at_zero": 0.25 * a * b + c,
-    "rmse": float(np.sqrt(cost / x.size)),
+  cal = compute_K()
+  result = {
+    "a_eps": a_eps, "b_eps": b_eps, "c_eps": c_eps, "d_eps": d_eps,
+    "slope_at_zero_eps": 0.25 * a_eps * b_eps + c_eps,
+    "rmse_eps": float(np.sqrt(cost / x.size)),
     "n": int(x.size),
     "v_ego_range": (float(v_ego.min()), float(v_ego.max())),
     "lat_accel_range": (float(lat_a.min()), float(lat_a.max())),
     "eps_torque_range": (float(eps_t.min()), float(eps_t.max())),
+    "calibration": cal,
   }
+  if cal is not None and cal.get("ok"):
+    K = cal["K"]
+    # siglin under output scaling y' = y/K:
+    #   a stays the same (operates on x), b/c/d divide by K.
+    result.update({
+      "a": a_eps,
+      "b": b_eps / K,
+      "c": c_eps / K,
+      "d": d_eps / K,
+      "slope_at_zero": (0.25 * a_eps * b_eps + c_eps) / K,
+    })
+  return result
+
+
+# --- car-prefix detection (mirror torque_autotune) -------------------------
+
+def _car_prefix() -> str | None:
+  raw = params.get("CarParamsPersistent")
+  if not raw:
+    return None
+  with car.CarParams.from_bytes(raw) as cp:
+    fingerprint = cp.carFingerprint
+  for candidate, prefix in SIGLIN_TORQUE_PARAM_PREFIX.items():
+    if fingerprint == candidate:
+      return prefix
+  return None
 
 
 # --- status helpers --------------------------------------------------------
 
 def _idle_status() -> str:
   try:
-    n_samples = SAMPLES_PATH.stat().st_size // SAMPLE_BYTES
+    n = SAMPLES_PATH.stat().st_size // SAMPLE_BYTES
   except FileNotFoundError:
-    n_samples = 0
-  return (f"Idle|{n_samples} open-loop samples|"
-          f"Open-loop store: {n_samples} samples (lat-off driver-steered, schema v1). "
-          f"Drive a parking-lot serpentine with OP lat disengaged to fill the "
-          f"transition zone, then tap Collect to ingest the resulting rlogs.")
+    n = 0
+  try:
+    nc = CAL_SAMPLES_PATH.stat().st_size // CAL_SAMPLE_BYTES
+  except FileNotFoundError:
+    nc = 0
+  return (f"Idle|{n} open-loop + {nc} cal|"
+          f"Open-loop store: {n} samples (lat-off driver-steered). "
+          f"Calibration store: {nc} paired (op_output, eps_torque) samples "
+          f"(lat-on, for converting raw EPS units to OP-normalized).  Drive "
+          f"with OP lat disengaged at low-mid speed for open-loop data; the "
+          f"calibration data auto-accumulates from any lat-on driving.")
 
 
 def restore_idle_status() -> None:
@@ -332,14 +441,25 @@ def restore_idle_status() -> None:
 
 
 def _preview_status(fit: dict) -> str:
-  return (f"Preview|Fit ready (RAW EPS units — manual scaling needed)|"
-          f"a={fit['a']:.3f}  b={fit['b']:.3f}  c={fit['c']:.3f}  d={fit['d']:.3f}  "
-          f"slope-at-zero={fit['slope_at_zero']:.3f}  RMSE={fit['rmse']:.4f}  "
-          f"n={fit['n']:,}  v_ego={fit['v_ego_range'][0]:.1f}-{fit['v_ego_range'][1]:.1f}m/s  "
-          f"|la|={fit['lat_accel_range'][1]:.2f}m/s²  "
-          f"eps_torque range=[{fit['eps_torque_range'][0]:.2f},{fit['eps_torque_range'][1]:.2f}].  "
-          f"NOTE: a/b/c/d are in raw EPS motor torque units, not OP-normalized [-1,1]. "
-          f"Apply is disabled pending a calibration step.")
+  cal = fit.get("calibration")
+  if cal is None:
+    cal_str = "no calibration data yet (need ≥200 lat-ON same-sign pairs)"
+    op_str = "apply DISABLED until calibration accrues"
+  elif not cal.get("ok"):
+    cal_str = f"K={cal['K']:.1f} (REJECTED: {cal.get('reason','out of sanity bounds')})"
+    op_str = "apply DISABLED"
+  else:
+    cal_str = f"K={cal['K']:.1f}±{cal['K_mad']:.1f} (median, n={cal['n']:,})"
+    op_str = (f"OP-normalized: a={fit['a']:.5f}  b={fit['b']:.5f}  "
+              f"c={fit['c']:.5f}  d={fit['d']:.5f}  slope-at-0={fit['slope_at_zero']:.3f}")
+
+  return (f"Preview|Fit ready ({op_str.split(': ',1)[-1] if 'OP' in op_str else 'cal pending'})|"
+          f"RAW EPS:  a={fit['a_eps']:.3f}  b={fit['b_eps']:.3f}  c={fit['c_eps']:.3f}  "
+          f"d={fit['d_eps']:.3f}  slope-at-0={fit['slope_at_zero_eps']:.3f}  "
+          f"RMSE={fit['rmse_eps']:.4f}  n={fit['n']:,}  "
+          f"v_ego={fit['v_ego_range'][0]:.1f}-{fit['v_ego_range'][1]:.1f}m/s  "
+          f"|la|≤{abs(fit['lat_accel_range'][1]):.2f}m/s²  ·  "
+          f"calibration: {cal_str}  ·  {op_str}")
 
 
 def restore_preview_status() -> None:
@@ -367,16 +487,21 @@ def run_collect() -> None:
     _set_status(_idle_status())
     return
 
-  new_samples = 0
+  new_ol, new_cal = 0, 0
   for i, path in enumerate(todo):
     _set_status(f"Collect|Processing {i + 1}/{len(todo)}|"
-                f"Ingesting {path.parent.name} (+{new_samples} open-loop samples so far)")
-    rows = extract_segment(path)
-    if rows is None:
-      continue   # unreadable -> retry later
-    if rows.shape[0]:
-      _append_samples(rows)
-      new_samples += rows.shape[0]
+                f"Ingesting {path.parent.name} (+{new_ol} open-loop, "
+                f"+{new_cal} calibration so far)")
+    res = extract_segment(path)
+    if res is None:
+      continue
+    ol_rows, cal_rows = res
+    if ol_rows.shape[0]:
+      _append_rows(SAMPLES_PATH, ol_rows)
+      new_ol += ol_rows.shape[0]
+    if cal_rows.shape[0]:
+      _append_rows(CAL_SAMPLES_PATH, cal_rows)
+      new_cal += cal_rows.shape[0]
     processed.add(str(path))
     if i % 20 == 0:
       _save_processed(processed)
@@ -390,12 +515,15 @@ def run_fit() -> None:
   fit = fit_store()
   if fit is None:
     _set_status("Refused|Need more data|"
-                "Open-loop fit refused: <200 samples in store. Drive a parking-lot "
-                "serpentine (OP lat disengaged, 5-15 mph, slow steering input) and "
-                "re-tap Collect, then Fit.")
+                "Open-loop fit refused: <200 lat-OFF samples in store. Drive "
+                "with OP lat disengaged at 1-18 m/s and re-tap Collect, then Fit.")
     return
   params.put(PENDING_PARAM, json.dumps(fit))
   _set_status(_preview_status(fit))
+
+
+def _covers(a, b, c, d) -> bool:
+  return (0.5 * b + 8.0 * c + d > 1.02) and (-0.5 * b - 8.0 * c + d < -1.02)
 
 
 def apply_pending() -> None:
@@ -403,13 +531,57 @@ def apply_pending() -> None:
   if not raw:
     _set_status("No previewed open-loop fit to apply. Run Fit first.")
     return
-  _set_status("Refused|Apply not yet wired|"
-              "Apply path intentionally disabled: open-loop fit is in raw EPS "
-              "motor torque units, while Mazda{Model}TuneA/B/C/D expect OP-"
-              "normalized [-1,1] units. The conversion factor isn't yet "
-              "characterized. Use the Preview values for diagnostic purposes; "
-              "if you want to try them live, manually edit Mazda{Model}TuneA-D "
-              "via SSH after sanity-checking against the math-lock baseline.")
+  try:
+    fit = json.loads(raw)
+  except Exception:
+    params.remove(PENDING_PARAM)
+    _set_status("Previewed open-loop fit was invalid. Re-run Fit.")
+    return
+
+  cal = fit.get("calibration")
+  if cal is None or not cal.get("ok"):
+    _set_status("Refused|Calibration not ready|"
+                "Apply refused: K not computed or out of sanity range. "
+                "Drive more (with OP lat ON) to accrue calibration pairs, "
+                "then re-run Fit to refresh the pending preview.")
+    return
+
+  prefix = _car_prefix()
+  if prefix is None:
+    _set_status("Refused|Unsupported fingerprint|"
+                "Open-loop apply only writes Mazda3/CX-30/CX-50 tune params.")
+    return
+
+  a = float(fit["a"]); b = float(fit["b"]); c = float(fit["c"]); d = float(fit["d"])
+
+  # Same ±1 coverage gate torque_autotune uses.  Sparse hard-cornering
+  # data can collapse c; if so, graft the baseline c (same fallback as
+  # torque_autotune.apply_pending) and re-test.
+  if not _covers(a, b, c, d):
+    c_baseline = float(NON_LINEAR_TORQUE_DEFAULTS[
+        next(k for k, v in SIGLIN_TORQUE_PARAM_PREFIX.items() if v == prefix)][2])
+    if _covers(a, b, c_baseline, d):
+      c = c_baseline
+    else:
+      _set_status(
+        f"Refused|Fit can't reach ±1 torque|"
+        f"max={0.5 * b + 8.0 * c + d:.3f} min={-0.5 * b - 8.0 * c + d:.3f} from "
+        f"a={a:.3f} b={b:.3f} c={c:.4f} d={d:.3f}; baseline-c fallback "
+        f"({c_baseline:.3f}) also insufficient.  Open-loop b is too small for "
+        f"current K={cal['K']:.1f}; more open-loop data at higher |lat_accel| "
+        f"may help."
+      )
+      return
+
+  vals = tuple(float(np.clip(v, lo, hi)) for v, lo, hi in zip((a, b, c, d), PARAM_LO, PARAM_HI))
+  for suffix, value in zip(("A", "B", "C", "D"), vals):
+    params.put_float(f"{prefix}Tune{suffix}", value)
+  params.remove(PENDING_PARAM)
+  _set_status(f"Done|Applied (K={cal['K']:.1f}) — reboot to use|"
+              f"{prefix} written from open-loop fit  "
+              f"a={vals[0]:.5f}  b={vals[1]:.5f}  c={vals[2]:.5f}  d={vals[3]:.5f}  "
+              f"(converted from raw EPS via K={cal['K']:.1f}±{cal['K_mad']:.1f}, "
+              f"n_cal={cal['n']:,}).")
 
 
 def reset_table() -> None:
