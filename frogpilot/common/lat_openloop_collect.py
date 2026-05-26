@@ -1,36 +1,36 @@
 #!/usr/bin/env python3
-# Mazda open-loop lateral rolling collector + siglin fitter + auto-K apply.
+# Mazda open-loop lateral collector + per-band a-extraction + closed-loop
+# cross-fit for b/c/d.
 #
-# Closed-loop torque_autotune cannot identify siglin's `a` because the
-# (torque, lat_accel) pairs are sampled under OP's lat controller (whatever
-# tune we ship biases the data toward itself).  This module fixes that:
+# Background: closed-loop torque_autotune can't identify siglin's `a` because
+# OP's lat controller biases the (torque, lat_accel) sampling.  We tried
+# extracting motor torque from the EPS for an unbiased fit but Mazda Gen2
+# doesn't populate cs.steeringTorqueEps - it's always 0.  This module uses
+# a different route:
 #
-#   1. Open-loop store: rlog windows where lat is DISENGAGED and the
-#      driver is actively steering.  In that regime the only force on
-#      the wheel is the EPS motor (assist + driver input through it),
-#      so (eps_motor_torque -> lat_accel) is the plant's unbiased
-#      response.  Fit siglin on this -> a/b/c/d in raw EPS-motor units.
+#   * `a` is unit-independent on the torque axis.  Whether torque is in raw
+#     EPS units, driver-torque units, or OP-normalized [-1,+1] units, the
+#     sigmoid curvature parameter `a` (which operates on lat_accel) is the
+#     same.  Only b/c/d rescale with units.
 #
-#   2. Calibration store: from the SAME rlogs' lat-ON windows, paired
-#      (torqueState.output, cs.steeringTorqueEps).  Robust linear
-#      regression gives K = EPS-units per OP-normalized unit.  This is
-#      the unknown that lets us scale the open-loop fit into the
-#      [-1,+1] OP normalization that Mazda{Model}TuneA/B/C/D expect.
-#      siglin under scaling: a stays the same, b/c/d divide by K.
+#   * So: fit `a` from open-loop (driver_torque, lat_accel) - it doesn't
+#     matter that driver-torque has unknown EPS-assist scaling, the
+#     CURVATURE is preserved.  Per-speed-band fit lets us see if `a`
+#     varies with speed (EPS assist is speed-dependent); a stable `a`
+#     across bands means the plant identification is reliable.
 #
-#   3. Apply: convert open-loop a/b/c/d via K, run the same coverage
-#      gate as torque_autotune (siglin must reach ±1 over lat_accel ∈
-#      [-8, 8]), clip to PARAM_LO/HI, write Mazda{Model}TuneA-D.
-#
-# Both stores accumulate via the same Collect tap (one rlog pass, two
-# files written).  Either passively from normal driving (any time you
-# disengage OP and steer) or actively from a parking-lot serpentine
-# session - whichever produces the data faster.
+#   * Then with `a` fixed, cross-fit b/c/d on the existing closed-loop
+#     torque_autotune store.  With `a` known, the siglin model is LINEAR
+#     in (b, c, d) - closed-form lstsq, no convergence issues, no bias
+#     from `a` being unidentifiable.  Result is in OP-normalized [-1,+1]
+#     units, ready to write to Mazda{Model}TuneA-D.
 #
 # Schemas:
-#   samples.f32      v1, 5 cols: driver_torque, eps_motor_torque,
-#                                 lat_accel, v_ego, pitch
-#   cal_samples.f32  v1, 2 cols: torque_output_normalized, eps_motor_torque
+#   samples.f32   v1, 5 cols: driver_torque, eps_motor_torque (unused on
+#                              Gen2 — always 0), lat_accel, v_ego, pitch
+#
+# Apply path runs the same ±1 coverage gate as torque_autotune and grafts
+# the baseline c if needed.
 
 import bz2
 import json
@@ -41,7 +41,9 @@ import numpy as np
 
 from cereal import car, log as capnp_log
 from openpilot.common.params import Params
-from openpilot.frogpilot.common.torque_autotune import _ffill, find_rlogs
+from openpilot.frogpilot.common.torque_autotune import (
+  LAT_DEADZONE_DEFAULT, PARAM_HI, PARAM_LO, PITCH_THRESH, _ffill, find_rlogs,
+)
 from openpilot.selfdrive.car.mazda.interface import (
   NON_LINEAR_TORQUE_DEFAULTS, SIGLIN_TORQUE_PARAM_PREFIX,
 )
@@ -50,37 +52,33 @@ from openpilot.selfdrive.car.mazda.interface import (
 
 STORE_DIR = Path("/data/media/0/lat_openloop")
 SAMPLES_PATH = STORE_DIR / "samples.f32"
-CAL_SAMPLES_PATH = STORE_DIR / "cal_samples.f32"
 PROCESSED_PATH = STORE_DIR / "processed.json"
 SCHEMA_PATH = STORE_DIR / "schema_version"
 SCHEMA_VERSION = 1
 
 SAMPLE_COLS = 5
 SAMPLE_BYTES = SAMPLE_COLS * 4
-CAL_SAMPLE_COLS = 2
-CAL_SAMPLE_BYTES = CAL_SAMPLE_COLS * 4
 MAX_STORE_BYTES = 100 * 1024 * 1024
+
+# Closed-loop torque_autotune store - read directly for cross-fit.
+CLOSED_LOOP_SAMPLES_PATH = Path("/data/media/0/lateral_autotune/samples.f32")
+CLOSED_LOOP_COLS = 3                  # output, lat_accel, pitch
 
 # --- open-loop filters -----------------------------------------------------
 
-MIN_DRIVER_TORQUE = 0.3        # raw EPS units; below = hand resting
+MIN_DRIVER_TORQUE = 0.3
 MIN_VEGO = 1.0
 MAX_VEGO = 18.0
 MIN_LAT_ACCEL_MAG = 0.05
 
-# --- calibration filters ---------------------------------------------------
-# Want clean lat-ON samples where OP is actually pushing the wheel and the
-# EPS torque reading isn't dominated by sensor noise around zero.
-CAL_MIN_OP_OUTPUT_MAG = 0.05   # OP commanding meaningfully
-CAL_MIN_EPS_TORQUE_MAG = 5.0   # EPS motor responding meaningfully
-CAL_MIN_VEGO = 3.0
-CAL_MIN_PAIRS = 200            # min samples to compute K
-CAL_K_MIN = 20.0               # sanity bounds on K
-CAL_K_MAX = 2000.0
-
-# --- siglin parameter bounds (mirror torque_autotune for safety) -----------
-PARAM_LO = np.array([1e-6, 1e-6, 1e-6, -1.0])
-PARAM_HI = np.array([30.0, 3.0, 3.0, 1.0])
+# --- per-speed-band fit ----------------------------------------------------
+# EPS assist is speed-dependent; fitting `a` separately per band shows if
+# the plant's sigmoid curvature is consistent across speeds (good) or
+# varies wildly (the single-value model breaks down).
+OL_BINS_MS = (1.0, 4.0, 8.0, 14.0, 18.0)
+OL_BIN_CENTERS = tuple(0.5 * (lo + hi) for lo, hi in zip(OL_BINS_MS[:-1], OL_BINS_MS[1:]))
+MIN_BAND_SAMPLES = 100               # per-band minimum for siglin fit
+A_VARIATION_REL = 0.5                # warn if max(a)/min(a) > 1+this across bands
 
 STATUS_PARAM = "LatOpenLoopStatus"
 PENDING_PARAM = "LatOpenLoopPending"
@@ -101,7 +99,7 @@ def _migrate_schema() -> None:
   except Exception:
     current = 0
   if current < SCHEMA_VERSION:
-    for p in (SAMPLES_PATH, CAL_SAMPLES_PATH, PROCESSED_PATH):
+    for p in (SAMPLES_PATH, PROCESSED_PATH):
       try:
         p.unlink()
       except FileNotFoundError:
@@ -125,51 +123,49 @@ def _append_rows(path: Path, rows: np.ndarray) -> None:
     f.write(rows.tobytes())
 
 
-def _trim_one(path: Path, sample_bytes: int) -> None:
+def _trim_store() -> None:
   try:
-    size = path.stat().st_size
+    size = SAMPLES_PATH.stat().st_size
   except FileNotFoundError:
     return
   if size <= MAX_STORE_BYTES:
     return
-  keep_rows = MAX_STORE_BYTES // sample_bytes
-  drop_bytes = size - keep_rows * sample_bytes
-  tmp = path.with_suffix(".tmp")
-  with open(path, "rb") as src, open(tmp, "wb") as dst:
+  keep_rows = MAX_STORE_BYTES // SAMPLE_BYTES
+  drop_bytes = size - keep_rows * SAMPLE_BYTES
+  tmp = SAMPLES_PATH.with_suffix(".tmp")
+  with open(SAMPLES_PATH, "rb") as src, open(tmp, "wb") as dst:
     src.seek(drop_bytes)
     while True:
       chunk = src.read(8 * 1024 * 1024)
       if not chunk:
         break
       dst.write(chunk)
-  os.replace(tmp, path)
-
-
-def _trim_store() -> None:
-  _trim_one(SAMPLES_PATH, SAMPLE_BYTES)
-  _trim_one(CAL_SAMPLES_PATH, CAL_SAMPLE_BYTES)
-
-
-def _load_rows(path: Path, cols: int) -> np.ndarray:
-  if not path.is_file():
-    return np.empty((0, cols), dtype=np.float32)
-  try:
-    arr = np.fromfile(path, dtype=np.float32)
-  except MemoryError:
-    return np.empty((0, cols), dtype=np.float32)
-  arr = arr[:arr.shape[0] - (arr.shape[0] % cols)]
-  return arr.reshape(-1, cols)
+  os.replace(tmp, SAMPLES_PATH)
 
 
 def load_store() -> np.ndarray:
-  return _load_rows(SAMPLES_PATH, SAMPLE_COLS)
+  if not SAMPLES_PATH.is_file():
+    return np.empty((0, SAMPLE_COLS), dtype=np.float32)
+  try:
+    arr = np.fromfile(SAMPLES_PATH, dtype=np.float32)
+  except MemoryError:
+    return np.empty((0, SAMPLE_COLS), dtype=np.float32)
+  arr = arr[:arr.shape[0] - (arr.shape[0] % SAMPLE_COLS)]
+  return arr.reshape(-1, SAMPLE_COLS)
 
 
-def load_cal_store() -> np.ndarray:
-  return _load_rows(CAL_SAMPLES_PATH, CAL_SAMPLE_COLS)
+def _load_closed_loop() -> np.ndarray:
+  if not CLOSED_LOOP_SAMPLES_PATH.is_file():
+    return np.empty((0, CLOSED_LOOP_COLS), dtype=np.float32)
+  try:
+    arr = np.fromfile(CLOSED_LOOP_SAMPLES_PATH, dtype=np.float32)
+  except MemoryError:
+    return np.empty((0, CLOSED_LOOP_COLS), dtype=np.float32)
+  arr = arr[:arr.shape[0] - (arr.shape[0] % CLOSED_LOOP_COLS)]
+  return arr.reshape(-1, CLOSED_LOOP_COLS)
 
 
-# --- rlog extraction -------------------------------------------------------
+# --- rlog extraction (open-loop windows only) ------------------------------
 
 def _read_rlog_bytes(path: Path) -> bytes:
   with open(path, "rb") as f:
@@ -180,14 +176,7 @@ def _read_rlog_bytes(path: Path) -> bytes:
 
 
 def extract_segment(path: Path):
-  """Returns (openloop_rows, cal_rows) tuple of float32 arrays, or None.
-  openloop_rows: (N, 5) for lat-OFF driver-steered windows.
-  cal_rows: (M, 2) for lat-ON OP-commanding windows.
-  Empty array on either side is fine ("nothing usable in that regime"
-  for this rlog); both empty still marks the rlog processed.
-  None means the log couldn't be read - caller leaves it OUT of processed
-  for a retry.
-  """
+  """Open-loop windows from one rlog as (N, 5) float32, or None if unreadable."""
   try:
     dat = _read_rlog_bytes(path)
   except Exception:
@@ -213,7 +202,7 @@ def extract_segment(path: Path):
 
   cols = {k: np.full(n, np.nan) for k in
           ("driver_torque", "eps_motor_torque", "lat_accel",
-           "v_ego", "pitch", "lat_active", "op_output")}
+           "v_ego", "pitch", "lat_active")}
 
   for i, event in enumerate(events):
     try:
@@ -228,9 +217,7 @@ def extract_segment(path: Path):
       elif which == "controlsState":
         lcs = event.controlsState.lateralControlState
         if lcs.which() == "torqueState":
-          ts = lcs.torqueState
-          cols["lat_accel"][i] = ts.actualLateralAccel
-          cols["op_output"][i] = ts.output
+          cols["lat_accel"][i] = lcs.torqueState.actualLateralAccel
       elif which == "liveLocationKalman":
         cols["pitch"][i] = event.liveLocationKalman.orientationNED.value[1]
     except Exception:
@@ -239,72 +226,29 @@ def extract_segment(path: Path):
   for k in cols:
     cols[k] = _ffill(cols[k])
 
-  base_valid = np.ones(n, dtype=bool)
-  for k in ("driver_torque", "eps_motor_torque", "lat_accel", "v_ego",
-            "pitch", "lat_active", "op_output"):
-    base_valid &= ~np.isnan(cols[k])
+  valid = np.ones(n, dtype=bool)
+  for k in ("driver_torque", "lat_accel", "v_ego", "pitch", "lat_active"):
+    valid &= ~np.isnan(cols[k])
+  # eps_motor_torque is always-zero on Gen2 (Mazda doesn't populate it);
+  # don't require it to be non-NaN, just record what's there.
 
-  # Open-loop: lat OFF, driver actively steering, real lat_accel, low-mid speed.
-  ol_keep = base_valid.copy()
-  ol_keep &= cols["lat_active"] < 0.5
-  ol_keep &= np.abs(cols["driver_torque"]) >= MIN_DRIVER_TORQUE
-  ol_keep &= np.abs(cols["lat_accel"]) >= MIN_LAT_ACCEL_MAG
-  ol_keep &= (cols["v_ego"] >= MIN_VEGO) & (cols["v_ego"] <= MAX_VEGO)
+  keep = valid
+  keep &= cols["lat_active"] < 0.5
+  keep &= np.abs(cols["driver_torque"]) >= MIN_DRIVER_TORQUE
+  keep &= np.abs(cols["lat_accel"]) >= MIN_LAT_ACCEL_MAG
+  keep &= (cols["v_ego"] >= MIN_VEGO) & (cols["v_ego"] <= MAX_VEGO)
 
-  # Calibration: lat ON, OP commanding meaningfully, EPS responding meaningfully.
-  cal_keep = base_valid.copy()
-  cal_keep &= cols["lat_active"] >= 0.5
-  cal_keep &= np.abs(cols["op_output"]) >= CAL_MIN_OP_OUTPUT_MAG
-  cal_keep &= np.abs(cols["eps_motor_torque"]) >= CAL_MIN_EPS_TORQUE_MAG
-  cal_keep &= cols["v_ego"] >= CAL_MIN_VEGO
+  if not keep.any():
+    return np.empty((0, SAMPLE_COLS), dtype=np.float32)
 
-  if ol_keep.any():
-    ol_rows = np.stack([cols["driver_torque"][ol_keep],
-                        cols["eps_motor_torque"][ol_keep],
-                        cols["lat_accel"][ol_keep],
-                        cols["v_ego"][ol_keep],
-                        cols["pitch"][ol_keep]], axis=1).astype(np.float32)
-  else:
-    ol_rows = np.empty((0, SAMPLE_COLS), dtype=np.float32)
-
-  if cal_keep.any():
-    cal_rows = np.stack([cols["op_output"][cal_keep],
-                         cols["eps_motor_torque"][cal_keep]], axis=1).astype(np.float32)
-  else:
-    cal_rows = np.empty((0, CAL_SAMPLE_COLS), dtype=np.float32)
-
-  return ol_rows, cal_rows
+  return np.stack([cols["driver_torque"][keep],
+                   cols["eps_motor_torque"][keep],
+                   cols["lat_accel"][keep],
+                   cols["v_ego"][keep],
+                   cols["pitch"][keep]], axis=1).astype(np.float32)
 
 
-# --- K calibration ---------------------------------------------------------
-
-def compute_K() -> dict | None:
-  """Robust slope of eps_motor_torque ≈ K * torqueState.output.
-
-  Theil-Sen style: take per-sample slope eps/output (signed), filter to
-  same-sign pairs (we don't want the slope to flip sign from sensor
-  noise), use the median as the K estimate.  Returns None if insufficient
-  or out-of-sanity-range data.
-  """
-  cal = load_cal_store()
-  if cal.shape[0] < CAL_MIN_PAIRS:
-    return None
-  op_out = cal[:, 0].astype(np.float64)
-  eps_t = cal[:, 1].astype(np.float64)
-  # Same-sign only.
-  same_sign = (op_out * eps_t) > 0
-  if same_sign.sum() < CAL_MIN_PAIRS:
-    return None
-  slopes = eps_t[same_sign] / op_out[same_sign]
-  K = float(np.median(slopes))
-  K_mad = float(np.median(np.abs(slopes - K)))
-  if not (CAL_K_MIN <= K <= CAL_K_MAX):
-    return {"K": K, "K_mad": K_mad, "n": int(same_sign.sum()),
-            "ok": False, "reason": f"K={K:.1f} outside sanity bounds [{CAL_K_MIN},{CAL_K_MAX}]"}
-  return {"K": K, "K_mad": K_mad, "n": int(same_sign.sum()), "ok": True}
-
-
-# --- siglin curve fitting --------------------------------------------------
+# --- siglin + nonlinear fit (for per-band `a` extraction) ------------------
 
 def siglin(x, a, b, c, d):
   s = a * x
@@ -322,7 +266,6 @@ def _curve_fit_lm(x, y, p0, lo, hi, max_iter=200):
 
   r = resid(p)
   cost = float(r @ r)
-
   for _ in range(max_iter):
     J = np.empty((x.shape[0], 4))
     for k in range(4):
@@ -353,55 +296,126 @@ def _curve_fit_lm(x, y, p0, lo, hi, max_iter=200):
   return p, cost
 
 
-def fit_store() -> dict | None:
-  """Fits siglin on (eps_motor_torque, -lat_accel) in raw EPS units,
-  then computes K from calibration store and converts to OP-normalized
-  units.  Returns combined dict, or None if either side fails.
+def _fit_a_per_band(driver_torque, lat_accel, v_ego):
+  """Per-speed-band siglin fit on (driver_torque, -lat_accel).  Returns list
+  of per-band dicts with {lo, hi, n, a, rmse, ok}.  `a` is unit-independent
+  on the torque axis, so the value here is directly reusable for the OP-
+  normalized cross-fit even though b/c/d here are in driver-torque units.
   """
-  data = load_store()
-  if data.shape[0] < 200:
+  # Wide bounds since driver-torque has unknown EPS-assist scaling - b/c/d
+  # may end up anywhere; only `a` matters.
+  lo = np.array([1e-6, 1e-6, 1e-6, -1e4])
+  hi = np.array([30.0, 1e4, 1e4, 1e4])
+
+  bands = []
+  for i in range(len(OL_BINS_MS) - 1):
+    v_lo, v_hi = OL_BINS_MS[i], OL_BINS_MS[i + 1]
+    m = (v_ego >= v_lo) & (v_ego < v_hi)
+    entry = {"lo": float(v_lo), "hi": float(v_hi), "n": int(m.sum())}
+    if entry["n"] < MIN_BAND_SAMPLES:
+      entry["ok"] = False
+      entry["reason"] = f"n={entry['n']}<{MIN_BAND_SAMPLES}"
+      bands.append(entry)
+      continue
+    x = -lat_accel[m].astype(np.float64)
+    y = driver_torque[m].astype(np.float64)
+    # Seed b/c from data scale so LM doesn't waste iterations climbing.
+    b0 = float(np.percentile(np.abs(y), 95))
+    p0 = np.array([10.0, b0, b0 * 0.1, 0.0])
+    p, cost = _curve_fit_lm(x, y, p0, lo, hi)
+    rmse = float(np.sqrt(cost / x.size))
+    a_fit = float(p[0])
+    entry.update({"a": a_fit, "b_drv": float(p[1]), "c_drv": float(p[2]),
+                  "d_drv": float(p[3]), "rmse_drv": rmse,
+                  "ok": True})
+    bands.append(entry)
+  return bands
+
+
+# --- closed-loop cross-fit for b/c/d (a fixed) -----------------------------
+
+def _cross_fit_bcd(a_fixed):
+  """With `a` fixed, the siglin model is linear in (b, c, d).  lstsq on the
+  closed-loop torque_autotune store gives b/c/d in OP-normalized units.
+  Returns dict {b, c, d, n, rmse} or None if insufficient closed-loop data.
+  """
+  data = _load_closed_loop()
+  if data.shape[0] < 1000:
+    return None
+  output = data[:, 0].astype(np.float64)
+  lat_accel = data[:, 1].astype(np.float64)
+  pitch = data[:, 2].astype(np.float64)
+
+  # Same filters torque_autotune uses at fit time.
+  fmask = np.abs(pitch - np.mean(pitch)) <= PITCH_THRESH
+  fmask &= np.abs(lat_accel) > LAT_DEADZONE_DEFAULT
+  output = output[fmask]
+  lat_accel = lat_accel[fmask]
+  if output.shape[0] < 1000:
     return None
 
-  eps_t = data[:, 1].astype(np.float64)
-  lat_a = data[:, 2].astype(np.float64)
-  v_ego = data[:, 3].astype(np.float64)
+  x = -lat_accel
+  y = output
 
-  x = -lat_a
-  y = eps_t
+  # S_a(x) is the sigmoid basis with fixed a; the model is y = b*S + c*x + d.
+  s = a_fixed * x
+  S = np.sign(s) * (1.0 / (1.0 + np.exp(-np.abs(s))) - 0.5)
+  A = np.column_stack([S, x, np.ones_like(x)])
+  coef, residuals, rank, _ = np.linalg.lstsq(A, y, rcond=None)
+  pred = A @ coef
+  rmse = float(np.sqrt(((y - pred) ** 2).mean()))
+  return {"b": float(coef[0]), "c": float(coef[1]), "d": float(coef[2]),
+          "n": int(x.size), "rmse": rmse}
 
-  # Bounds wide because we're fitting in raw EPS torque units (typically
-  # tens to low hundreds in EPS units).  Converted to OP-norm below.
-  lo_eps = np.array([1e-6, 1e-6, 1e-6, -200.0])
-  hi_eps = np.array([100.0, 500.0, 100.0, 200.0])
-  p, cost = _curve_fit_lm(x, y, np.array([6.0, 50.0, 5.0, 0.0]), lo_eps, hi_eps)
-  a_eps, b_eps, c_eps, d_eps = (float(v) for v in p)
 
-  cal = compute_K()
-  result = {
-    "a_eps": a_eps, "b_eps": b_eps, "c_eps": c_eps, "d_eps": d_eps,
-    "slope_at_zero_eps": 0.25 * a_eps * b_eps + c_eps,
-    "rmse_eps": float(np.sqrt(cost / x.size)),
-    "n": int(x.size),
-    "v_ego_range": (float(v_ego.min()), float(v_ego.max())),
-    "lat_accel_range": (float(lat_a.min()), float(lat_a.max())),
-    "eps_torque_range": (float(eps_t.min()), float(eps_t.max())),
-    "calibration": cal,
+# --- combined fit ----------------------------------------------------------
+
+def fit_store() -> dict | None:
+  """Per-band `a` from open-loop driver-torque + closed-loop lstsq for
+  b/c/d in OP-normalized units.  Returns combined dict or None.
+  """
+  ol = load_store()
+  if ol.shape[0] < MIN_BAND_SAMPLES:
+    return None
+  driver_torque = ol[:, 0]
+  lat_accel = ol[:, 2]
+  v_ego = ol[:, 3]
+
+  bands = _fit_a_per_band(driver_torque, lat_accel, v_ego)
+  passing = [b for b in bands if b.get("ok")]
+  if not passing:
+    return None
+
+  # Representative `a`: sample-count-weighted median across passing bands.
+  # Median is more robust than mean against one weird-low-data band; weighting
+  # by n biases toward the band we have the most evidence for.
+  weighted_a = []
+  for b in passing:
+    weighted_a.extend([b["a"]] * b["n"])
+  a_chosen = float(np.median(weighted_a))
+  a_per_band = [b["a"] for b in passing]
+  a_min, a_max = min(a_per_band), max(a_per_band)
+  a_variation = (a_max - a_min) / max(a_min, 1e-6)
+
+  cross = _cross_fit_bcd(a_chosen)
+  if cross is None:
+    return {"a_chosen": a_chosen, "per_band": bands, "cross": None,
+            "a_variation": a_variation,
+            "warn": "closed-loop store too small for cross-fit"}
+
+  return {
+    "a_chosen": a_chosen,
+    "a_per_band": a_per_band,
+    "a_variation": a_variation,
+    "per_band": bands,
+    "cross": cross,
+    "a": a_chosen,
+    "b": cross["b"], "c": cross["c"], "d": cross["d"],
+    "slope_at_zero": 0.25 * a_chosen * cross["b"] + cross["c"],
+    "n_openloop": int(ol.shape[0]),
+    "n_closedloop": cross["n"],
   }
-  if cal is not None and cal.get("ok"):
-    K = cal["K"]
-    # siglin under output scaling y' = y/K:
-    #   a stays the same (operates on x), b/c/d divide by K.
-    result.update({
-      "a": a_eps,
-      "b": b_eps / K,
-      "c": c_eps / K,
-      "d": d_eps / K,
-      "slope_at_zero": (0.25 * a_eps * b_eps + c_eps) / K,
-    })
-  return result
 
-
-# --- car-prefix detection (mirror torque_autotune) -------------------------
 
 def _car_prefix() -> str | None:
   raw = params.get("CarParamsPersistent")
@@ -423,15 +437,14 @@ def _idle_status() -> str:
   except FileNotFoundError:
     n = 0
   try:
-    nc = CAL_SAMPLES_PATH.stat().st_size // CAL_SAMPLE_BYTES
+    nc = CLOSED_LOOP_SAMPLES_PATH.stat().st_size // (CLOSED_LOOP_COLS * 4)
   except FileNotFoundError:
     nc = 0
-  return (f"Idle|{n} open-loop + {nc} cal|"
-          f"Open-loop store: {n} samples (lat-off driver-steered). "
-          f"Calibration store: {nc} paired (op_output, eps_torque) samples "
-          f"(lat-on, for converting raw EPS units to OP-normalized).  Drive "
-          f"with OP lat disengaged at low-mid speed for open-loop data; the "
-          f"calibration data auto-accumulates from any lat-on driving.")
+  return (f"Idle|{n} open-loop + {nc:,} closed-loop|"
+          f"Open-loop store: {n} lat-OFF driver-steered samples (need ≥{MIN_BAND_SAMPLES} "
+          f"in at least one speed band).  Closed-loop torque_autotune store: "
+          f"{nc:,} samples (reused for b/c/d cross-fit with `a` fixed).  Drive "
+          f"with OP lat disengaged at 1-18 m/s to populate the open-loop side.")
 
 
 def restore_idle_status() -> None:
@@ -441,25 +454,25 @@ def restore_idle_status() -> None:
 
 
 def _preview_status(fit: dict) -> str:
-  cal = fit.get("calibration")
-  if cal is None:
-    cal_str = "no calibration data yet (need ≥200 lat-ON same-sign pairs)"
-    op_str = "apply DISABLED until calibration accrues"
-  elif not cal.get("ok"):
-    cal_str = f"K={cal['K']:.1f} (REJECTED: {cal.get('reason','out of sanity bounds')})"
-    op_str = "apply DISABLED"
-  else:
-    cal_str = f"K={cal['K']:.1f}±{cal['K_mad']:.1f} (median, n={cal['n']:,})"
-    op_str = (f"OP-normalized: a={fit['a']:.5f}  b={fit['b']:.5f}  "
-              f"c={fit['c']:.5f}  d={fit['d']:.5f}  slope-at-0={fit['slope_at_zero']:.3f}")
-
-  return (f"Preview|Fit ready ({op_str.split(': ',1)[-1] if 'OP' in op_str else 'cal pending'})|"
-          f"RAW EPS:  a={fit['a_eps']:.3f}  b={fit['b_eps']:.3f}  c={fit['c_eps']:.3f}  "
-          f"d={fit['d_eps']:.3f}  slope-at-0={fit['slope_at_zero_eps']:.3f}  "
-          f"RMSE={fit['rmse_eps']:.4f}  n={fit['n']:,}  "
-          f"v_ego={fit['v_ego_range'][0]:.1f}-{fit['v_ego_range'][1]:.1f}m/s  "
-          f"|la|≤{abs(fit['lat_accel_range'][1]):.2f}m/s²  ·  "
-          f"calibration: {cal_str}  ·  {op_str}")
+  cross = fit.get("cross")
+  bands = fit.get("per_band", [])
+  per_band_str = "  ".join(
+    (f"{b['lo']:g}-{b['hi']:g}m/s: a={b.get('a',0):.2f} n={b['n']} rmse_drv={b.get('rmse_drv',0):.2f} OK"
+     if b.get('ok') else f"{b['lo']:g}-{b['hi']:g}m/s: SKIP ({b.get('reason','?')})")
+    for b in bands
+  )
+  a_var = fit.get("a_variation", 0.0)
+  a_var_warn = "  [a varies >50% across bands - single-tune approximation may be poor]" if a_var > A_VARIATION_REL else ""
+  if cross is None:
+    return (f"Refused|Closed-loop store too small|"
+            f"a chosen (median across bands): {fit['a_chosen']:.3f}  ·  "
+            f"per-band: {per_band_str}.  Cross-fit needs ≥1000 closed-loop samples; "
+            f"populate torque_autotune first.")
+  return (f"Preview|Cross-fit ready (a={fit['a']:.2f} b={fit['b']:.3f} c={fit['c']:.3f} d={fit['d']:.3f})|"
+          f"OP-normalized:  a={fit['a']:.5f}  b={fit['b']:.5f}  c={fit['c']:.5f}  "
+          f"d={fit['d']:.5f}  slope-at-0={fit['slope_at_zero']:.3f}  "
+          f"cross-fit RMSE={cross['rmse']:.4f} (n_closed={cross['n']:,}, n_open={fit['n_openloop']:,})"
+          f"{a_var_warn}.  Per-band a: {per_band_str}")
 
 
 def restore_preview_status() -> None:
@@ -487,25 +500,19 @@ def run_collect() -> None:
     _set_status(_idle_status())
     return
 
-  new_ol, new_cal = 0, 0
+  new = 0
   for i, path in enumerate(todo):
     _set_status(f"Collect|Processing {i + 1}/{len(todo)}|"
-                f"Ingesting {path.parent.name} (+{new_ol} open-loop, "
-                f"+{new_cal} calibration so far)")
-    res = extract_segment(path)
-    if res is None:
+                f"Ingesting {path.parent.name} (+{new} open-loop samples so far)")
+    rows = extract_segment(path)
+    if rows is None:
       continue
-    ol_rows, cal_rows = res
-    if ol_rows.shape[0]:
-      _append_rows(SAMPLES_PATH, ol_rows)
-      new_ol += ol_rows.shape[0]
-    if cal_rows.shape[0]:
-      _append_rows(CAL_SAMPLES_PATH, cal_rows)
-      new_cal += cal_rows.shape[0]
+    if rows.shape[0]:
+      _append_rows(SAMPLES_PATH, rows)
+      new += rows.shape[0]
     processed.add(str(path))
     if i % 20 == 0:
       _save_processed(processed)
-
   _save_processed(processed)
   _trim_store()
   _set_status(_idle_status())
@@ -515,8 +522,9 @@ def run_fit() -> None:
   fit = fit_store()
   if fit is None:
     _set_status("Refused|Need more data|"
-                "Open-loop fit refused: <200 lat-OFF samples in store. Drive "
-                "with OP lat disengaged at 1-18 m/s and re-tap Collect, then Fit.")
+                f"No speed band has ≥{MIN_BAND_SAMPLES} open-loop samples.  Drive "
+                f"with OP lat disengaged at 1-18 m/s (parking-lot serpentine is "
+                f"ideal) and re-tap Collect, then Fit.")
     return
   params.put(PENDING_PARAM, json.dumps(fit))
   _set_status(_preview_status(fit))
@@ -538,12 +546,9 @@ def apply_pending() -> None:
     _set_status("Previewed open-loop fit was invalid. Re-run Fit.")
     return
 
-  cal = fit.get("calibration")
-  if cal is None or not cal.get("ok"):
-    _set_status("Refused|Calibration not ready|"
-                "Apply refused: K not computed or out of sanity range. "
-                "Drive more (with OP lat ON) to accrue calibration pairs, "
-                "then re-run Fit to refresh the pending preview.")
+  if fit.get("cross") is None or "b" not in fit:
+    _set_status("Refused|No cross-fit in pending|"
+                "Pending fit lacks the closed-loop cross-fit step. Re-run Fit.")
     return
 
   prefix = _car_prefix()
@@ -554,9 +559,7 @@ def apply_pending() -> None:
 
   a = float(fit["a"]); b = float(fit["b"]); c = float(fit["c"]); d = float(fit["d"])
 
-  # Same ±1 coverage gate torque_autotune uses.  Sparse hard-cornering
-  # data can collapse c; if so, graft the baseline c (same fallback as
-  # torque_autotune.apply_pending) and re-test.
+  # Same ±1 coverage gate torque_autotune uses, with baseline-c fallback.
   if not _covers(a, b, c, d):
     c_baseline = float(NON_LINEAR_TORQUE_DEFAULTS[
         next(k for k, v in SIGLIN_TORQUE_PARAM_PREFIX.items() if v == prefix)][2])
@@ -567,9 +570,8 @@ def apply_pending() -> None:
         f"Refused|Fit can't reach ±1 torque|"
         f"max={0.5 * b + 8.0 * c + d:.3f} min={-0.5 * b - 8.0 * c + d:.3f} from "
         f"a={a:.3f} b={b:.3f} c={c:.4f} d={d:.3f}; baseline-c fallback "
-        f"({c_baseline:.3f}) also insufficient.  Open-loop b is too small for "
-        f"current K={cal['K']:.1f}; more open-loop data at higher |lat_accel| "
-        f"may help."
+        f"({c_baseline:.3f}) also insufficient.  Cross-fit b is too small; "
+        f"closed-loop store may need more high-|lat_accel| coverage."
       )
       return
 
@@ -577,11 +579,13 @@ def apply_pending() -> None:
   for suffix, value in zip(("A", "B", "C", "D"), vals):
     params.put_float(f"{prefix}Tune{suffix}", value)
   params.remove(PENDING_PARAM)
-  _set_status(f"Done|Applied (K={cal['K']:.1f}) — reboot to use|"
-              f"{prefix} written from open-loop fit  "
-              f"a={vals[0]:.5f}  b={vals[1]:.5f}  c={vals[2]:.5f}  d={vals[3]:.5f}  "
-              f"(converted from raw EPS via K={cal['K']:.1f}±{cal['K_mad']:.1f}, "
-              f"n_cal={cal['n']:,}).")
+  a_var = fit.get("a_variation", 0.0)
+  warn = "  WARNING: a varied >50% across speed bands - check feel carefully" if a_var > A_VARIATION_REL else ""
+  _set_status(f"Done|Applied (a={vals[0]:.2f} b={vals[1]:.2f}) — reboot to use|"
+              f"{prefix} written from open-loop+cross-fit  "
+              f"a={vals[0]:.5f}  b={vals[1]:.5f}  c={vals[2]:.5f}  d={vals[3]:.5f}.  "
+              f"a from per-band open-loop median; b/c/d from closed-loop lstsq with "
+              f"a fixed.{warn}")
 
 
 def reset_table() -> None:
