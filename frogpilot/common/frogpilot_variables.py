@@ -711,25 +711,33 @@ class FrogPilotVariables:
 
     advanced_longitudinal_tuning = toggle.openpilot_longitudinal and (params.get_bool("AdvancedLongitudinalTune") if toggle.tuning_level >= level["AdvancedLongitudinalTune"] else default.get_bool("AdvancedLongitudinalTune"))
     toggle.longitudinalActuatorDelay = np.clip(params.get_float("LongitudinalActuatorDelay"), 0, 1) if advanced_longitudinal_tuning and toggle.tuning_level >= level["LongitudinalActuatorDelay"] else longitudinalActuatorDelay
-    # Optional per-speed long-delay breakpoint table (applied via the Mazda
-    # panel's "Apply Long Delay Table" button after auto-fit). longcontrol
-    # and longitudinal_planner interp this by current v_ego at runtime
-    # instead of using the single scalar. Stored tuple-of-tuples (not
-    # ndarray) - toggle.__dict__ is json.dumps'd every update and ndarrays
-    # aren't serializable. Consumers do np.interp on the tuple directly.
-    toggle.long_delay_table = None
-    raw_long_table = params.get("LongDelayTable", encoding="utf-8") or ""
-    if raw_long_table:
+    # Optional per-speed long-delay breakpoint tables (Mazda auto-tune).
+    # Split into throttle and brake sides because the Mazda plant has two
+    # actuators with different delays (interface.py:137: "gas is 0.25s and
+    # brake looks like 0.5"); a single mixed table is bimodal at highway.
+    # longcontrol and longitudinal_planner pick a table per-frame by
+    # sign(planned accel).  Either side may be absent - consumer falls
+    # back to the scalar on the missing side.  Stored tuple-of-tuples
+    # because toggle.__dict__ is json.dumps'd every update and ndarrays
+    # aren't serializable.
+    def _load_long_delay(key):
+      raw = params.get(key, encoding="utf-8") or ""
+      if not raw:
+        return None
       try:
         import json as _json
-        long_bps = _json.loads(raw_long_table).get("breakpoints", [])
-        cleaned_long = tuple((float(v), float(np.clip(d, 0.05, 1.0))) for v, d in long_bps)
-        vs_long = [v for v, _ in cleaned_long]
-        if len(cleaned_long) >= 2 and all(b > a for a, b in zip(vs_long[:-1], vs_long[1:])):
-          toggle.long_delay_table = cleaned_long
+        bps = _json.loads(raw).get("breakpoints", [])
+        cleaned = tuple((float(v), float(np.clip(d, 0.05, 1.0))) for v, d in bps)
+        vs = [v for v, _ in cleaned]
+        if len(cleaned) >= 2 and all(b > a for a, b in zip(vs[:-1], vs[1:])):
+          return cleaned
       except Exception:
-        toggle.long_delay_table = None
-    toggle.use_long_delay_table = toggle.long_delay_table is not None
+        pass
+      return None
+    toggle.long_delay_table_throttle = _load_long_delay("LongDelayTableThrottle")
+    toggle.long_delay_table_brake = _load_long_delay("LongDelayTableBrake")
+    toggle.use_long_delay_table = (toggle.long_delay_table_throttle is not None
+                                   or toggle.long_delay_table_brake is not None)
     toggle.max_desired_acceleration = np.clip(params.get_float("MaxDesiredAcceleration"), 0.1, 4.0) if advanced_longitudinal_tuning and toggle.tuning_level >= level["MaxDesiredAcceleration"] else default.get_float("MaxDesiredAcceleration")
     toggle.startAccel = np.clip(params.get_float("StartAccel"), 0, 4) if advanced_longitudinal_tuning and toggle.tuning_level >= level["StartAccel"] else startAccel
     toggle.stopAccel = np.clip(params.get_float("StopAccel"), -4, 0) if advanced_longitudinal_tuning and toggle.tuning_level >= level["StopAccel"] else stopAccel

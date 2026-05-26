@@ -651,7 +651,9 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"LongDelayReset", CLEAR_ON_MANAGER_START},
     {"LongDelayStatus", CLEAR_ON_MANAGER_START},
     {"LongDelayPending", PERSISTENT},
-    {"LongDelayTable", PERSISTENT},
+    {"LongDelayTable", PERSISTENT},                 // legacy single-table; cleared on next apply
+    {"LongDelayTableThrottle", PERSISTENT},
+    {"LongDelayTableBrake", PERSISTENT},
     {"BlendedACC", PERSISTENT},
     {"ManualTransmission", PERSISTENT},
     {"RemoteAccess", PERSISTENT},

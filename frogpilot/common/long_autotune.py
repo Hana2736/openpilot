@@ -383,9 +383,16 @@ def _xcorr_peak(desired: np.ndarray, actual: np.ndarray):
 
 
 def _collect_delay_samples(rec):
-  """Returns (n, 4) float32 array of (v_ego, lag_s, ncc, rpm) per filtered
-  6s window. Filtering: OP long active, no driver override, command-side
-  variation >= MIN_ACCEL_STD, no 0.5-2 Hz oscillation contamination.
+  """Returns (n, 5) float32 array of (v_ego, lag_s, ncc, rpm, mean_accel_desired)
+  per filtered 6s window. Filtering: OP long active, no driver override,
+  command-side variation >= MIN_ACCEL_STD, no 0.5-2 Hz oscillation
+  contamination.
+
+  mean_accel_desired is the signed mean of accel_desired over the window.
+  Used at fit time to split throttle (>0) vs brake (<0) populations - the
+  Mazda plant has two different actuators with different response times
+  (interface.py:137 "gas is 0.25s and brake looks like 0.5"), so a single
+  median is bimodal at highway speeds.
   """
   desired = rec["accel_desired"]
   actual = rec["a_ego"]
@@ -402,7 +409,7 @@ def _collect_delay_samples(rec):
            & np.isfinite(brake) & np.isfinite(standstill)
            & (long_act > 0.5) & (gas < 0.5) & (brake < 0.5) & (standstill < 0.5))
   if not valid.any():
-    return np.empty((0, 4), dtype=np.float32)
+    return np.empty((0, 5), dtype=np.float32)
 
   osc = _oscillation_mask_long(desired)
   valid &= ~osc
@@ -418,10 +425,11 @@ def _collect_delay_samples(rec):
       r = _xcorr_peak(desired[sl], actual[sl])
       if r is not None and r[1] >= DELAY_MIN_NCC:
         rows.append((float(np.median(v_ego[sl])), r[0], r[1],
-                     float(np.median(rpm[sl]))))
+                     float(np.median(rpm[sl])),
+                     float(np.mean(desired[sl]))))
     i += hop
   if not rows:
-    return np.empty((0, 4), dtype=np.float32)
+    return np.empty((0, 5), dtype=np.float32)
   return np.asarray(rows, dtype=np.float32)
 
 

@@ -30,19 +30,20 @@ from openpilot.frogpilot.common.torque_autotune import find_rlogs
 # --- storage ---------------------------------------------------------------
 
 STORE_DIR = Path("/data/media/0/long_autotune")
-# v2 schema: 5 cols (v_ego, can_cmd, a_ego, pitch, rpm). v1 was 3 cols
-# (v_ego, can_cmd, a_ego). Old stores get wiped on first run after upgrade
-# since the format changed (pitch is now stored not filtered, rpm added).
+# v3 schema: static 5 cols (v_ego, can_cmd, a_ego, pitch, rpm) - unchanged
+# from v2.  Delay store gained a 5th column: mean signed accel_desired per
+# window, used to split throttle (>0) vs brake (<0) populations at fit time
+# (Mazda has two actuators with different delays - see _collect_delay_samples).
+# v2 was 4-col delay; v1 was 3-col static (no pitch/rpm/delay at all).
 SAMPLES_PATH = STORE_DIR / "samples.f32"
-# Per-window xcorr peaks for long delay tuning: (v_ego, lag_s, ncc, rpm).
 DELAY_SAMPLES_PATH = STORE_DIR / "delay_samples.f32"
 PROCESSED_PATH = STORE_DIR / "processed.json"
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 SCHEMA_PATH = STORE_DIR / "schema_version"
 
 SAMPLE_COLS = 5
 SAMPLE_BYTES = SAMPLE_COLS * 4                    # float32
-DELAY_SAMPLE_COLS = 4
+DELAY_SAMPLE_COLS = 5
 DELAY_SAMPLE_BYTES = DELAY_SAMPLE_COLS * 4
 MAX_STORE_BYTES = 500 * 1024 * 1024               # 500 MB rolling budget per file
 
