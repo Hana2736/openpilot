@@ -397,13 +397,17 @@ def _car_prefix() -> str | None:
   return None
 
 
-def run_autotune() -> None:
+def run_collect() -> int | None:
+  """Ingest new rlogs into the closed-loop store (no fit).  Returns the number
+  of new samples added (>=0) on success, or None if the car is unsupported or
+  there's nothing to learn from yet (status is set in those cases).  Split out
+  of run_autotune so Collect All can fill the closed-loop (b/c/d) bucket
+  without also running the throwaway closed-loop fit."""
   STORE_DIR.mkdir(parents=True, exist_ok=True)
 
-  prefix = _car_prefix()
-  if prefix is None:
+  if _car_prefix() is None:
     _set_status("Auto-Tune only supports the Mazda 3, CX-30, and CX-50.")
-    return
+    return None
 
   processed = _load_processed()
   rlogs = find_rlogs()
@@ -411,7 +415,7 @@ def run_autotune() -> None:
 
   if not todo and not SAMPLES_PATH.is_file():
     _set_status("No driving logs found to learn from yet.")
-    return
+    return None
 
   new_samples = 0
   for i, path in enumerate(todo):
@@ -430,6 +434,15 @@ def run_autotune() -> None:
 
   _save_processed(processed)
   _trim_store()
+  return new_samples
+
+
+def run_autotune() -> None:
+  new_samples = run_collect()
+  if new_samples is None:
+    return  # unsupported car or no data - run_collect already set the status
+
+  prefix = _car_prefix()  # guaranteed non-None: run_collect returned a count
 
   _set_status("Fitting curve...")
   result = fit_store()

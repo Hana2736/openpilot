@@ -43,7 +43,12 @@ from openpilot.frogpilot.common.lat_openloop_collect import (
   run_collect as run_lat_openloop_collect,
   run_fit as run_lat_openloop_fit,
 )
-from openpilot.frogpilot.common.torque_autotune import apply_pending, restore_preview_status, run_autotune
+from openpilot.frogpilot.common.torque_autotune import (
+  apply_pending,
+  restore_preview_status,
+  run_autotune,
+  run_collect as run_closed_loop_collect,
+)
 from openpilot.frogpilot.controls.frogpilot_planner import FrogPilotPlanner
 from openpilot.frogpilot.system.frogpilot_stats import send_stats
 from openpilot.frogpilot.system.frogpilot_tracking import FrogPilotTracking
@@ -85,7 +90,8 @@ def run_collect_all() -> None:
   steps = (
     ("Long (static + delay)", run_long_collect),
     ("Lat delay",             run_lat_delay_collect),
-    ("Open-loop lat (+ K)",   run_lat_openloop_collect),
+    ("Closed-loop lat (BCD)", run_closed_loop_collect),
+    ("Open-loop lat (A)",     run_lat_openloop_collect),
   )
   for i, (label, fn) in enumerate(steps, 1):
     _stack_status(f"Collect|Step {i}/{len(steps)}: {label}|"
@@ -97,8 +103,9 @@ def run_collect_all() -> None:
                     f"Other steps not run.  See individual buttons for details.")
       return
   _stack_status(f"Done|All {len(steps)} collectors ran|"
-                f"Collected: long (static + delay), lat delay, open-loop lat + K calibration. "
-                f"Each store's own status button shows sample counts.")
+                f"Collected: long (static + delay), lat delay, closed-loop lat (b/c/d), "
+                f"open-loop lat (a). Each store's own status button shows sample counts. "
+                f"Now tap Fit All — open-loop lat cross-fits a (open-loop) + b/c/d (closed-loop).")
 
 
 def run_fit_all() -> None:
