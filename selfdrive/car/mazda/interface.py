@@ -142,6 +142,15 @@ class CarInterface(CarInterfaceBase):
       ret.startingState = True
       ret.steerActuatorDelay = 0.335
 
+    # Empirically-measured wheel-speed correction for the modded tire size
+    # (225/45R18 on 18x8+40 vs stock 215/45R18 on 18x7+45).  Comparing GPS
+    # Doppler + liveLocationKalman ground speed against vEgo across rlogs, vEgo
+    # under-reads true ground speed by ~1.56% (both sources agreed to <0.04%).
+    # Scale wheel speeds up so vEgo == true ground speed (affects control,
+    # cruise set-speed, display, logs).  Gated to the Mazda 3 only.
+    if candidate == CAR.MAZDA_3_2019:
+      ret.wheelSpeedFactor = 1.0156
+
     ret.steerLimitTimer = 0.8
 
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
