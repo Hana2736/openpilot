@@ -81,6 +81,12 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "HONDA_CIVIC_2022" = [2.5, 1.2, 0.15]
 "HONDA_HRV_3G" = [2.5, 1.2, 0.2]
 
-"MAZDA_3_2019" = [1.45, 3.0, 0.33]
+# friction was 0.33 (inherited from CX-9 substitute). At latAccelFactor 1.45 that
+# saturated the friction feedforward at 0.33*1.45 = 0.48 torque, which slammed the
+# output to the rail on every corner entry (des-act error >> 0.3 threshold during the
+# EPS deadtime) -> bang-bang limit cycle / corner ping-pong. Dropped to 0.10 (cap 0.145)
+# so the friction term is a small stiction nudge again, not half the torque budget.
+# See rlog analysis: in hard corners FF was 84% of saturation, ~half of it friction.
+"MAZDA_3_2019" = [1.45, 3.0, 0.10]
 "MAZDA_CX_30" = [1.45, 3.0, 0.33]
 "MAZDA_CX_50" = [1.45, 3.0, 0.33]
