@@ -85,10 +85,13 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 # saturated the friction feedforward at 0.33*1.45 = 0.48 torque, which slammed the
 # output to the rail on every corner entry (des-act error >> threshold during the
 # EPS deadtime) -> bang-bang limit cycle / corner ping-pong. Cut to 0.10 to kill that.
-# 0.10 then under-broke straight-line stiction (car drifted then snapped). Settled at
-# 0.15 (cap 0.15*1.45 = 0.218): paired with FRICTION_THRESHOLD 0.3->0.15 in
-# interfaces.py, small straight corrections now get the full 0.218 (breaks stiction)
-# while hard-corner FF peak stays ~0.88 (off the 1.0 rail). See rlog analysis.
-"MAZDA_3_2019" = [1.45, 3.0, 0.15]
+# 0.10 then under-broke straight-line stiction (car drifted then snapped), so we
+# tried 0.15 + FRICTION_THRESHOLD 0.3->0.15 -- but raising the coefficient lifted the
+# friction CAP 0.145->0.218, and that extra torque re-railed DEEP corners (rail 9%->28%,
+# act/des 1.01->1.95, pong back). Reverted the coefficient to 0.10 (cap 0.145 = good
+# corners) while KEEPING FRICTION_THRESHOLD=0.15: small straight errors still get the
+# full 0.145 (breaks stiction, straights stayed good) but the corner cap is unchanged,
+# so corners can't re-rail. Decoupled: low cap for corners, early saturation for straights.
+"MAZDA_3_2019" = [1.45, 3.0, 0.10]
 "MAZDA_CX_30" = [1.45, 3.0, 0.33]
 "MAZDA_CX_50" = [1.45, 3.0, 0.33]
