@@ -83,10 +83,12 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 
 # friction was 0.33 (inherited from CX-9 substitute). At latAccelFactor 1.45 that
 # saturated the friction feedforward at 0.33*1.45 = 0.48 torque, which slammed the
-# output to the rail on every corner entry (des-act error >> 0.3 threshold during the
-# EPS deadtime) -> bang-bang limit cycle / corner ping-pong. Dropped to 0.10 (cap 0.145)
-# so the friction term is a small stiction nudge again, not half the torque budget.
-# See rlog analysis: in hard corners FF was 84% of saturation, ~half of it friction.
-"MAZDA_3_2019" = [1.45, 3.0, 0.10]
+# output to the rail on every corner entry (des-act error >> threshold during the
+# EPS deadtime) -> bang-bang limit cycle / corner ping-pong. Cut to 0.10 to kill that.
+# 0.10 then under-broke straight-line stiction (car drifted then snapped). Settled at
+# 0.15 (cap 0.15*1.45 = 0.218): paired with FRICTION_THRESHOLD 0.3->0.15 in
+# interfaces.py, small straight corrections now get the full 0.218 (breaks stiction)
+# while hard-corner FF peak stays ~0.88 (off the 1.0 rail). See rlog analysis.
+"MAZDA_3_2019" = [1.45, 3.0, 0.15]
 "MAZDA_CX_30" = [1.45, 3.0, 0.33]
 "MAZDA_CX_50" = [1.45, 3.0, 0.33]

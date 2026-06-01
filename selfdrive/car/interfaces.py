@@ -38,7 +38,14 @@ EventName = car.CarEvent.EventName
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS
 ACCEL_MAX = 2.0
 ACCEL_MIN = -3.5
-FRICTION_THRESHOLD = 0.3
+# lateral-accel error at which the friction feedforward saturates. Lowered
+# 0.3->0.15 for the Mazda EPS: small straight-line corrections (~0.16 m/s^2 error)
+# sit below 0.3 and so were only getting ~half friction -> not enough torque to
+# break steering stiction -> the car drifts then snaps back. At 0.15 those small
+# errors get full friction. Corner entry (error >> 0.3) was already saturated, so
+# this is corner-neutral. (Only the torque controller reads this; GM imports but
+# doesn't use it.)
+FRICTION_THRESHOLD = 0.15
 
 TORQUE_PARAMS_PATH = os.path.join(BASEDIR, 'selfdrive/car/torque_data/params.toml')
 TORQUE_OVERRIDE_PATH = os.path.join(BASEDIR, 'selfdrive/car/torque_data/override.toml')
