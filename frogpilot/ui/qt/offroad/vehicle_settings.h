@@ -42,24 +42,23 @@ private:
   // sub-panel; delay collect/fit/apply on the delay sub-panel; long
   // collector on the long sub-panel. mazdaKeys is the union (used for
   // top-level visibility gating).
+  // NOTE: MazdaAutoTune/Apply/Deadzone and LatOpenLoop* are HIDDEN (removed from
+  // the vehicleToggles vector in the .cc). Their handlers + backend are kept; see
+  // docs/MAZDA_AUTOTUNE_NOTES.md. Restore them to these sets + the vector to re-show.
   QSet<QString> mazdaLatAbcdKeys = {"Mazda3TuneA", "Mazda3TuneB", "Mazda3TuneC", "Mazda3TuneD",
                                     "MazdaCX30TuneA", "MazdaCX30TuneB", "MazdaCX30TuneC", "MazdaCX30TuneD",
                                     "MazdaCX50TuneA", "MazdaCX50TuneB", "MazdaCX50TuneC", "MazdaCX50TuneD",
-                                    "MazdaAutoTune", "MazdaAutoTuneApply", "MazdaAutoTuneDeadzone",
-                                    "MazdaTuneReset",
-                                    "LatOpenLoopCollect", "LatOpenLoopFit", "LatOpenLoopApply", "LatOpenLoopReset"};
+                                    "MazdaTuneReset"};
   QSet<QString> mazdaLatDelayKeys = {"LatDelayCollect", "LatDelayFit", "LatDelayApply", "LatDelayReset"};
   QSet<QString> mazdaLongKeys = {"LongAutoTuneCollect", "LongDelayFit", "LongDelayApply", "LongDelayReset",
                                  "LongStaticFit", "LongStaticApply", "LongStaticReset"};
   QSet<QString> mazdaKeys = {"Mazda3TuneA", "Mazda3TuneB", "Mazda3TuneC", "Mazda3TuneD",
                              "MazdaCX30TuneA", "MazdaCX30TuneB", "MazdaCX30TuneC", "MazdaCX30TuneD",
                              "MazdaCX50TuneA", "MazdaCX50TuneB", "MazdaCX50TuneC", "MazdaCX50TuneD",
-                             "MazdaAutoTune", "MazdaAutoTuneApply", "MazdaAutoTuneDeadzone",
                              "MazdaTuneReset",
                              "LatDelayCollect", "LatDelayFit", "LatDelayApply", "LatDelayReset",
                              "LongAutoTuneCollect", "LongDelayFit", "LongDelayApply", "LongDelayReset",
                              "LongStaticFit", "LongStaticApply", "LongStaticReset",
-                             "LatOpenLoopCollect", "LatOpenLoopFit", "LatOpenLoopApply", "LatOpenLoopReset",
                              "MazdaCollectAll", "MazdaFitAll",
                              "MazdaLatAbcdToggles", "MazdaLatDelayToggles", "MazdaLongToggles"};
   QSet<QString> longitudinalKeys = {"ExperimentalGMTune", "FrogsGoMoosTweak", "HondaAltTune", "HondaMaxBrake", "HondaLowSpeedPedal", "LongPitch", "NewLongAPI", "SNGHack", "SubaruSNG", "VoltSNG"};

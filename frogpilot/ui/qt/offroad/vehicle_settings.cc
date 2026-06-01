@@ -214,9 +214,12 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"MazdaCX50TuneB", tr("CX-50 — b"), tr("Sigmoid gain."), ""},
     {"MazdaCX50TuneC", tr("CX-50 — c"), tr("Linear gain (≥0)."), ""},
     {"MazdaCX50TuneD", tr("CX-50 — d"), tr("Torque offset; ± OK, 0 = none."), ""},
-    {"MazdaAutoTune", tr("Auto-Tune Now"), tr("Fit the tune from drive logs. Parked only; previews first."), ""},
-    {"MazdaAutoTuneApply", tr("Apply Auto-Tune"), tr("Write the previewed tune, then reboot."), ""},
-    {"MazdaAutoTuneDeadzone", tr("Auto-Tune Deadzone"), tr("Ignore |lat accel| below this when fitting."), ""},
+    // HIDDEN (closed-loop siglin auto-tune): the fitter pegs `a` at the bound on
+    // real data and needs `a` pinned + a coverage gate before it's trustworthy
+    // (see docs/MAZDA_AUTOTUNE_NOTES.md). Backend (torque_autotune.py, params,
+    // frogpilot_process trigger) and the button handlers below are intact -- to
+    // re-enable, restore these entries and the mazdaLatAbcdKeys/mazdaKeys members:
+    //   {"MazdaAutoTune", ...}, {"MazdaAutoTuneApply", ...}, {"MazdaAutoTuneDeadzone", ...}
     {"MazdaTuneReset", tr("Reset Mazda Tune"), tr("Restore default coefficients."), ""},
     {"LongAutoTuneCollect", tr("Collect Long Samples"), tr("Ingest any new rlogs into the long-tune rolling store. Parked only."), ""},
     {"LatDelayCollect", tr("Collect Lat Delay Samples"), tr("Ingest any new rlogs into the lateral-delay rolling store. Parked only."), ""},
@@ -229,10 +232,10 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"LongStaticFit", tr("Fit Long Static Map"), tr("Build a per-speed piecewise-affine-with-deadband table from the long static store. Replaces the global accel_scale/accel_offset affine. Previews first."), ""},
     {"LongStaticApply", tr("Apply Long Static Map"), tr("Write the previewed static map; carcontroller will invert the plant per (target_accel, v_ego) at runtime. Reboot after."), ""},
     {"LongStaticReset", tr("Reset Long Static Map"), tr("Clear the applied static map; fall back to the global accel_scale/accel_offset affine."), ""},
-    {"LatOpenLoopCollect", tr("Collect Open-Loop Lat Samples"), tr("Ingest rlogs into the open-loop lateral store (lat-off driver-steered windows). Parked only."), ""},
-    {"LatOpenLoopFit", tr("Fit Open-Loop Lat"), tr("Fit siglin on the open-loop store, auto-compute K from the calibration store, and convert to OP-normalized a/b/c/d. Previews first."), ""},
-    {"LatOpenLoopApply", tr("Apply Open-Loop Lat"), tr("Write the converted open-loop fit to Mazda{Model}TuneA-D. Requires K calibration (auto-accumulated from any lat-ON driving) and the ±1 coverage gate."), ""},
-    {"LatOpenLoopReset", tr("Reset Open-Loop Lat"), tr("Clear the previewed open-loop fit."), ""},
+    // HIDDEN (open-loop lateral fit): superseded by the hand-tuned siglin; kept
+    // in-code for reference. Backend (lat_openloop_collect.py) + handlers below
+    // intact. To re-enable, restore these entries + the keyset members:
+    //   {"LatOpenLoopCollect", ...}, {"LatOpenLoopFit", ...}, {"LatOpenLoopApply", ...}, {"LatOpenLoopReset", ...}
 
     {"SubaruToggles", tr("Subaru Settings"), tr("<b>FrogPilot features for Subaru vehicles.</b>"), ""},
     {"SubaruSNG", tr("Stop and Go"), tr("Stop and go for supported Subaru vehicles."), ""},
