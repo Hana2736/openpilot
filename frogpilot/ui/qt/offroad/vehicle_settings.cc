@@ -155,6 +155,7 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
   FrogPilotListWidget *mazdaLatAbcdList = new FrogPilotListWidget(this);
   FrogPilotListWidget *mazdaLatDelayList = new FrogPilotListWidget(this);
   FrogPilotListWidget *mazdaLongList = new FrogPilotListWidget(this);
+  FrogPilotListWidget *mazdaHardwareList = new FrogPilotListWidget(this);
   FrogPilotListWidget *subaruList = new FrogPilotListWidget(this);
   FrogPilotListWidget *toyotaList = new FrogPilotListWidget(this);
   FrogPilotListWidget *vehicleInfoList = new FrogPilotListWidget(this);
@@ -166,6 +167,7 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
   ScrollView *mazdaLatAbcdPanel = new ScrollView(mazdaLatAbcdList, this);
   ScrollView *mazdaLatDelayPanel = new ScrollView(mazdaLatDelayList, this);
   ScrollView *mazdaLongPanel = new ScrollView(mazdaLongList, this);
+  ScrollView *mazdaHardwarePanel = new ScrollView(mazdaHardwareList, this);
   ScrollView *subaruPanel = new ScrollView(subaruList, this);
   ScrollView *toyotaPanel = new ScrollView(toyotaList, this);
   ScrollView *vehicleInfoPanel = new ScrollView(vehicleInfoList, this);
@@ -177,6 +179,7 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
   vehiclesLayout->addWidget(mazdaLatAbcdPanel);
   vehiclesLayout->addWidget(mazdaLatDelayPanel);
   vehiclesLayout->addWidget(mazdaLongPanel);
+  vehiclesLayout->addWidget(mazdaHardwarePanel);
   vehiclesLayout->addWidget(subaruPanel);
   vehiclesLayout->addWidget(toyotaPanel);
   vehiclesLayout->addWidget(vehicleInfoPanel);
@@ -202,6 +205,16 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
     {"MazdaLatAbcdToggles", tr("Lateral ABCD Tuning"), tr("Sigmoid+linear tune (a/b/c/d) and per-model sliders."), ""},
     {"MazdaLatDelayToggles", tr("Lateral Delay Tuning"), tr("Per-speed steerActuatorDelay breakpoint table."), ""},
     {"MazdaLongToggles", tr("Longitudinal Tuning"), tr("Gen2 long static-map sample collector."), ""},
+    {"MazdaHardwareToggles", tr("Hardware / Features"), tr("Car hardware & feature flags (interceptors, stock MRCC/FSC, transmission, blended ACC)."), ""},
+    // Mazda hardware/feature flags (restored to the UI after the 2025-11-01 update
+    // dropped them; the params themselves never went away). Routed to the Hardware
+    // sub-panel via mazdaHardwareKeys.
+    {"BlendedACC", tr("Blended ACC (Experimental)"), tr("<b>Blend stock MRCC and Experimental Mode longitudinal control.</b> Provides smooth transitions between stock and openpilot control."), ""},
+    {"TorqueInterceptorEnabled", tr("Torque Interceptor Installed"), tr("<b>Enable the torque interceptor</b> to control the steering wheel. Only enable if you have installed a torque interceptor."), ""},
+    {"RadarInterceptorEnabled", tr("Radar Interceptor Installed"), tr("<b>Enable the radar interceptor</b> for longitudinal control. Only enable if you have installed a radar interceptor."), ""},
+    {"NoMRCC", tr("No Stock MRCC"), tr("<b>Enable if your car does not have stock MRCC</b> (Mazda Radar Cruise Control)."), ""},
+    {"NoFSC", tr("No Stock FSC"), tr("<b>Enable if your car does not have stock FSC</b> (Front Sensing Camera)."), ""},
+    {"ManualTransmission", tr("Manual Transmission"), tr("<b>Enable if your car has a manual transmission.</b>"), ""},
     {"Mazda3TuneA", tr("Mazda 3 — a"), tr("Sigmoid slope."), ""},
     {"Mazda3TuneB", tr("Mazda 3 — b"), tr("Sigmoid gain."), ""},
     {"Mazda3TuneC", tr("Mazda 3 — c"), tr("Linear gain (≥0)."), ""},
@@ -347,6 +360,14 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
       QObject::connect(navButton, &ButtonControl::clicked, [vehiclesLayout, mazdaLongPanel, this]() {
         openDescriptions(forceOpenDescriptions, toggles);
         vehiclesLayout->setCurrentWidget(mazdaLongPanel);
+      });
+      vehicleToggle = navButton;
+
+    } else if (param == "MazdaHardwareToggles") {
+      ButtonControl *navButton = new ButtonControl(title, tr("MANAGE"), desc);
+      QObject::connect(navButton, &ButtonControl::clicked, [vehiclesLayout, mazdaHardwarePanel, this]() {
+        openDescriptions(forceOpenDescriptions, toggles);
+        vehiclesLayout->setCurrentWidget(mazdaHardwarePanel);
       });
       vehicleToggle = navButton;
 
@@ -665,6 +686,8 @@ FrogPilotVehiclesPanel::FrogPilotVehiclesPanel(FrogPilotSettingsWindow *parent) 
       mazdaLatDelayList->addItem(vehicleToggle);
     } else if (mazdaLongKeys.contains(param)) {
       mazdaLongList->addItem(vehicleToggle);
+    } else if (mazdaHardwareKeys.contains(param)) {
+      mazdaHardwareList->addItem(vehicleToggle);
     } else if (mazdaKeys.contains(param)) {
       mazdaList->addItem(vehicleToggle);
     } else if (subaruKeys.contains(param)) {
@@ -939,6 +962,8 @@ void FrogPilotVehiclesPanel::updateToggles() {
     } else if (hondaKeys.contains(key)) {
       setVisible &= parent->isHonda;
     } else if (mazdaKeys.contains(key)) {
+      setVisible &= parent->isMazda;
+    } else if (mazdaHardwareKeys.contains(key)) {
       setVisible &= parent->isMazda;
     } else if (subaruKeys.contains(key)) {
       setVisible &= parent->isSubaru;

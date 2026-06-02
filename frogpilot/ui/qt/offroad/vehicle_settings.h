@@ -52,6 +52,9 @@ private:
   QSet<QString> mazdaLatDelayKeys = {"LatDelayCollect", "LatDelayFit", "LatDelayApply", "LatDelayReset"};
   QSet<QString> mazdaLongKeys = {"LongAutoTuneCollect", "LongDelayFit", "LongDelayApply", "LongDelayReset",
                                  "LongStaticFit", "LongStaticApply", "LongStaticReset"};
+  // Hardware/feature flags (restored to the UI 2026-06; params predate the 2025-11-01 update that dropped their toggles).
+  QSet<QString> mazdaHardwareKeys = {"BlendedACC", "TorqueInterceptorEnabled", "RadarInterceptorEnabled",
+                                     "NoMRCC", "NoFSC", "ManualTransmission"};
   QSet<QString> mazdaKeys = {"Mazda3TuneA", "Mazda3TuneB", "Mazda3TuneC", "Mazda3TuneD",
                              "MazdaCX30TuneA", "MazdaCX30TuneB", "MazdaCX30TuneC", "MazdaCX30TuneD",
                              "MazdaCX50TuneA", "MazdaCX50TuneB", "MazdaCX50TuneC", "MazdaCX50TuneD",
@@ -60,7 +63,7 @@ private:
                              "LongAutoTuneCollect", "LongDelayFit", "LongDelayApply", "LongDelayReset",
                              "LongStaticFit", "LongStaticApply", "LongStaticReset",
                              "MazdaCollectAll", "MazdaFitAll",
-                             "MazdaLatAbcdToggles", "MazdaLatDelayToggles", "MazdaLongToggles"};
+                             "MazdaLatAbcdToggles", "MazdaLatDelayToggles", "MazdaLongToggles", "MazdaHardwareToggles"};
   QSet<QString> longitudinalKeys = {"ExperimentalGMTune", "FrogsGoMoosTweak", "HondaAltTune", "HondaMaxBrake", "HondaLowSpeedPedal", "LongPitch", "NewLongAPI", "SNGHack", "SubaruSNG", "VoltSNG"};
   QSet<QString> subaruKeys = {"SubaruSNG"};
   QSet<QString> toyotaKeys = {"ClusterOffset", "FrogsGoMoosTweak", "LockDoorsTimer", "SNGHack", "ToyotaDoors"};
