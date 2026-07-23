@@ -38,8 +38,8 @@ GEN2_LONG_TUNING = {
   MazdaFlags.GEN2: Gen2LongitudinalParams(
     accel_scale = 200.0,
     accel_offset = 2000.0,
-    brake_overboost_threshold = 6.0,
-    brake_overboost_multiplier = 2.0,
+    brake_overboost_threshold = 1000.0,
+    brake_overboost_multiplier = 1.0,
     accel_min = -3.0
   )
 }
